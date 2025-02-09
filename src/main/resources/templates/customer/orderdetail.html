@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+<!-- Sweet Alert 2 CSS -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css">
+
+<style>
+.rating {
+	display: flex;
+	flex-direction: row-reverse;
+	justify-content: center;
+	gap: 5px;
+}
+
+.rating input {
+	display: none;
+}
+
+.rating label {
+	cursor: pointer;
+	font-size: 35px;
+	color: #ddd;
+	transition: color 0.2s ease-in-out;
+}
+
+.rating label:hover, .rating label:hover ~ label, .rating input:checked 
+	~ label {
+	color: #ffd700;
+}
+
+/* Modal Styling */
+.modal-body {
+	padding: 1.5rem;
+}
+
+.product-info img {
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rating-container {
+	background-color: #f8f9fa;
+	padding: 1.5rem;
+	border-radius: 8px;
+	margin-bottom: 1.5rem;
+}
+
+.form-control {
+	border-radius: 8px;
+	border: 1px solid #ced4da;
+}
+
+.modal-footer {
+	padding-top: 1rem;
+}
+
+.btn {
+	padding: 0.5rem 1.5rem;
+}
+
+.input-group .btn-primary {
+	border-color: #007bff;
+}
+
+
+.input-group .btn-primary.disabled {
+	background-color: #e9ecef;
+	color: #6c757d;
+}
+
+.return-quantity {
+	border: 1px solid #ced4da;
+	margin: 0px 5px;
+}
+
+.return-quantity:focus {
+	border-color: #80bdff;
+	box-shadow: none;
+}
+
+.return-quantity::-webkit-inner-spin-button, .return-quantity::-webkit-outer-spin-button
+	{
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.return-quantity {
+	-moz-appearance: textfield;
+}
+
+.chat-wrapper {
+    position: fixed;
+    bottom: 100px;  /* Tăng lên từ 30px thành 100px */
+    right: 20px;
+    z-index: 1000;
+}
+.chat-button {
+    width: 60px;
+    height: 60px;
+    border-radius: 30px;
+    background-color: #FFD700;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chat-button {
+    background-color: #FFD700;
+    color: black;
+}
+.chat-input button {
+    background: #FFD700; 
+    color: black;
+}
+.chat-input button:hover {
+    background: #FFC800; 
+}
+
+.chat-box {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 400px; /* Tăng width từ 350px lên 400px */
+    height: 550px; /* Tăng height từ 500px lên 550px */
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 9999;
+}
+
+
+
+.chat-header {
+    padding: 15px 20px; /* Thêm padding ngang */
+    background: #FFD700;
+    color: black;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-chat:hover {
+    opacity: 1;
+}
+
+.close-chat {
+    background: none;
+    border: none;
+    color: black; /* Đổi màu thành đen */
+    cursor: pointer;
+    font-size: 20px; /* Tăng kích thước */
+    padding: 5px;
+    opacity: 0.7; /* Làm mờ đi chút */
+    transition: opacity 0.3s;
+}
+
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #f8f9fa;
+}
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+    position: relative;
+}
+
+
+.message.message-sent {
+    background: #FFD700;
+    color: black;
+    margin-left: auto;
+    margin-right: 10px;
+    border-bottom-right-radius: 5px;
+}
+
+
+.message.message-received {
+    background: white;
+    color: black;
+    margin-right: auto;
+    margin-left: 10px;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+
+.message-time {
+    font-size: 0.7em;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: right;
+}
+
+.chat-messages {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-input {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    gap: 15px; 
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    outline: none;
+    font-size: 15px;
+}
+.chat-input button {
+    background: #FFD700;
+    color: black; 
+    border: none;
+    border-radius: 50%;
+    width: 45px; 
+    height: 45px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-input button i {
+    font-size: 20px; 
+    color: black;
+}
+.chat-input button:hover {
+    background: #FFC800;
+    transform: scale(1.1);
+}
+
+.message-content {
+    word-break: break-word;
+}
+
+.message-time {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    text-align: right;
+}
+</style>
+<body>
+
+	<div th:replace="~{customer/layout/header_customer}"></div>
+
+	<!-- Breadcrumb Start -->
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-12">
+				<nav class="breadcrumb bg-light mb-30">
+					<a class="breadcrumb-item text-dark" href="#">Home</a> <a
+						class="breadcrumb-item text-dark" href="#">Shop</a> <span
+						class="breadcrumb-item active">Order detail</span>
+				</nav>
+			</div>
+		</div>
+	</div>
+	<!-- Breadcrumb End -->
+
+
+	<!-- Cart Start -->
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-lg-12">
+				<h5 class="section-title position-relative text-uppercase mb-3">
+					<span class="bg-secondary pr-3">Billing Address</span>
+				</h5>
+				<div class="bg-light p-30 mb-5">
+					<div class="row">
+						<div class="col-md-6 form-group">
+							<label>Order Id</label> <input class="form-control" type="text"
+								readonly placeholder="Order ID" th:value="${order.OrderID}">
+						</div>
+
+
+						<div class="col-md-6 form-group">
+							<label>Customer Name</label> <input class="form-control"
+								type="text" placeholder="John Doe" th:value="${order.Cus_Name}"
+								readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Phone</label> <input class="form-control" type="text"
+								placeholder="+123456789" th:value="${order.Phone}" readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Address</label> <input class="form-control" type="text"
+								placeholder="123 Street" th:value="${order.Address}" readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Status</label> <input class="form-control" type="text"
+								placeholder="Pending/Completed" th:value="${order.Status}"
+								readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Payment Status</label> <input class="form-control"
+								type="text" placeholder="Paid/Unpaid"
+								th:value="${order.Pay_status}" readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Date</label> <input class="form-control" type="text"
+								placeholder="YYYY-MM-DD" th:value="${order.Date}" readonly>
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Total Amount</label> <input class="form-control"
+								type="text" placeholder="Total Amount"
+								th:value="${order.totalAmount}" readonly>
+						</div>
+						<div class="col-md-12 form-group">
+							<label>Notes</label>
+							<textarea class="form-control" placeholder="Notes" readonly
+								th:text="${order.notes}"></textarea>
+						</div>
+						<div class="col-md-9 form-group"></div>
+						<div class="col-md-3 form-group">
+							<a th:if="${order.Status == 'Waiting for confirmation'}"
+								class="btn btn-primary" data-toggle="modal"
+								data-target="#confirmCancelModal"> Cancel Order </a>
+							<div th:if="${order.Status == 'Canceled'}"
+								style="border-color: #acacac; background-color: #dddddd;"
+								class="btn">Order Canceled</div>
+							<div
+								th:if="${order.Status != 'Waiting for confirmation' && order.Status != 'Canceled'}"
+								style="border-color: #acacac; background-color: #dddddd;"
+								class="btn">Confirmed - No Cancellation</div>
+
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+			<div class="col-9 mb-9" th:if="${order.Status == 'Completed'}">
+				&nbsp;</div>
+			<div class="col-3" th:if="${order.Status == 'Completed'}">
+				<div th:if="${!hasReturnOrder}">
+					<div class="alert alert-info">
+						<i class="fas fa-info-circle mr-1"></i> Note: You can only return
+						products once per order.
+					</div>
+					<button id="toggleReturnMode" class="btn btn-warning"
+						onclick="toggleReturnMode(event)" style="margin-bottom: 20px;">
+						<i class="fas fa-undo mr-1"></i> Return Products
+					</button>
+				</div>
+				<div th:if="${hasReturnOrder}" class="alert alert-secondary">
+					<i class="fas fa-ban mr-1"></i> This order has already been
+					returned and cannot be returned again.
+				</div>
+			</div>
+			<div class="col-lg-12 table-responsive mb-5">
+				<table
+					class="table table-light table-borderless table-hover text-center mb-0">
+					<thead class="thead-dark">
+						<tr>
+							<th></th>
+							<th>Product</th>
+							<th>Price</th>
+							<th>Quantity</th>
+							<th>Total</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody class="align-middle">
+						<tr th:each="item : ${orderdetail}"
+							th:onclick="|godetailor(event,${item.Product_Id})|">
+							<td class="align-middle"><img
+								th:src="'/uploads/' + ${item.Img}" alt="" style="width: 50px;"></td>
+
+							<td class="align-middle" th:text="${item.product_name}"></td>
+							<td class="align-middle" th:text="'$' + ${item.Price}"></td>
+							<td class="align-middle" th:text="${item.Quantity}"></td>
+							<td class="align-middle"
+								th:text="${'$' + #numbers.formatDecimal(item.Price * item.Quantity, 1, 'COMMA', 2, 'POINT')}"></td>
+							<td onclick="event.stopPropagation()">
+								<button th:if="${item.status == 'Reviewed'}" type="button"
+									class="btn btn-sm" style="background-color: #e9ecef;">
+									Rated</button>
+								<button
+									th:if="${order.Status == 'Completed' && item.status != 'Reviewed'}"
+									type="button" class="btn btn-primary btn-sm"
+									th:onclick="|showFeedbackModal(${item.Id}, event)|">
+									Rate</button> <!-- Modal Feedback -->
+								<div class="modal fade" th:id="'feedbackModal' + ${item.Id}"
+									tabindex="-1" role="dialog">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<h5 class="modal-title">Product Rating</h5>
+												<button type="button" class="close"
+													onclick="closeFeedbackModal(event, this)"
+													aria-label="Close">
+													<span aria-hidden="true">&times;</span>
+												</button>
+											</div>
+
+											<div class="modal-body">
+												<!-- Product Info -->
+												<div class="product-info d-flex align-items-center mb-4">
+													<img th:src="'/uploads/' + ${item.Img}"
+														class="img-thumbnail mr-3"
+														style="width: 80px; height: 80px; object-fit: cover;">
+													<div>
+														<h6 class="mb-1" th:text="${item.product_name}"></h6>
+														<p class="text-muted mb-0"
+															th:text="'Price: $' + ${item.Price}"></p>
+													</div>
+												</div>
+
+												<!-- Rating Form -->
+												<form th:action="@{/feedback/submit}" method="post"
+													class="rating-form">
+													<input type="hidden" name="productId"
+														th:value="${item.Product_Id}"> <input
+														type="hidden" name="orderdetailId" th:value="${item.Id}">
+													<input type="hidden" name="orderId"
+														th:value="${item.Order_id}">
+													<!-- Rating Stars -->
+													<div class="rating-container text-center mb-4">
+														<label class="d-block mb-2">Your Rating</label>
+														<div class="rating">
+															<input type="radio" th:id="'star5' + ${item.Id}"
+																name="rating" value="5" required /> <label
+																th:for="'star5' + ${item.Id}" title="5 stars">★</label>
+
+															<input type="radio" th:id="'star4' + ${item.Id}"
+																name="rating" value="4" /> <label
+																th:for="'star4' + ${item.Id}" title="4 stars">★</label>
+
+															<input type="radio" th:id="'star3' + ${item.Id}"
+																name="rating" value="3" /> <label
+																th:for="'star3' + ${item.Id}" title="3 stars">★</label>
+
+															<input type="radio" th:id="'star2' + ${item.Id}"
+																name="rating" value="2" /> <label
+																th:for="'star2' + ${item.Id}" title="2 stars">★</label>
+
+															<input type="radio" th:id="'star1' + ${item.Id}"
+																name="rating" value="1" /> <label
+																th:for="'star1' + ${item.Id}" title="1 star">★</label>
+														</div>
+													</div>
+
+													<!-- Review Text -->
+													<div class="form-group">
+														<label for="comment">Your Review</label>
+														<textarea name="comment" class="form-control" rows="4"
+															placeholder="Write your review here..."></textarea>
+														<small class="form-text text-muted"> Please share
+															your experience with this product </small>
+													</div>
+
+													<!-- Buttons -->
+													<div class="modal-footer border-0 px-0 pb-0">
+														<button type="submit" class="btn btn-primary"
+															onclick="event.stopPropagation()">Submit Review
+														</button>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="return-column align-middle" style="display: none;"
+								onclick="event.stopPropagation()">
+								<div class="custom-control custom-checkbox">
+									<input type="checkbox"
+										class="custom-control-input return-checkbox"
+										th:id="'return-' + ${item.Id}" th:data-id="${item.Id}"
+										th:data-price="${item.Price}"
+										th:data-quantity="${item.Quantity}"
+										onclick="event.stopPropagation()"
+										onchange="handleReturnSelection(event)"> <label
+										class="custom-control-label" th:for="'return-' + ${item.Id}"
+										onclick="event.stopPropagation()"> </label>
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-lg-12">
+				<div th:if="${hasReturnOrder}" class="mt-4">
+					<h4>Return Order Information</h4>
+					<div class="card">
+						<div class="card-body">
+							<div class="row">
+								<div class="col-md-6">
+									<p>
+										<strong>Return Date:</strong> <span
+											th:text="${#temporals.format(returnOrder.returnDate, 'dd-MM-yyyy')}"></span>
+									</p>
+									<p>
+										<strong>Status:</strong> <span th:text="${returnOrder.status}"
+											th:class="${
+							        returnOrder.status == 'Processing' ? 'badge badge-warning' : 
+							        returnOrder.status == 'Accepted' ? 'badge badge-success' : 
+							        returnOrder.status == 'Completed' ? 'badge badge-success' : 
+							        returnOrder.status == 'Cancelled' ? 'badge badge-danger' : 
+							        returnOrder.status == 'Rejected' ? 'badge badge-danger' : ''
+							    }">
+										</span>
+									</p>
+									<p>
+										<strong>Note:</strong> <span th:text="${returnOrder.note}"></span>
+									</p>
+									<p>
+										<strong>Message from Seller:</strong> <span
+											th:text="${returnOrder.message}"></span>
+									</p>
+								</div>
+								<div class="col-md-6 text-right">
+									<p>
+										<strong>Total Amount:</strong> $<span
+											th:text="${#numbers.formatDecimal(returnOrder.totalAmount, 1, 2)}"></span>
+									</p>
+									<p>
+										<strong>Discount Amount:</strong> $<span
+											th:text="${#numbers.formatDecimal(returnOrder.discountAmount, 1, 2)}"></span>
+									</p>
+									<p class="h5">
+										<strong>Final Amount:</strong> $<span
+											th:text="${#numbers.formatDecimal(returnOrder.finalAmount, 1, 2)}"></span>
+									</p>
+								</div>
+							</div>
+
+							<div class="mt-4">
+								<h5>Returned Items</h5>
+								<div class="table-responsive">
+									<table class="table table-bordered">
+										<thead class="thead-light">
+											<tr>
+												<th style="width: 40%">Product</th>
+												<th style="width: 15%">Return Quantity</th>
+												<th style="width: 15%">Original Price</th>
+												<th style="width: 15%">Return Amount</th>
+												<th style="width: 15%">Reason</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr th:each="detail : ${returnOrderDetails}">
+												<td>
+													<div class="d-flex align-items-center">
+														<img th:src="'/uploads/' + ${detail.productImage}"
+															alt="Product Image" class="img-thumbnail mr-3"
+															style="max-width: 80px;">
+														<div>
+															<div class="font-weight-bold"
+																th:text="${detail.productName}"></div>
+															<small class="text-muted"> Original Order
+																Quantity: <span th:text="${detail.originalQuantity}"></span>
+															</small>
+														</div>
+													</div>
+												</td>
+												<td class="align-middle text-center"><span class=""
+													th:text="${detail.quantity}"></span></td>
+												<td class="align-middle text-right">$<span
+													th:text="${#numbers.formatDecimal(detail.productPrice, 1, 2)}"></span>
+												</td>
+												<td class="align-middle text-right">$<span
+													th:text="${#numbers.formatDecimal(detail.amount, 1, 2)}"></span>
+												</td>
+												<td class="align-middle"><span
+													th:text="${detail.reason}"></span></td>
+											</tr>
+										</tbody>
+										<tfoot>
+											<tr>
+												<td colspan="3" class="text-right"><strong>Total
+														Return Amount:</strong></td>
+												<td class="text-right"><strong>$<span
+														th:text="${#numbers.formatDecimal(returnOrder.totalAmount, 1, 2)}"></span></strong>
+												</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td colspan="3" class="text-right"><strong>Discount
+														Amount:</strong></td>
+												<td class="text-right"><strong>$<span
+														th:text="${#numbers.formatDecimal(returnOrder.discountAmount, 1, 2)}"></span></strong>
+												</td>
+												<td></td>
+											</tr>
+											<tr class="table-info">
+												<td colspan="3" class="text-right"><strong>Final
+														Return Amount:</strong></td>
+												<td class="text-right"><strong>$<span
+														th:text="${#numbers.formatDecimal(returnOrder.finalAmount, 1, 2)}"></span></strong>
+												</td>
+												<td></td>
+											</tr>
+										</tfoot>
+									</table>
+								</div>
+							</div>
+							<div class="col-12 mt-3 text-right">
+								<button th:if="${returnOrder.status == 'Processing'}"
+									class="btn btn-danger" th:data-return-id="${returnOrder.id}"
+									th:onclick="'showCancelModal(\'' + ${returnOrder.id} + '\')'">
+									<i class="fas fa-times"></i> Cancel Return
+								</button>
+
+								<button th:unless="${returnOrder.status == 'Processing'}"
+									class="btn d-flex align-items-center justify-content-center float-right"
+									th:classappend="${
+					            returnOrder.status == 'Accepted' ? 'btn-info' : 
+					            returnOrder.status == 'Completed' ? 'btn-success' : 
+					            returnOrder.status == 'Cancelled' ? 'btn-secondary' : 
+					            returnOrder.status == 'Rejected' ? 'btn-danger' : ''
+					        }"
+									style="min-width: 120px;" disabled>
+									<i
+										th:class="${
+					        returnOrder.status == 'Accepted' ? 'fas fa-check-circle' : 
+					        returnOrder.status == 'Completed' ? 'fas fa-check' : 
+					        returnOrder.status == 'Cancelled' ? 'fas fa-ban' : 
+					        returnOrder.status == 'Rejected' ? 'fas fa-times-circle' : ''
+					    }"></i>
+									<span class="ml-2"
+										th:text="${
+					        returnOrder.status == 'Accepted' ? 'Accepted' : 
+					        returnOrder.status == 'Completed' ? 'Completed' : 
+					        returnOrder.status == 'Cancelled' ? 'Cancelled' : 
+					        returnOrder.status == 'Rejected' ? 'Rejected' : ''
+					    }"></span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- modal cancel return -->
+	<div class="modal fade" id="cancelReturnModal" tabindex="-1"
+		role="dialog" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Cancel Return Order</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to cancel this return order?</p>
+					<input type="hidden" id="returnOrderId">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-danger"
+						onclick="confirmCancel()">
+						<i class="fas fa-times"></i> Confirm Cancel
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Cart End -->
+	<div class="modal fade" id="confirmCancelModal" tabindex="-1"
+		role="dialog" aria-labelledby="confirmCancelModal" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirmModalLabel">Confirm
+						Cancellation</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">Are you sure you want to cancel this
+					order?</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">No</button>
+					<a id="confirmCancelLink"
+						th:href="@{/order/gocancel/{id}(id=${order.Id})}"
+						class="btn btn-primary">Yes, Cancel</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-lg-12">
+				<div id="returnOptionsPanel" class="card mt-3"
+					style="display: none;">
+					<div class="card-body">
+						<h5 class="card-title">Selected Items for Return</h5>
+						<div id="selectedItems" class="mb-3">
+							<p class="text-muted">No items selected</p>
+						</div>
+						<div class="text-right">
+							<button class="btn btn-secondary mr-2"
+								onclick="cancelReturn(event)">Cancel</button>
+							<button id="processReturnBtn" class="btn btn-primary"
+								onclick="showReturnModal(event)" disabled>Process
+								Return</button>
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+	<input type="hidden" th:data-order-id="${order.Id}">
+
+	<!-- Return Modal -->
+	<div class="modal fade" id="returnModal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Confirm Return</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<!-- Content will be dynamically populated -->
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary"
+						onclick="submitReturn(event)">Submit Return Request</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<input type="hidden" id="chatOrderId" th:value="${order.id}">
+	<div class="chat-wrapper">
+    <button id="chatButton" class="chat-button">
+        <i class="fas fa-comments"></i>
+    </button>
+
+    <div id="chatBox" class="chat-box" style="display: none;">
+        <div class="chat-header">
+            <h6 class="m-0">Chat with Support</h6>
+            <button class="close-chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <th:block th:if="${chatMessages != null}">
+                <div th:each="msg : ${chatMessages}" 
+                     class="message" 
+                     th:classappend="${msg.senderType == 'CUSTOMER'} ? 'message-sent' : 'message-received'">
+                    <div class="message-content" th:text="${msg.message}"></div>
+                    <div class="message-time" th:text="${#temporals.format(msg.timestamp, 'HH:mm')}"></div>
+                </div>
+            </th:block>
+        </div>
+
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<div class="chat-wrapper" th:if="${order.Status == 'Canceled' && chatMessages != null && !chatMessages.empty}">
+    <button id="viewMessagesBtn" class="chat-button">
+        <i class="fas fa-history"></i>
+    </button>
+
+    <div id="chatHistoryBox" class="chat-box" style="display: none;">
+        <div class="chat-header">
+            <h6 class="m-0">Chat History</h6>
+            <button class="close-chat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chat-messages" id="chatHistoryMessages">
+            <div th:each="msg : ${chatMessages}" 
+                 class="message" 
+                 th:classappend="${msg.senderType == 'CUSTOMER'} ? 'message-sent' : 'message-received'">
+                <div class="message-content" th:text="${msg.message}"></div>
+                <div class="message-time" th:text="${#temporals.format(msg.timestamp, 'HH:mm')}"></div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <div class="alert alert-warning m-2">
+                Cannot send messages for canceled orders
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="chatRoomId" th:value="${chatRoom?.id}">
+<input type="hidden" id="chatRoomStatus" th:value="${chatRoom?.status}">
+</div>
+	<!-- Footer Start -->
+	<div th:replace="~{customer/layout/footer_customer}"></div>
+	<!-- Foo<!-- Sweet Alert 2 JS -->
+	<script
+		src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+
+</body>
+<script>
+	function godetailor(event,id){
+		event.stopPropagation();
+	    window.location.href = "/detailproduct/product?id=" + encodeURIComponent(id);
+	}
+
+	  document.addEventListener('DOMContentLoaded', function () {
+	    const confirmCancelModal = document.getElementById('confirmCancelModal');
+	    const confirmCancelLink = document.getElementById('confirmCancelLink');
+
+	    confirmCancelModal.addEventListener('show.bs.modal', function (event) {
+	      // Nút kích hoạt modal
+	      const button = event.relatedTarget;
+	      // Lấy URL từ thuộc tính data-href
+
+	    });
+	  });
+	  function showFeedbackModal(itemId, event) { 
+		    event.stopPropagation();
+
+		    $('#feedbackModal' + itemId).modal('show');
+		    
+		    
+		  
+		}
+	  function closeFeedbackModal(event, button) {
+		    event.stopPropagation();
+		    $('.modal').modal('hide');
+		}
+	  
+	  
+	  let returnModeActive = false;
+
+
+	function toggleReturnMode(event) {
+	    if (event) event.stopPropagation();
+	    
+	    returnModeActive = !returnModeActive;
+	    const returnColumns = document.querySelectorAll('.return-column');
+	    const returnOptionsPanel = document.getElementById('returnOptionsPanel');
+	    const toggleBtn = document.getElementById('toggleReturnMode');
+	    
+	    returnColumns.forEach(col => {
+	        col.style.display = returnModeActive ? 'table-cell' : 'none';
+	    });
+	    
+
+	    returnOptionsPanel.style.display = returnModeActive ? 'block' : 'none';
+	    
+
+	    toggleBtn.innerHTML = returnModeActive ? 
+	        '<i class="fas fa-times mr-1"></i> Cancel Return' : 
+	        '<i class="fas fa-undo mr-1"></i> Return Products';
+	    
+	    // Clear selections khi cancel
+	    if (!returnModeActive) {
+	        clearSelections();
+	    }
+	}
+
+
+	function handleReturnSelection(event) {
+	    event.stopPropagation();
+	    
+	    const selectedCheckboxes = document.querySelectorAll('.return-checkbox:checked');
+	    const processReturnBtn = document.getElementById('processReturnBtn');
+	    const selectedItemsDiv = document.getElementById('selectedItems');
+	    
+	    processReturnBtn.disabled = selectedCheckboxes.length === 0;
+	    
+	    let selectedItemsHtml = '';
+	    selectedCheckboxes.forEach(checkbox => {
+	        const row = checkbox.closest('tr');
+	        const productName = row.querySelector('td:nth-child(2)').textContent;
+	        const productImg = row.querySelector('td:nth-child(1) img').src;
+	        const price = parseFloat(checkbox.dataset.price);
+	        const quantity = parseInt(checkbox.dataset.quantity);
+	        
+	        selectedItemsHtml += `
+	            <div class="selected-item mb-3 pb-3" style="border-bottom: 1px solid #dee2e6;">
+	                <div class="row align-items-center">
+	                    <div class="col-2">
+	                        <img src="${productImg}" alt="" class="img-fluid" style="max-width: 80px;">
+	                    </div>
+	                    <div class="col-3">
+	                        <span class="font-weight-bold">${productName}</span>
+	                        <div class="text-muted">Unit Price: $${price.toFixed(2)}</div>
+	                    </div>
+	                    
+	                    <div class="col-2">
+	                        <div class="input-group">
+	                            <div class="input-group-prepend">
+	                                <button class="btn btn-secondary disabled btn-sm" 
+	                                        type="button" 
+	                                        style="height: 31px; padding: 0px 8px;"
+	                                        onclick="decreaseQuantity(this, event)">
+	                                    <i class="fas fa-minus"></i>
+	                                </button>
+	                            </div>
+	                            <input type="number" 
+	                                   class="form-control form-control-sm return-quantity text-center" 
+	                                   value="${quantity}" 
+	                                   min="1" 
+	                                   max="${quantity}"
+	                                   data-id="${checkbox.dataset.id}"
+	                                   data-price="${price}"
+	                                   onchange="validateQuantity(this, event)"
+	                                   onclick="event.stopPropagation()"
+	                                   style="height: 31px; border-left: none; border-right: none;">
+	                            <div class="input-group-append">
+	                                <button class="btn btn-secondary disabled btn-sm" 
+	                                        type="button" 
+	                                        style="height: 31px; padding: 0px 8px;"
+	                                        onclick="increaseQuantity(this, event)">
+	                                    <i class="fas fa-plus"></i>
+	                                </button>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="col-3">
+	                        <input type="text" 
+	                               class="form-control form-control-sm item-reason" 
+	                               placeholder="Specific reason for this item"
+	                               data-id="${checkbox.dataset.id}">
+	                    </div>
+	                    <div class="col-2 text-right">
+	                        <div class="return-amount">
+	                            <span class="font-weight-bold">Return Amount: </span>
+	                            <span class="text-primary">$${(price * quantity).toFixed(2)}</span>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        `;
+	    });
+	    
+	    selectedItemsDiv.innerHTML = selectedItemsHtml || '<p class="text-muted">No items selected</p>';
+	    
+	    // Cập nhật trạng thái ban đầu của các nút
+	    document.querySelectorAll('.return-quantity').forEach(input => {
+	        updateButtonStates(input);
+	    });
+	}
+	function updateButtonStates(input) {
+	    const group = input.closest('.input-group');
+	    const decreaseBtn = group.querySelector('.input-group-prepend button');
+	    const increaseBtn = group.querySelector('.input-group-append button');
+	    const value = parseInt(input.value);
+	    const max = parseInt(input.max);
+	    
+	    // Cập nhật nút giảm
+	    if (value <= 1) {
+	        decreaseBtn.classList.remove('btn-primary');
+	        decreaseBtn.classList.add('btn-secondary', 'disabled');
+	    } else {
+	        decreaseBtn.classList.remove('btn-secondary', 'disabled');
+	        decreaseBtn.classList.add('btn-primary');
+	    }
+	    
+	    // Cập nhật nút tăng
+	    if (value >= max) {
+	        increaseBtn.classList.remove('btn-primary');
+	        increaseBtn.classList.add('btn-secondary', 'disabled');
+	    } else {
+	        increaseBtn.classList.remove('btn-secondary', 'disabled');
+	        increaseBtn.classList.add('btn-primary');
+	    }
+	    
+	    // Cập nhật số tiền trả lại
+	    const price = parseFloat(input.dataset.price);
+	    const returnAmount = price * value;
+	    const amountElement = group.closest('.selected-item').querySelector('.return-amount .text-primary');
+	    amountElement.textContent = `$${returnAmount.toFixed(2)}`;
+	}
+
+	function increaseQuantity(btn, event) {
+	    event.stopPropagation();
+	    const input = btn.closest('.input-group').querySelector('input');
+	    const max = parseInt(input.max);
+	    let value = parseInt(input.value);
+	    
+	    if (value < max) {
+	        input.value = value + 1;
+	        validateQuantity(input, event);
+	        updateButtonStates(input);
+	    }
+	}
+
+	function decreaseQuantity(btn, event) {
+	    event.stopPropagation();
+	    const input = btn.closest('.input-group').querySelector('input');
+	    let value = parseInt(input.value);
+	    
+	    if (value > 1) {
+	        input.value = value - 1;
+	        validateQuantity(input, event);
+	        updateButtonStates(input);
+	    }
+	}
+
+	function validateQuantity(input, event) {
+	    event.stopPropagation();
+	    const max = parseInt(input.max);
+	    let value = parseInt(input.value);
+	    
+	    if (isNaN(value) || value < 1) input.value = 1;
+	    if (value > max) input.value = max;
+	    
+	    updateButtonStates(input);
+	}
+
+	// Clear tất cả selections
+	function clearSelections() {
+	    const checkboxes = document.querySelectorAll('.return-checkbox, #selectAll');
+	    checkboxes.forEach(checkbox => checkbox.checked = false);
+	    document.getElementById('selectedItems').innerHTML = '<p class="text-muted">No items selected</p>';
+	    document.getElementById('processReturnBtn').disabled = true;
+	}
+
+	// Hủy return
+	function cancelReturn(event) {
+	    if (event) event.stopPropagation();
+	    toggleReturnMode();
+	}
+
+	function showReturnModal(event) {
+	    if (event) event.stopPropagation();
+	    
+	    // Thu thập dữ liệu return
+	    const returnItems = [];
+	    document.querySelectorAll('.return-checkbox:checked').forEach(checkbox => {
+	        const row = checkbox.closest('tr');
+	        const quantityInput = document.querySelector(`.return-quantity[data-id="${checkbox.dataset.id}"]`);
+	        const reasonInput = document.querySelector(`.item-reason[data-id="${checkbox.dataset.id}"]`);
+	        
+	        returnItems.push({
+	            id: checkbox.dataset.id,
+	            productName: row.querySelector('td:nth-child(2)').textContent,
+	            price: parseFloat(checkbox.dataset.price),
+	            quantity: parseInt(quantityInput.value),
+	            total: parseFloat(checkbox.dataset.price) * parseInt(quantityInput.value),
+	            reason: reasonInput.value.trim()
+	        });
+	    });
+	    
+	    // Tính tổng tiền
+	    const totalAmount = returnItems.reduce((sum, item) => sum + item.total, 0);
+	    
+	    // Cập nhật nội dung modal
+	    const modalBody = document.querySelector('#returnModal .modal-body');
+	    modalBody.innerHTML = `
+	        <div class="return-items-summary">
+	            ${returnItems.map(item => `
+	                <div class="return-item-row mb-3 border-bottom pb-2">
+	                    <div class="d-flex justify-content-between">
+	                        <div>
+	                            <h6 class="mb-1">${item.productName}</h6>
+	                            <div class="text-muted">
+	                                <small>Quantity: ${item.quantity}</small>
+	                            </div>
+	                            <div class="text-muted">
+	                                <small>Reason: ${item.reason || '<span class="text-danger">No reason provided</span>'}</small>
+	                            </div>
+	                        </div>
+	                        <div class="text-right">
+	                            <h6 class="mb-1">$${item.total.toFixed(2)}</h6>
+	                            <small class="text-muted">($${item.price} each)</small>
+	                        </div>
+	                    </div>
+	                </div>
+	            `).join('')}
+	            <div class="d-flex justify-content-between mt-3">
+	                <h5>Total Return Amount:</h5>
+	                <h5>$${totalAmount.toFixed(2)}</h5>
+	            </div>
+	            <div class="form-group mt-3">
+	                <label for="returnReason">General Return Note:</label>
+	                <textarea class="form-control" id="returnReason" rows="3" 
+	                          placeholder="Enter general note for this return order" required></textarea>
+	            </div>
+	        </div>
+	    `;
+	    
+	    // Hiển thị modal
+	    $('#returnModal').modal('show');
+	}
+
+	function submitReturn(event) {
+	    if (event) event.stopPropagation();
+	    
+	    const returnReason = document.getElementById('returnReason').value.trim();
+	    if (!returnReason) {
+	        alert('Please provide a reason for return');
+	        return;
+	    }
+	    
+	    const returnItems = [];
+	    document.querySelectorAll('.return-checkbox:checked').forEach(checkbox => {
+	        const quantityInput = document.querySelector(`.return-quantity[data-id="${checkbox.dataset.id}"]`);
+	        const reasonInput = document.querySelector(`.item-reason[data-id="${checkbox.dataset.id}"]`);
+	        const price = parseFloat(checkbox.dataset.price);
+	        const quantity = parseInt(quantityInput.value);
+	        
+	        returnItems.push({
+	            orderDetailId: parseInt(checkbox.dataset.id),
+	            quantity: quantity,
+	            amount: price * quantity,
+	            reason: reasonInput.value.trim()
+	        });
+	    });
+	    
+	    // Lấy orderId từ URL hoặc data attribute của một element
+	    const orderId = document.querySelector('[data-order-id]').dataset.orderId; // Thêm cách lấy orderId
+	    
+	    const returnData = {
+	        orderId: parseInt(orderId),
+	        reason: returnReason,
+	        items: returnItems
+	    };
+	    
+	    // Gửi AJAX request
+	    $.ajax({
+	        url: '/returnorders/create',
+	        type: 'POST',
+	        contentType: 'application/json',
+	        data: JSON.stringify(returnData),
+	        success: function(response) {
+	            $('#returnModal').modal('hide');
+	            toggleReturnMode();
+	            
+	            Swal.fire({
+	                icon: 'success',
+	                title: 'Success',
+	                text: 'Return order created successfully'
+	            }).then(() => {
+	                window.location.reload();
+	            });
+	        },
+	        error: function(xhr, status, error) {
+	            Swal.fire({
+	                icon: 'error',
+	                title: 'Error',
+	                text: xhr.responseText || 'Failed to create return order'
+	            });
+	        }
+	    });
+	}
+	
+	
+	function showCancelModal(returnId) {
+	    $('#returnOrderId').val(returnId);
+	    $('#cancelReturnModal').modal('show');
+	}
+
+	function confirmCancel() {
+	    var returnId = $('#returnOrderId').val();
+	    
+	    $.ajax({
+	        url: '/returnorders/cancel/' + returnId,
+	        method: 'POST',
+	        success: function(response) {
+	            $('#cancelReturnModal').modal('hide');
+	            location.reload();
+	        },
+	        error: function(xhr, status, error) {
+	            alert('Error cancelling return order');
+	            console.error('Error:', error);
+	        }
+	    });
+	}
+	
+	document.addEventListener('DOMContentLoaded', function() {
+	    const orderStatus = '[[${order.Status}]]';
+	    
+	    if (orderStatus === 'Canceled') {
+	        
+	        initChatHistory();
+	    } else {
+	       
+	        initNormalChat();
+	    }
+	});
+	function initChatHistory() {
+	    const viewMessagesBtn = document.getElementById('viewMessagesBtn');
+	    const chatHistoryBox = document.getElementById('chatHistoryBox');
+	    const closeBtn = chatHistoryBox?.querySelector('.close-chat');
+
+	    if (viewMessagesBtn && chatHistoryBox) {
+	        viewMessagesBtn.addEventListener('click', function() {
+	            chatHistoryBox.style.display = 'flex';
+	            const messagesDiv = document.getElementById('chatHistoryMessages');
+	            if (messagesDiv) {
+	                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+	            }
+	        });
+
+	        if (closeBtn) {
+	            closeBtn.addEventListener('click', function() {
+	                chatHistoryBox.style.display = 'none';
+	            });
+	        }
+	    }
+	}
+
+	function initNormalChat() {
+	   
+	    chatInitHandler();
+	}
+	
+	let stompClient = null;
+	let chatRoomId = null;
+	let reconnectAttempts = 0;
+	const MAX_RECONNECT_ATTEMPTS = 5;
+	function connectWebSocket() {
+	    const socket = new SockJS('/ws');
+	    stompClient = Stomp.over(socket);
+	    stompClient.debug = null;
+	    stompClient.connect({}, function(frame) {
+	       
+	        
+	        stompClient.subscribe('/topic/chat/' + chatRoomId, function(response) {
+	            try {
+	                const message = JSON.parse(response.body);
+	               
+	                displayMessage(message);
+	            } catch (error) {
+	                console.error('Error parsing message:', error);
+	            }
+	        });
+	    }, function(error) {
+	        console.error('WebSocket connection error:', error);
+	        setTimeout(connectWebSocket, 3000);
+	    });
+	}
+	function handleConnectionError() {
+	    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+	        reconnectAttempts++;
+	      
+	        setTimeout(connectWebSocket, 3000); 
+	    } else {
+	        alert('Không thể kết nối tới server chat. Vui lòng thử lại sau.');
+	    }
+	}
+
+	function displayMessage(message) {
+	    const chatMessages = document.getElementById('chatMessages');
+	    const messageDiv = document.createElement('div');
+	    
+	    // Sửa lại class name thành message-sent cho tất cả tin nhắn của CUSTOMER
+	    messageDiv.className = `message ${message.senderType === 'CUSTOMER' ? 'message-sent' : 'message-received'}`;
+	    
+	    const contentDiv = document.createElement('div');
+	    contentDiv.className = 'message-content';
+	    contentDiv.textContent = message.message;
+	    
+	    const timeDiv = document.createElement('div');
+	    timeDiv.className = 'message-time';
+	    const timestamp = message.timestamp ? new Date(message.timestamp).toLocaleTimeString([], { 
+	        hour: '2-digit', 
+	        minute: '2-digit' 
+	    }) : '';
+	    timeDiv.textContent = timestamp;
+	    
+	    messageDiv.appendChild(contentDiv);
+	    messageDiv.appendChild(timeDiv);
+	    chatMessages.appendChild(messageDiv);
+	    
+	    chatMessages.scrollTop = chatMessages.scrollHeight;
+	}
+	function sendMessage() {
+	    const messageInput = document.getElementById('messageInput');
+	    const message = messageInput.value.trim();
+	    const orderStatus = '[[${order.Status}]]';
+	    const orderId = document.getElementById('chatOrderId').value;
+	    const chatRoomStatus = document.getElementById('chatRoomStatus')?.value;
+	    if (!message) return;
+	   
+	    if (orderStatus === 'Canceled') {
+	        alert('Cannot send messages for canceled orders');
+	        return;
+	    }
+	    if (chatRoomStatus === 'Closed') {
+	        alert('This chat has been closed. You cannot send new messages.');
+	        return;
+	    }
+	    if (!chatRoomId) {
+	        $.ajax({
+	            url: '/support/room/create',
+	            type: 'POST',
+	            data: { orderId: orderId },
+	            success: function(response) {
+	                chatRoomId = response.id;
+	                connectWebSocket();
+	                setTimeout(() => {
+	                    sendMessageToServer(message);
+	                    messageInput.value = '';
+	                }, 1000);
+	            },
+	            error: function(xhr) {
+	                console.error('Error creating chat room:', xhr.responseText);
+	                alert('Không thể tạo phòng chat. Vui lòng thử lại.');
+	            }
+	        });
+	    } else {
+	        if (!stompClient || !stompClient.connected) {
+	            connectWebSocket();
+	            setTimeout(() => {
+	                sendMessageToServer(message);
+	                messageInput.value = '';
+	            }, 1000);
+	        } else {
+	            sendMessageToServer(message);
+	            messageInput.value = '';
+	        }
+	    }
+	}
+
+	function loadOldMessages(roomId) {
+	    $.ajax({
+	        url: `/support/messages/${roomId}`, 
+	        method: 'GET',
+	        success: function(messages) {
+	            messages.forEach(message => {
+	                displayMessage(message);
+	            });
+	        }
+	    });
+	}
+
+	function sendMessageToServer(message) {
+	    if (!stompClient || !stompClient.connected) {
+	        alert('Mất kết nối, đang thử kết nối lại...');
+	        connectWebSocket();
+	        pendingMessage = message; 
+	        return;
+	    }
+
+	    const chatMessage = {
+	        chatroomId: chatRoomId,
+	        message: message,
+	        senderType: 'CUSTOMER'
+	    };
+	    
+	    stompClient.send("/app/chat/send/" + chatRoomId, {}, JSON.stringify(chatMessage));
+	}
+	
+
+	function loadExistingMessages() {
+	    const chatMessages = document.getElementById('chatMessages');
+	    if (chatMessages && chatMessages.dataset.messages) {
+	        const messages = JSON.parse(chatMessages.dataset.messages);
+	        messages.forEach(message => {
+	            displayMessage(message);
+	        });
+	        
+	        scrollToBottom();
+	    }
+	}
+	let pendingMessage = null;
+	window.onbeforeunload = function() {
+	    if (stompClient !== null) {
+	        stompClient.disconnect();
+	    }
+	};
+	function chatInitHandler() {
+	    const orderStatus = '[[${order.Status}]]';
+	    const chatButton = document.getElementById('chatButton');
+	    const chatBox = document.getElementById('chatBox');
+	    const closeChat = document.querySelector('.close-chat');
+	    const messageInput = document.getElementById('messageInput');
+	    const chatInput = document.querySelector('.chat-input');
+	    
+	    // Lấy thông tin chatroom từ hidden inputs
+	    const chatRoomId = document.getElementById('chatRoomId')?.value;
+	    const chatRoomStatus = document.getElementById('chatRoomStatus')?.value;
+
+	  
+	    if (orderStatus === 'Canceled' || (chatRoomId && chatRoomStatus === 'Closed')) {
+	     
+	        if (messageInput) {
+	            messageInput.disabled = true;
+	            messageInput.placeholder = orderStatus === 'Canceled' ? 
+	                'Cannot chat with canceled order' : 
+	                'This chat has been closed';
+	        }
+	        
+	      
+	        if (chatInput) {
+	            const message = orderStatus === 'Canceled' ? 
+	                'Cannot send messages for canceled orders' : 
+	                'This chat has been closed. You can only view previous messages';
+	            
+	            chatInput.innerHTML = `
+	                <div class="alert alert-warning m-2 w-100">
+	                    ${message}
+	                </div>
+	            `;
+	        }
+	        
+	       
+	        if (chatRoomId) {
+	            loadOldMessages(chatRoomId);
+	        }
+	    }
+
+	    
+	    if (chatButton) {
+	        chatButton.addEventListener('click', function(e) {
+	            e.preventDefault();
+	            e.stopPropagation();
+	            
+	            if (chatBox.style.display === 'none' || !chatBox.style.display) {
+	                chatBox.style.display = 'flex';
+	                const messagesDiv = document.getElementById('chatMessages');
+	                if (messagesDiv) {
+	                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+	                }
+	            }
+	        });
+	    }
+
+	   
+	    if (closeChat) {
+	        closeChat.addEventListener('click', function(e) {
+	            e.preventDefault();
+	            e.stopPropagation();
+	            chatBox.style.display = 'none';
+	        });
+	    }
+
+	   
+	    if (messageInput && orderStatus !== 'Canceled' && chatRoomStatus !== 'CLOSED') {
+	        messageInput.addEventListener('keypress', function(e) {
+	            if (e.key === 'Enter' && !e.shiftKey) {
+	                e.preventDefault();
+	                sendMessage();
+	            }
+	        });
+	    }
+	}
+
+	
+	window.addEventListener('beforeunload', function() {
+	    if (stompClient && stompClient.connected) {
+	        stompClient.disconnect();
+	    }
+	});
+
+	
+	setInterval(function() {
+	    if (chatRoomId && (!stompClient || !stompClient.connected)) {
+	        connectWebSocket();
+	    }
+	}, 5000);
+	document.addEventListener('DOMContentLoaded', chatInitHandler);
+	let isConnecting = false;
+	function scrollToBottom() {
+	    const chatMessages = document.getElementById('chatMessages');
+	    if (chatMessages) {
+	        chatMessages.scrollTop = chatMessages.scrollHeight;
+	    }
+	}
+</script>
+</html>

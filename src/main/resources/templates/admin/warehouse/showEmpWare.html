@@ -1,0 +1,80 @@
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<!-- Content Header (Page header) -->
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Warehouse Employee</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Warehouse</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+		</section>
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div>
+								<p th:if="${message}" th:text="${message}"
+									class="custom-alert success"></p>
+								<p th:if="${error}" th:text="${error}"
+									class="custom-alert error"></p>
+							</div>
+							<div class="card-header">
+								<h3 class="card-title">Warehouse Table</h3>
+								<div class="input-group input-group-sm"
+									style="width: 80%; margin-left: 15%;">
+									<input type="text" name="table_search" id="searchInput"
+										onkeyup="searchTable()" class="form-control float-right"
+										placeholder="Search">
+								</div>
+							</div>
+							<!-- /.card-header -->
+							<div class="card-body table-responsive p-0">
+								<table class="table table-hover text-nowrap">
+									<thead>
+										<tr class="text-center">
+											<th>STT</th>
+											<th>Employee</th>
+											<th>Warehouse</th>
+											<th>Function</th>
+										</tr>
+									</thead>
+									<tbody id="warehouseTable">
+										<tr th:if="${#lists.isEmpty(ews)}" class="text-center">
+											<td colspan="5">No warehouses found</td>
+										</tr>
+										<tr th:each="item, iterStat : ${ews}" class="text-center">
+											<td th:text="${iterStat.index + 1}"></td>
+											<td><span th:text="${item.employee_name}"></span></td>
+											<td><span th:text="${item.warehouse_name}"></span></td>
+											<td><a th:href="@{deleteManager(idew=${item.id})}"
+												onclick="return confirmDeletew();" class="btn btn-danger">Delete</a>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script th:src="@{/js/showWh_type.js}"></script>
+	<div th:replace="admin/layout/footer_admin"></div>
+</body>
+

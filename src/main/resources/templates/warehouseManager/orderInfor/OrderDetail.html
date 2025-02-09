@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href=@{/css/showOrderRequestDetail.css}>
+    
+</head>
+<body>
+
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Order Details</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Order Details</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Order Information</h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="table-container">
+
+                                <table class="table table-bordered">
+                                    <tbody>
+                                    	<tr>
+                                            <th>Order ID</th>
+                                            <td th:text="${order.orderID}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Customer name</th>
+                                            <td th:text="${order.cus_Name}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td th:text="${order.status}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                                <table class="table table-bordered table-sm mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="detail : ${details}">
+                                            <td>
+                                                <span th:text="${detail.product_name}"></span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${detail.quantity}"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <a href="/warehouseManager/ShowInforOrder" class="btn btn-primary">Back to List</a>
+                                <form th:action="@{/warehouseManager/receiveInOrder}" method="post" style="display: inline;">
+							        <input type="hidden" name="id" th:value="${order.id}" />
+							        <button type="submit" class="btn btn-success">receive votes</button>
+							    </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>

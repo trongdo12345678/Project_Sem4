@@ -1,0 +1,132 @@
+<link rel="stylesheet" th:href="@{/css/addProduct.css}">
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="warehouseManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Create product receipt</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Create product receipt</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header p-2">
+								<ul class="nav nav-pills" id="tabNavigation">
+									<li class="nav-item"><a class="nav-link active"
+										href="#Warehousereceiptdetails" data-toggle="tab"
+										id="tabWarehouseReceiptDetails"> Add Warehouse receipt
+											details </a></li>
+								</ul>
+							</div>
+							<div class="card-body">
+								<div class="tab-content">
+									<form action="addWhReceipt" method="post">
+										<div class="tab-pane active" id="Warehousereceiptdetails">
+											<!-- Add Warehouse receipt details-->
+											<h3>Warehouse Receipt</h3>
+											<div class="card-body row">
+												<input type="hidden" id="employeeId" name="employeeId"
+													th:value="${employeeId}"> <input type="hidden"
+													id="wh_id" name="wh_id" th:value="${whId}">
+												<div class="form-group col-md-4">
+													<label for="name">Name</label> <input type="text" id="name"
+														name="name" class="form-control" disabled>
+												</div>
+												<input type="hidden" name="status" value="Entered" required>
+
+												<div class="form-group col-md-4">
+													<label for="shippingFee">Shipping Fee ($)</label> <input
+														type="text" id="shippingFee" name="shippingFee"
+														class="form-control" placeholder="Enter shipping fee"
+														required>
+												</div>
+
+												<div class="form-group col-md-4">
+													<label for="otherFee">Order Fee ($)(If not, enter "0")</label> <input
+														type="text" id="otherFee" name="otherFee"
+														class="form-control" placeholder="Enter order fee">
+												</div>
+
+											</div>
+										</div>
+										<div style="border-top: 2px solid #ccc; margin: 20px 0;"></div>
+										<div id="detailsContainer" data-receipt-counter="0">
+											<div class="detail-group">
+												<h3 class="receipt-title"></h3>
+												<div class="card-body row detail-group">
+													<!-- Các trường thông tin -->
+													<div class="form-group col-md-2">
+														<label for="quantity">Quantity</label> <input
+															type="number" name="quantity" class="form-control"
+															placeholder="Enter Quantity" required>
+													</div>
+													<div class="form-group col-md-2">
+														<label for="wh_price">Price($)(This,Meter)</label> <input
+															type="number" name="wh_price" class="form-control"
+															placeholder="Enter Warehouse Price" step="0.01" required>
+													</div>
+													<input type="hidden" name="statusDetails" value="Entered"
+														required>
+													<!-- Dropdown Product -->
+													<div class="form-group col-md-2">
+														<label for="product_id">Product</label> <select
+															class="product_id form-control" name="product_id"
+															required onchange="fetchConversionId(this)">
+															<option value="" disabled selected>Select
+																Product</option>
+															<option th:each="item : ${products}"
+																th:value="${item.id}" th:text="${item.product_name}"></option>
+														</select>
+													</div>
+													<div class="form-group col-md-2">
+														<label for="searchProduct">Search Product</label> <input
+															type="text" placeholder="Search Product"
+															class="form-control" onkeyup="filterProducts(this)">
+													</div>
+													<!-- Dropdown Conversion -->
+													<div class="form-group col-md-4">
+														<label for="conversion_id">Conversion</label> <select
+															class="conversion_id form-control" name="conversionId"
+															required>
+															<option value="" disabled selected>Select
+																Conversion</option>
+														</select>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="card-footer">
+											<a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt}"
+												class="btn btn-danger">Back to List</a>
+											<button type="submit" class="btn btn-primary">Add
+												warehouse receipt</button>
+											<button type="button" class="btn btn-success"
+												onclick="addDetailGroup()">Add More Details</button>
+										</div>
+
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="warehouseManager/layout/footer_admin"></div>
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script th:src="@{/js/addWhReceipt.js}"></script>
+</body>

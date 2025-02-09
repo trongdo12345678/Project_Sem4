@@ -1,0 +1,185 @@
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="warehouseManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Warehouse Receipt and Warehouse Receipt Details</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Details Warehouse Receipt
+								and Warehouse Receipt Details</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div class="card-header p-2">
+								<ul class="nav nav-pills" id="tabNavigation">
+									<li class="nav-item"><a class="nav-link"
+										href="#Warehousereceiptdetails" data-toggle="tab">
+											Warehouse receipt details </a></li>
+									<li class="nav-item"><a class="nav-link active"
+										href="#Warehousedetailsreceipt" data-toggle="tab">
+											Warehouse details receipt </a></li>
+								</ul>
+							</div>
+							<div class="card-body">
+								<div class="tab-content">
+									<div class="tab-pane" id="Warehousereceiptdetails">
+										<!--  Warehouse receipt details-->
+										<form th:object="${whr}">
+											<div class="card-body row">
+												<div class="form-group col-md-4">
+													<label for="title">Name warehouse receipt</label> <input
+														type="text" disabled readonly th:value="${whr.name}"
+														class="form-control">
+												</div>
+
+												<div class="form-group col-md-4">
+													<label for="title">Warehouse name</label> <input
+														type="text" disabled readonly th:value="${whr.wh_name}"
+														class="form-control">
+												</div>
+
+												<div class="form-group col-md-4">
+													<label for="phone">Date time</label> <input type="text"
+														disabled readonly
+														th:value="${#temporals.format(whr.date, 'HH:mm dd/MM/yyyy')}"
+														class="form-control">
+												</div>
+
+												<div class="form-group col-4">
+													<label for="exampleInputEmail1">Shipping fee</label> <input
+														class="form-control" disabled readonly
+														th:value="${whr.shipping_fee}">
+												</div>
+
+												<div class="form-group col-4">
+													<label for="exampleInputEmail1">Order fee</label> <input
+														class="form-control" disabled readonly
+														th:value="${whr.other_fee}">
+												</div>
+
+												<div class="form-group col-4">
+													<label for="exampleInputEmail1">Total fee</label> <input
+														class="form-control" disabled readonly
+														th:value="${whr.total_fee}">
+												</div>
+
+												<div class="form-group col-6">
+													<label for="employeeName">Employee</label> <input
+														class="form-control" disabled readonly
+														th:value="${whr.employee_name}">
+												</div>
+												<div class="form-group col-6">
+													<label for="employeeName">Status</label> <input
+														class="form-control" disabled readonly
+														th:value="${whr.status}">
+												</div>
+
+											</div>
+											<div class="card-footer">
+												<a
+													th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt}"
+													class="btn btn-danger">Back to List</a>
+											</div>
+										</form>
+									</div>
+									<div class="tab-pane active" id="Warehousedetailsreceipt">
+										<table class="table table-hover text-nowrap">
+											<thead>
+												<tr class="text-center">
+													<th>STT</th>
+													<th>Price</th>
+													<th>Quantity</th>
+													<th>Quantity Stock</th>
+													<th>Product</th>
+													<th>Status</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr th:if="${#lists.isEmpty(details)}" class="text-center">
+													<td colspan="8">No positions found</td>
+												</tr>
+												<tr th:each="item , iterStat: ${details}"
+													class="text-center">
+													<td th:text="${(pageView.page_current - 1) * pageView.page_size + iterStat.index + 1}"></td>
+													<td><span
+														th:text="${#numbers.formatCurrency(item.wh_price)}"></span>
+													</td>
+													<td><span
+														th:text="${item.quantity} + ' ' + ${item.toUnitName}"></span>
+													</td>
+													<td><span
+														th:text="${item.conversion_rate} + ' ' + ${item.fromUnitName}"></span>
+													</td>
+													<td><span th:text="${item.product_name}"></span></td>
+													<td><span th:text="${item.status}"></span></td>
+												</tr>
+											</tbody>
+										</table>
+										<table style="margin-left: 42%;">
+											<tfoot id="paginationFooter">
+												<tr class="pagination">
+													<!-- First Page -->
+													<td><a
+														th:href="@{/warehouseManager/warehouseReceipt/showWhReceiptDetail(id=${whr.id}, page=1, size=${pageView.page_size})}"
+														title="First page"> &laquo; </a></td>
+													<!-- Previous Page -->
+													<td th:if="${pageView.page_current > 1}"><a
+														th:href="@{/warehouseManager/warehouseReceipt/showWhReceiptDetail(id=${whr.id}, page=${pageView.page_current - 1}, size=${pageView.page_size})}"
+														title="Previous page"> &lt; </a></td>
+													<!-- Page Numbers -->
+													<td
+														th:each="i : ${#numbers.sequence(1, pageView.total_page)}"
+														th:if="${i < 3 or (i >= (pageView.page_current - 2) and i <= (pageView.page_current + 2))}">
+														<a
+														th:href="@{/warehouseManager/warehouseReceipt/showWhReceiptDetail(id=${whr.id}, page=${i}, size=${pageView.page_size})}"
+														th:class="${i == pageView.page_current ? 'active' : ''}">
+															<span th:text="${i}"></span>
+													</a>
+													</td>
+													<!-- Next Page -->
+													<td th:if="${pageView.page_current < pageView.total_page}">
+														<a
+														th:href="@{/warehouseManager/warehouseReceipt/showWhReceiptDetail(id=${whr.id}, page=${pageView.page_current + 1}, size=${pageView.page_size})}"
+														title="Next page"> &gt; </a>
+													</td>
+													<!-- Last Page -->
+													<td><a
+														th:href="@{/showWhReceiptDetail(id=${whr.id}, page=${pageView.total_page}, size=${pageView.page_size})}"
+														title="Last page"> &raquo; </a></td>
+												</tr>
+											</tfoot>
+										</table>
+
+										<div class="card-footer">
+											<a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt}"
+												class="btn btn-danger">Back to List</a>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="warehouseManager/layout/footer_admin"></div>
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script th:src="@{/js/addDetails.js}"></script>
+</body>
+

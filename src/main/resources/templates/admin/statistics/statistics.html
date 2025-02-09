@@ -1,0 +1,3373 @@
+
+<div xmlns:th="http://www.thymeleaf.org">
+
+	<style>
+.statistics-container {
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	padding: 1.5rem;
+}
+
+.chart-controls {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.period-btn {
+	border: none !important;
+	padding: 0.6rem 1.2rem;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+	background-color: #0056b3;
+	transform: translateY(-1px);
+}
+
+.period-btn:active {
+	transform: translateY(0);
+}
+
+.product-select {
+	height: 42px;
+	border-radius: 6px;
+	border: 1px solid #dee2e6;
+	padding: 0.375rem 1rem;
+	font-size: 0.95rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+}
+
+.product-select:focus {
+	border-color: #80bdff;
+	box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.chart-container {
+	height: 400px;
+	margin-top: 1rem;
+	padding: 1rem;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive adjustments */
+@media ( max-width : 768px) {
+	.statistics-container {
+		padding: 1rem;
+	}
+	.row>.col {
+		margin-bottom: 1rem;
+	}
+	.btn-group {
+		width: 100%;
+		display: flex;
+	}
+	.period-btn {
+		flex: 1;
+	}
+	.product-select {
+		width: 100%;
+	}
+}
+
+/* Optional: Add active state for period buttons */
+.period-btn.active {
+	background-color: #0056b3;
+	box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.tab-pane {
+	padding: 1rem 0;
+}
+
+.kpi-card {
+	background: white;
+	padding: 1.2rem;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	text-align: center;
+	transition: transform 0.2s;
+	margin-bottom: 1rem;
+}
+
+.kpi-card:hover {
+	transform: translateY(-2px);
+}
+
+.kpi-card h6 {
+	color: #666;
+	margin-bottom: 0.5rem;
+	font-size: 0.9rem;
+}
+
+.kpi-card h3 {
+	margin-bottom: 0.5rem;
+	color: #333;
+}
+
+.kpi-card small {
+	color: #666;
+	font-size: 0.8rem;
+}
+
+.table tbody tr.even-period {
+	background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table tbody tr.odd-period {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Hover effect */
+.table tbody tr:hover {
+	background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+.province-tooltip {
+	background: white;
+	padding: 8px;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#vietnamMap {
+	background: #f8f9fa;
+}
+
+.province-tooltip {
+	background: white;
+	padding: 8px;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.legend {
+	background: white;
+	padding: 10px;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	font-family: Arial, sans-serif;
+}
+
+.legend i {
+	width: 18px;
+	height: 18px;
+	float: left;
+	margin-right: 8px;
+	opacity: 0.7;
+}
+
+.legend h6 {
+	margin-bottom: 10px;
+	font-weight: bold;
+}
+
+.chart-container {
+	position: relative;
+	min-height: 500px;
+	width: 100%;
+	height: 60vh;
+}
+
+.period-note {
+	font-size: 12px;
+	color: #666;
+	font-style: italic;
+	font-weight: normal;
+}
+</style>
+	<script src="/plugins/jquery/jquery.min.js"></script>
+	<!-- Bootstrap 4 -->
+	<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<!-- AdminLTE App -->
+	<script src="/dist/js/adminlte.min.js"></script>
+	<!-- Header -->
+	<div th:replace="admin/layout/header_admin"></div>
+
+	<!-- Main Content -->
+	<div class="content-wrapper">
+		<!-- Content Header -->
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Statistics Management</h1>
+					</div>
+
+				</div>
+			</div>
+		</section>
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="container-fluid">
+				<div class="card">
+					<div class="card-header">
+						<h3 class="card-title">Revenue Statistics</h3>
+					</div>
+					<div class="card-body statistics-container">
+						<!-- Period Buttons - Moved outside tabs -->
+						<div class="row mb-4">
+							<div class="col">
+								<div class="btn-group chart-controls">
+									<button class="btn btn-primary period-btn"
+										onclick="changePeriod('monthly')">Monthly</button>
+									<button class="btn btn-primary period-btn"
+										onclick="changePeriod('quarterly')">Quarterly</button>
+									<button class="btn btn-primary period-btn"
+										onclick="changePeriod('yearly')">Yearly</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Navigation Tabs -->
+						<ul class="nav nav-tabs mb-4">
+							<li class="nav-item"><a class="nav-link active"
+								data-toggle="tab" href="#revenueTab"> <i
+									class="fas fa-dollar-sign"></i> Revenue
+							</a></li>
+							<li class="nav-item"><a class="nav-link" data-toggle="tab"
+								href="#warehouseTab"> <i class="fas fa-warehouse"></i>
+									Warehouse Analysis
+							</a></li>
+							<li class="nav-item"><a class="nav-link" data-toggle="tab"
+								href="#productsTab"> <i class="fas fa-box"></i> Products
+									Analysis
+							</a></li>
+							<li class="nav-item"><a class="nav-link" data-toggle="tab"
+								href="#mapTab"> <i class="fas fa-map-marked-alt"></i>
+									Geography
+							</a></li>
+							<li class="nav-item"><a class="nav-link" data-toggle="tab"
+								href="#profitTab"> <i class="fas fa-chart-line"></i> Gross
+									Profit
+							</a></li>
+							<li class="nav-item"><a class="nav-link" data-toggle="tab"
+								href="#profitAnalysisTab" onclick="loadProfitAnalysisTab()"> <i class="fas fa-chart-pie"></i>
+									Profit Analysis
+							</a></li>
+						</ul>
+
+						<!-- Tab Content -->
+						<div class="tab-content">
+							<!-- Revenue Tab -->
+							<div class="tab-pane fade show active" id="revenueTab">
+								<div class="row mb-4 align-items-center g-2">
+									<div class="col-auto">
+										<select class="form-control form-control-sm bg-white border"
+											style="width: 150px;" id="productSelect"
+											onchange="handleSelectChange('product')">
+											<option value="">All Products</option>
+											<option th:each="product : ${products}"
+												th:value="${product.Id}" th:text="${product.Product_name}"></option>
+										</select>
+									</div>
+
+									<div class="col-auto">
+										<select class="form-control form-control-sm bg-white border"
+											style="width: 150px;" id="categorySelect"
+											onchange="handleSelectChange('category')">
+											<option value="">All Categories</option>
+											<option th:each="category : ${categories}"
+												th:value="${category.Id}" th:text="${category.Name}"></option>
+										</select>
+									</div>
+
+									<div class="col-auto">
+										<select class="form-control form-control-sm bg-white border"
+											style="width: 150px;" id="brandSelect"
+											onchange="handleSelectChange('brand')">
+											<option value="">All Brands</option>
+											<option th:each="brand : ${brands}" th:value="${brand.Id}"
+												th:text="${brand.Name}"></option>
+										</select>
+									</div>
+
+									<div class="col-auto">
+										<button onclick="clearRevenueSelections()">Clear All</button>
+									</div>
+								</div>
+								<div class="chart-container">
+									<canvas id="revenueChart"></canvas>
+								</div>
+							</div>
+
+							<!-- Products Analysis Tab -->
+							<div class="tab-pane fade" id="productsTab" role="tabpanel">
+								<!-- KPI Cards Row -->
+								<div class="row">
+									<!-- Summary Cards -->
+									<div class="col-12">
+										<div class="row">
+											<div class="col-md-3">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">
+															Best Product<span class="period-note"></span>
+														</h6>
+														<p class="card-text" id="bestProduct">-</p>
+														<small class="text-muted" id="bestProductRevenue">$0</small>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-3">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">
+															Total Units Sold<span class="period-note"></span>
+														</h6>
+														<p class="card-text" id="totalUnitsSold">0</p>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-3">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">
+															Average Price<span class="period-note"></span>
+														</h6>
+														<p class="card-text" id="averagePrice">$0</p>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-3">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">
+															Return Rate<span class="period-note"></span>
+														</h6>
+														<p class="card-text" id="returnRate">0%</p>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- Main Product Chart -->
+								<div class="row mb-4">
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<div class="chart-container"
+													style="position: relative; min-height: 400px; height: 50vh;">
+													<canvas id="productChart"></canvas>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Top Products Chart -->
+								<div class="row mb-4">
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<div class="chart-container"
+													style="position: relative; min-height: 400px; height: 50vh;">
+													<canvas id="topProductsChart"></canvas>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row mb-4">
+									<!-- Top Products Table -->
+									<div class="col-12 mt-4">
+										<div class="card">
+											<div class="card-body">
+												<h5 class="card-title">Top Products</h5>
+												<div class="table-container"
+													style="max-height: 400px; overflow-y: auto;">
+													<table class="table">
+														<thead>
+															<tr>
+																<th>Period</th>
+																<th>Product</th>
+																<th>Revenue</th>
+																<th>Units Sold</th>
+															</tr>
+														</thead>
+														<tbody id="topProductsTable">
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+
+							<div class="tab-pane fade" id="warehouseTab">
+								<div class="row">
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<div
+													class="d-flex justify-content-between align-items-center mb-3">
+													<h4 class="card-title">Warehouse Revenue Analysis</h4>
+												</div>
+												<div class="chart-container"
+													style="position: relative; height: 50vh; width: 100%">
+													<canvas id="warehouseChart"></canvas>
+												</div>
+												<div class="table-container"
+													style="height: 300px; overflow-y: auto;">
+													<table class="table table-hover">
+														<thead>
+															<tr>
+																<th>Period</th>
+																<th>Warehouse</th>
+																<th>Revenue</th>
+																<th>Orders</th>
+																<th>Units Sold</th>
+																<th>% of Total</th>
+															</tr>
+														</thead>
+														<tbody id="warehouseTableBody">
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="tab-pane fade" id="mapTab">
+								<div class="container-fluid">
+
+
+									<!-- Map and Summary -->
+									<div class="row">
+										<!-- Vietnam Map -->
+										<div class="col-md-8">
+											<div class="card">
+												<div class="card-body">
+													<div id="vietnamMap" style="height: 600px;"></div>
+
+												</div>
+											</div>
+										</div>
+
+										<!-- Summary Stats -->
+										<div class="col-md-4">
+											<div class="card mb-3">
+												<div class="card-body top-provinces">
+													<h5>
+														Top Provinces <span class="geoperiod-note"></span>
+													</h5>
+													<div id="topRegionsTable"></div>
+												</div>
+											</div>
+
+											<div class="card">
+												<div class="card-body summarygeo">
+													<h5>
+														Summary <span class="geoperiod-note"></span>
+													</h5>
+													<div class="summary-stats">
+														<div class="stat-item">
+															<label>Total Revenue:</label> <span
+																id="totalRegionRevenue">0</span>
+														</div>
+														<div class="stat-item">
+															<label>Total Orders:</label> <span id="totalRegionOrders">0</span>
+														</div>
+														<div class="stat-item">
+															<label>Unique Customers:</label> <span
+																id="totalRegionCustomers">0</span>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- District Details (shows when province clicked) -->
+									<div class="row mt-3" id="districtDetails"
+										style="display: none;">
+										<div class="col-12">
+											<div class="card">
+												<div class="card-body">
+													<h5 id="districtTitle">District Details</h5>
+													<div id="districtTable"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="row mt-4">
+										<div class="col-12">
+											<div id="provinceDetailChart" style="min-height: 400px;"></div>
+										</div>
+									</div>
+
+								</div>
+							</div>
+
+							<div class="tab-pane fade" id="profitTab">
+								<div class="row">
+									<!-- Monthly Profit Overview -->
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<h5 class="card-title">Monthly Profit Overview</h5>
+												<div class="chart-container"
+													style="position: relative; min-height: 400px; height: 50vh;">
+													<canvas id="profitChart"></canvas>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row mt-4">
+									<!-- Product Profit Analysis -->
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<h5 class="card-title">Product Profit Analysis</h5>
+												<div class="chart-container"
+													style="position: relative; min-height: 400px; height: 50vh;">
+													<canvas id="productProfitChart"></canvas>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="row mt-4">
+									<!-- Detailed Profit Table -->
+									<div class="col-12">
+										<div class="card">
+											<div class="card-body">
+												<h5 class="card-title">Profit Details</h5>
+												<div class="table-container"
+													style="max-height: 400px; overflow-y: auto;">
+													<table class="table">
+														<thead>
+															<tr>
+																<th>Period</th>
+																<th>Product</th>
+																<th>Units</th>
+																<th>Revenue</th>
+																<th>Cost</th>
+																<th>Profit</th>
+																<th>Margin%</th>
+															</tr>
+														</thead>
+														<tbody id="profitDetailsTable">
+														</tbody>
+													</table>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+
+							<div class="tab-pane fade" id="profitAnalysisTab">
+								<!-- Main Chart -->
+								<div class="card mb-4">
+									<div class="card-body">
+										<h5 class="card-title">Profit Analysis Overview</h5>
+										<div class="chart-container"
+											style="position: relative; height: 40vh;">
+											<canvas id="profitAnalysisChart"></canvas>
+										</div>
+									</div>
+								</div>
+
+								<!-- Period Breakdown -->
+								<div class="card mb-4">
+									<div class="card-header">
+										<h6 class="card-title mb-0">
+											Period Breakdown: <span id="selectedPeriod"></span>
+										</h6>
+									</div>
+									<div class="card-body">
+										<!-- Detail Charts Row -->
+										<div class="row g-3">
+											<div class="col-md-6">
+												<div class="card h-100">
+													<div class="card-body">
+														<canvas id="revenueDetailChart"></canvas>
+														<div id="revenueDetailSummary" class="mt-3"></div>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="card h-100">
+													<div class="card-body">
+														<canvas id="expenseDetailChart"></canvas>
+														<div id="expenseDetailSummary" class="mt-3"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+										<!-- Tables Row -->
+										<div class="row g-3 mt-2">
+											<div class="col-md-6">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">Revenue Breakdown</h6>
+														<div class="table-responsive">
+															<table class="table table-sm table-hover">
+																<thead>
+																	<tr>
+																		<th>Category</th>
+																		<th class="text-end">Amount</th>
+																		<th class="text-end">%</th>
+																	</tr>
+																</thead>
+																<tbody id="revenueDetailsTableBody">
+																</tbody>
+															</table>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="card">
+													<div class="card-body">
+														<h6 class="card-title">Cost Details</h6>
+														<div class="table-responsive">
+															<table id="costDetailsTable"
+																class="table table-sm table-hover">
+																<thead>
+																	<tr>
+																		<th>Category</th>
+																		<th class="text-end">Amount</th>
+																		<th class="text-end">%</th>
+																	</tr>
+																</thead>
+																<tbody></tbody>
+															</table>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Historical Data Table -->
+								<div class="card">
+									<div class="card-body">
+										<h5 class="card-title">Historical Analysis</h5>
+										<div class="table-responsive">
+											<table class="table table-bordered table-hover">
+												<thead>
+													<tr>
+														<th>Period</th>
+														<th class="text-end">Revenue</th>
+														<th class="text-end">Gross Profit</th>
+														<th class="text-end">Expenses</th>
+														<th class="text-end">VAT</th>
+														<th class="text-end">Net Profit</th>
+														<th class="text-end">Margin</th>
+													</tr>
+												</thead>
+												<tbody id="profitAnalysisTableBody">
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+		</section>
+	</div>
+
+
+	<!-- Footer -->
+	<div th:replace="admin/layout/footer_admin"></div>
+
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+	<script>
+	// ===== COMMON UTILITIES & INITIALIZATION =====
+	let currentChart = null;
+	let currentPeriod = 'monthly';
+
+	function showLoading(selector) {
+	    $(selector).css('opacity', '0.5');
+	}
+
+	function hideLoading(selector) {
+	    $(selector).css('opacity', '1');
+	}
+
+	function showToast(type, message) {
+	    console.log(`${type}: ${message}`);
+	}
+
+	function getRandomColor() {
+	    const letters = '0123456789ABCDEF';
+	    let color = '#';
+	    for (let i = 0; i < 6; i++) {
+	        color += letters[Math.floor(Math.random() * 16)];
+	    }
+	    return color;
+	}
+
+	function formatNumber(value) {
+	    return new Intl.NumberFormat('en-US', {
+	        minimumFractionDigits: 2,
+	        maximumFractionDigits: 2
+	    }).format(value);
+	}
+
+	function formatCurrency(value) {
+	    return new Intl.NumberFormat('en-US', {
+	        style: 'currency',
+	        currency: 'USD',
+	        minimumFractionDigits: 2,
+	        maximumFractionDigits: 2
+	    }).format(value);
+	}
+
+	function formatPercent(value) {
+	    return new Intl.NumberFormat('en-US', {
+	        style: 'percent',
+	        minimumFractionDigits: 1,
+	        maximumFractionDigits: 1
+	    }).format(value / 100);
+	}
+
+	function formatPeriodLabel(period) {
+	    if (period.includes('-Q')) {
+	        const [year, quarter] = period.split('-Q');
+	        return `Quarter ${quarter} ${year}`;
+	    } else if (period.includes('-')) {
+	        const [year, month] = period.split('-');
+	        const date = new Date(year, parseInt(month) - 1);
+	        return date.toLocaleDateString('en-US', {
+	            month: 'long',
+	            year: 'numeric'
+	        });
+	    }
+	    return `Year ${period}`;
+	}
+	function formatProductPeriodLabel(period) {
+	    if (!period) return '';
+	    
+	    // Reverse the period before formatting
+	    if (period.includes('-Q')) {
+	        const [year, quarter] = period.split('-Q');
+	        return `Q${quarter} ${year}`; // Shorter format for chart
+	    } else if (period.includes('-')) {
+	        const [year, month] = period.split('-');
+	        return `${month}/${year}`; // Shorter format for chart
+	    } else {
+	        return period;
+	    }
+	}
+	function getMonthName(month) {
+	    const months = [
+	        'January', 'February', 'March', 'April', 'May', 'June',
+	        'July', 'August', 'September', 'October', 'November', 'December'
+	    ];
+	    return months[month - 1];
+	}
+
+	function formatDate(dateString) {
+	    if (!dateString) return '-';
+	    const date = new Date(dateString);
+	    return date.toLocaleDateString('en-US', {
+	        year: 'numeric',
+	        month: 'short',
+	        day: 'numeric',
+	        hour: '2-digit',
+	        minute: '2-digit'
+	    });
+	}
+	function getPeriodDescription(period) {
+	    switch(period.toLowerCase()) {
+	        case 'monthly':
+	            return 'Showing data for last 12 months';
+	        case 'quarterly':
+	            return 'Showing data for last 4 quarters';
+	        case 'yearly':
+	            return 'Showing data for last 5 years';
+	        default:
+	            return '';
+	    }
+	}
+
+	function changePeriod(period) {
+	    currentPeriod = period;
+	    document.querySelectorAll('.period-btn').forEach(btn => {
+	        btn.classList.remove('active');
+	    });
+	    document.querySelector(`.period-btn[onclick*="${period}"]`).classList.add('active');
+	    
+	    const activeTab = document.querySelector('.tab-pane.active');
+	    if (activeTab.id === 'revenueTab') {
+	        loadChart(period);
+	    } else if (activeTab.id === 'productsTab') {
+	        loadProductStats(period);
+	    } else if (activeTab.id === 'warehouseTab') {
+	        loadWarehouseData(period);
+	    } else if (activeTab.id === 'mapTab') {
+	        loadRevenueData(period);
+	    } else if (activeTab.id === 'profitTab') {
+	        loadProfitAnalysis(period);
+	    } else if (activeTab.id === 'profitAnalysisTab') {
+	        loadProfitAnalysisData(period);
+	    }
+	}
+
+
+	// ===== REVENUE TAB =====
+		
+		function handleSelectChange(type) {
+    const productSelect = document.getElementById('productSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const brandSelect = document.getElementById('brandSelect');
+    
+    switch(type) {
+        case 'product':
+            if (productSelect.value) {
+                // Reset các select khác về giá trị mặc định
+                categorySelect.value = '';    // Reset về "All Categories"
+                brandSelect.value = '';       // Reset về "All Brands"
+            }
+            break;
+        case 'category':
+            if (categorySelect.value) {
+                // Reset các select khác về giá trị mặc định
+                productSelect.value = '';     // Reset về "All Products"
+                brandSelect.value = '';       // Reset về "All Brands"
+            }
+            break;
+        case 'brand':
+            if (brandSelect.value) {
+                // Reset các select khác về giá trị mặc định
+                productSelect.value = '';     // Reset về "All Products"
+                categorySelect.value = '';    // Reset về "All Categories"
+            }
+            break;
+    }
+    
+    loadChart(currentPeriod);
+}
+		function clearRevenueSelections() {
+			 const productSelect = document.getElementById('productSelect');
+			    const categorySelect = document.getElementById('categorySelect');
+			    const brandSelect = document.getElementById('brandSelect');
+		    // Reset UI elements
+		    categorySelect.value = '';    // Reset về "All Categories"
+                brandSelect.value = '';      
+                productSelect.value = '';  
+		    // Reset chart to default state
+		    loadChart(currentPeriod);
+
+		  
+		}
+		function loadChart(period) {
+		    currentPeriod = period;
+		    const productId = document.getElementById('productSelect').value;
+		    const categoryId = document.getElementById('categorySelect').value;
+		    const brandId = document.getElementById('brandSelect').value;
+		    
+		    // Build URL with appropriate parameter
+		    let url = `/admin/statistics/api/revenue/${period}`;
+		    if (productId) url += `?productId=${productId}`;
+		    else if (categoryId) url += `?categoryId=${categoryId}`;
+		    else if (brandId) url += `?brandId=${brandId}`;
+		    
+		    // Update active period button
+		    document.querySelectorAll('.period-btn').forEach(btn => {
+		        btn.classList.remove('active');
+		    });
+		    document.querySelector(`.period-btn[onclick*="${period}"]`).classList.add('active');
+		    
+		    fetch(url)
+		        .then(response => response.json())
+		        .then(data => {
+		            if (currentChart) {
+		                currentChart.destroy();
+		            }
+
+		            const chartElement = document.getElementById('revenueChart');
+		            Chart.register(ChartDataLabels);
+		            
+		            const datasets = [];
+		            
+		            if (productId || categoryId || brandId) {
+		                // Selected Revenue (bottom)
+		                datasets.push({
+		                    label: getSelectedLabel(),
+		                    data: data.values,
+		                    backgroundColor: data.isPredicted.map(isPred => 
+		                        isPred ? 'rgba(255, 192, 203, 0.4)' : 'rgba(255, 99, 132, 0.7)'  // Màu hồng nhạt cho dự đoán
+		                    ),
+		                    borderColor: data.isPredicted.map(isPred =>
+		                        isPred ? 'rgba(255, 192, 203, 0.6)' : 'rgba(255, 99, 132, 1)'
+		                    ),
+		                    borderWidth: 1,
+		                    datalabels: {
+		                        anchor: 'end',
+		                        align: 'bottom',
+		                        formatter: function(value, context) {
+		                            if (value === 0) return '';
+		                            const isPredicted = data.isPredicted[context.dataIndex];
+		                            const percentage = data.percentage[context.dataIndex].toFixed(1);
+		                            const formattedValue = value.toLocaleString(undefined, {
+		                                minimumFractionDigits: 2,
+		                                maximumFractionDigits: 2
+		                            });
+		                            return isPredicted ? 
+		                                `(Predicted)\n${percentage}%\n$${formattedValue}` : 
+		                                `${percentage}%\n$${formattedValue}`;
+		                        },
+		                        font: function(context) {
+		                            return {
+		                                weight: data.isPredicted[context.dataIndex] ? 'normal' : 'bold',
+		                                size: 14
+		                            };
+		                        },
+		                        color: function(context) {
+		                            return data.isPredicted[context.dataIndex] ? '#666666' : '#000000';
+		                        },
+		                        padding: 8,
+		                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		                        borderRadius: 4
+		                    }
+		                });
+
+		                // Other Revenue (top)
+		                const otherRevenue = data.totalPeriodRevenue.map((total, index) => 
+		                    Math.max(0, total - data.values[index])
+		                );
+		                datasets.push({
+		                    label: 'Other Revenue',
+		                    data: otherRevenue,
+		                    backgroundColor: data.isPredicted.map(isPred => 
+		                        isPred ? 'rgba(169, 169, 169, 0.5)' : 'rgba(54, 162, 235, 0.7)'  // Màu xám nhạt cho dự đoán
+		                    ),
+		                    borderColor: data.isPredicted.map(isPred =>
+		                        isPred ? 'rgba(169, 169, 169, 0.8)' : 'rgba(54, 162, 235, 1)'
+		                    ),
+		                    borderWidth: 1,
+		                    datalabels: {
+		                        anchor: 'start',
+		                        align: 'top',
+		                        formatter: function(value, context) {
+		                            if (value === 0) return '';
+		                            const isPredicted = data.isPredicted[context.dataIndex];
+		                            const percentage = (100 - data.percentage[context.dataIndex]).toFixed(1);
+		                            const formattedValue = value.toLocaleString(undefined, {
+		                                minimumFractionDigits: 2,
+		                                maximumFractionDigits: 2
+		                            });
+		                            return isPredicted ? 
+		                                `(Predicted)\n${percentage}%\n$${formattedValue}` : 
+		                                `${percentage}%\n$${formattedValue}`;
+		                        },
+		                        font: function(context) {
+		                            return {
+		                                weight: data.isPredicted[context.dataIndex] ? 'normal' : 'bold',
+		                                size: 14
+		                            };
+		                        },
+		                        color: function(context) {
+		                            return data.isPredicted[context.dataIndex] ? '#666666' : '#000000';
+		                        },
+		                        padding: 8,
+		                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		                        borderRadius: 4
+		                    }
+		                });
+		            } else {
+		            	datasets.push({
+		            	    label: 'Total Revenue',
+		            	    data: data.totalPeriodRevenue,
+		            	    backgroundColor: data.isPredicted.map(isPred => 
+		            	        isPred ? 'rgba(169, 169, 169, 0.5)' : 'rgba(54, 162, 235, 0.7)'
+		            	    ),
+		            	    borderColor: data.isPredicted.map(isPred =>
+		            	        isPred ? 'rgba(169, 169, 169, 0.8)' : 'rgba(54, 162, 235, 1)'
+		            	    ),
+		            	    borderWidth: 1,
+		            	    datalabels: {
+		            	        anchor: 'end',
+		            	        align: 'top',
+		            	        formatter: function(value, context) {
+		            	            if (value === 0) return '';
+		            	            const isPredicted = data.isPredicted[context.dataIndex];
+		            	            const formattedValue = value.toLocaleString(undefined, {
+		            	                minimumFractionDigits: 2,
+		            	                maximumFractionDigits: 2
+		            	            });
+		            	            return isPredicted ? 
+		            	                `(Predicted)\n$${formattedValue}` : 
+		            	                `$${formattedValue}`;
+		            	        },
+		            	        font: function(context) {
+		            	            const isPredicted = data.isPredicted[context.dataIndex];
+		            	            return {
+		            	                weight: isPredicted ? 'normal' : 'bold',
+		            	                size: 14
+		            	            };
+		            	        },
+		            	        color: function(context) {
+		            	            const isPredicted = data.isPredicted[context.dataIndex];
+		            	            return isPredicted ? '#666666' : '#000000';
+		            	        },
+		            	        padding: 8,
+		            	        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+		            	        borderRadius: 4
+		            	    }
+		            	});
+		            }
+
+		            currentChart = new Chart(chartElement, {
+		                type: 'bar',
+		                data: {
+		                    labels: data.labels,
+		                    datasets: datasets
+		                },
+		                options: {
+		                    responsive: true,
+		                    maintainAspectRatio: false,
+		                    plugins: {
+		                        title: {
+		                            display: true,
+		                            text: `Revenue Statistics (${period.charAt(0).toUpperCase() + period.slice(1)})`,
+		                            font: { size: 16 }
+		                        },
+		                        subtitle: {
+		                            display: true,
+		                            text: getPeriodDescription(currentPeriod),
+		                            font: { size: 12, style: 'italic' },
+		                            color: '#666666'
+		                        },
+		                        legend: { position: 'top' },
+		                        tooltip: {
+		                            callbacks: {
+		                                label: function(context) {
+		                                    const datasetLabel = context.dataset.label;
+		                                    const value = context.raw;
+		                                    const formattedValue = value.toLocaleString(undefined, {
+		                                        minimumFractionDigits: 2,
+		                                        maximumFractionDigits: 2
+		                                    });
+		                                    
+		                                    if (datasetLabel.includes('Selected')) {
+		                                        const percentage = data.percentage[context.dataIndex];
+		                                        return `${datasetLabel}: $${formattedValue} (${percentage.toFixed(1)}%)`;
+		                                    }
+		                                    if (datasetLabel === 'Other Revenue') {
+		                                        const percentage = 100 - data.percentage[context.dataIndex];
+		                                        return `${datasetLabel}: $${formattedValue} (${percentage.toFixed(1)}%)`;
+		                                    }
+		                                    return `${datasetLabel}: $${formattedValue}`;
+		                                }
+		                            }
+		                        }
+		                    },
+		                    scales: {
+		                        x: { stacked: true },
+		                        y: {
+		                            stacked: true,
+		                            beginAtZero: true,
+		                            ticks: {
+		                                callback: value => '$' + value.toLocaleString(undefined, {
+		                                    minimumFractionDigits: 2,
+		                                    maximumFractionDigits: 2
+		                                })
+		                            }
+		                        }
+		                    }
+		                }
+		            });
+		        });
+		}
+
+		function getSelectedLabel() {
+		    if (document.getElementById('productSelect').value) return 'Selected Product Revenue';
+		    if (document.getElementById('categorySelect').value) return 'Selected Category Revenue';
+		    if (document.getElementById('brandSelect').value) return 'Selected Brand Revenue';
+		    return 'Total Revenue';
+		}
+	document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+	    tab.addEventListener('click', function (e) {
+	        const targetTab = this.getAttribute('href');
+	        if (targetTab === '#revenueTab') {
+	            setTimeout(() => {
+	                loadChart(currentPeriod); // Will use currentPeriod for revenue chart
+	            }, 100);
+	        }
+	    });
+	});
+
+	// Revenue Tab Initialization
+	document.addEventListener('DOMContentLoaded', function() {
+	    if (document.querySelector('#revenueTab').classList.contains('active')) {
+	        loadChart('monthly'); // Default to monthly
+	    }
+	});
+	// ===== PRODUCTS TAB =====
+	let productChart = null;
+	let topProductsChart = null;
+	function loadProductStats(period = currentPeriod) {
+	    $("#loading").show();
+	    $.ajax({
+	        url: `/admin/statistics/products/${period}`,
+	        method: "GET",
+	        dataType: "json"
+	    })
+	    .done(function(response) {
+	        if (response) {
+	            updateProductSummary(response.summary);
+	            updateProductChart(response.summaryTrend);
+	            updateTopProductsTable(response.topProducts);
+	            updateTopProductsChart(response.topProducts);
+	            const periodNote = getLatestPeriod(response.summaryTrend);
+	            $('.card-title .period-note').text(` (${periodNote})`);
+	        }
+	    })
+	    .fail(function(error) {
+	        console.error("Error loading stats:", error);
+	        toastr.error("Failed to load statistics");
+	    })
+	    .always(function() {
+	        $("#loading").hide();
+	    });
+	}
+
+	function getLatestPeriod(summaryTrend) {
+	    if (!summaryTrend || !summaryTrend.length) return '';
+	    
+	    // Lấy period cuối cùng từ summaryTrend
+	    const latestData = summaryTrend[summaryTrend.length - 1];
+	    const period = latestData.timePeriod; // hoặc tên field chứa period
+
+	    // Format period
+	    if (currentPeriod === 'monthly') {
+	        const [year, month] = period.split('-');
+	        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+	                          'July', 'August', 'September', 'October', 'November', 'December'];
+	        return monthNames[parseInt(month) - 1];
+	    } else if (currentPeriod === 'quarterly') {
+	        return period; // Giả sử đã format "Q4-2024"
+	    } else {
+	        return period; // Yearly
+	    }
+	}
+	function updateProductSummary(summary) {
+	    if (!summary) return;
+	    
+	    $('#bestProduct').text(summary.bestProduct || '-');
+	    $('#bestProductRevenue').text('$' + formatNumber(summary.bestProductRevenue || 0));
+	    $('#totalUnitsSold').text(formatNumber(summary.totalUnitsSold || 0));
+	    $('#averagePrice').text('$' + formatNumber(summary.averagePrice || 0, 2));
+	    $('#returnRate').text(formatNumber(summary.returnRate || 0, 1) + '%');
+
+	}
+	function updateProductChart(summaryTrend) {
+	    if (!summaryTrend || !summaryTrend.length) return;
+
+	    const ctx = document.getElementById('productChart');
+	    if (productChart) {
+	        productChart.destroy();
+	    }
+
+	    // Chuẩn bị data
+	    const sortedData = [...summaryTrend].sort((a, b) => new Date(a.timePeriod) - new Date(b.timePeriod));
+	    const periods = sortedData.map(item => formatProductPeriodLabel(item.timePeriod));
+	    const unitsSold = sortedData.map(item => item.totalUnitsSold);
+	    const avgPrices = sortedData.map(item => item.averagePrice);
+	    const returnRates = sortedData.map(item => item.returnRate);
+	    const maxAveragePrice = Math.max(...sortedData.map(item => item.averagePrice));
+	    const calculateGridSpacing = (maxValue) => {
+	        // Các ngưỡng phổ biến cho khoảng chia
+	        const ranges = [
+	            { max: 10, spacing: 2 },
+	            { max: 20, spacing: 4 },
+	            { max: 50, spacing: 5 },
+	            { max: 100, spacing: 10 },
+	            { max: 200, spacing: 20 },
+	            { max: 500, spacing: 50 },
+	            { max: 1000, spacing: 100 },
+	            { max: 2000, spacing: 200 },
+	            { max: 5000, spacing: 500 },
+	            { max: 10000, spacing: 1000 }
+	        ];
+
+	        // Tìm khoảng chia phù hợp
+	        for (const range of ranges) {
+	            if (maxValue <= range.max) {
+	                return range.spacing;
+	            }
+	        }
+
+	        // Nếu lớn hơn 10000, tính toán động
+	        const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
+	        return Math.ceil(maxValue / 10 / magnitude) * magnitude;
+	    };
+
+	    const maxUnitsSold = Math.max(...unitsSold);
+	    const gridSpacing = calculateGridSpacing(maxUnitsSold);
+	    const yAxisMax = Math.ceil(maxUnitsSold / gridSpacing) * gridSpacing + (gridSpacing * 2);
+	    // Datasets configuration
+	    const datasets = [
+	        {
+	            label: 'Units Sold',
+	            data: unitsSold,
+	            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+	            borderColor: 'rgba(54, 162, 235, 1)',
+	            borderWidth: 1,
+	            yAxisID: 'y'
+	        },
+	        {
+	            label: 'Average Price ($)',
+	            data: avgPrices,
+	            type: 'line',
+	            borderColor: 'rgba(255, 99, 132, 1)',
+	            borderWidth: 2,
+	            fill: false,
+	            yAxisID: 'y1',
+	            datalabels: {
+	                display: false
+	            }
+	        },
+	        {
+	            label: 'Return Rate (%)',
+	            data: returnRates,
+	            type: 'line',
+	            borderColor: 'rgba(75, 192, 192, 1)',
+	            borderWidth: 2,
+	            fill: false,
+	            yAxisID: 'y2',
+	            datalabels: {
+	                display: false
+	            }
+	        }
+	    ];
+
+	    // Create chart
+	    productChart = new Chart(ctx, {
+    type: 'bar',
+    data: { 
+        labels: periods, 
+        datasets 
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+            mode: 'index',
+            intersect: false,
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: `Product Analysis (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})`,
+                font: {
+                    size: 16,
+                    weight: 'bold'	
+                },
+                padding: {
+                    top: 10,
+                    bottom: 10
+                }
+            },
+            subtitle: {
+                display: true,
+                text: getPeriodDescription(currentPeriod),
+                font: { size: 12, style: 'italic' },
+                color: '#666666'
+            },
+            legend: {
+                position: 'top',
+                padding: {
+                    bottom: 30  // Thêm padding dưới legend
+                }
+            },
+            datalabels: {
+                color: '#666',
+                font: { 
+                    weight: 'bold',
+                    size: 11
+                },
+                formatter: function(value, context) {
+                    if (context.datasetIndex === 0) {
+                        return value;  // Units Sold in middle
+                    }
+                    return null;
+                },
+                align: 'center',
+                anchor: 'center'
+            }
+        },
+        layout: {
+            padding: {
+                top: 30,    // Giảm padding top vì đã thêm padding cho legend
+                right: 20,
+                bottom: 0,
+                left: 10
+            }
+        },
+	            scales: {
+	                x: {
+	                    reverse: false,
+	                    padding: {
+	                        top: 20  // Thêm padding phía trên cho x axis
+	                    }
+	                },
+	                y: {
+	                    type: 'linear',
+	                    position: 'left',
+	                    title: {
+	                        display: true,
+	                        text: 'Units Sold'
+	                    },
+	                    min: 0,
+	                    max: yAxisMax,  // Sử dụng giá trị động
+	                    padding: {
+	                        top: 30
+	                    }
+	                },
+	                y1: {
+	                    type: 'linear',
+	                    position: 'right',
+	                    max: Math.ceil(maxAveragePrice * 1.3), 
+	                    title: {
+	                        display: true,
+	                        text: 'Average Price ($)'
+	                    },
+	                    grid: {
+	                        drawOnChartArea: false
+	                    },
+	                    padding: {
+	                        top: 30  // Thêm padding cho y axis
+	                    }
+	                },
+	                y2: {
+	                    type: 'linear',
+	                    position: 'right',
+	                    max: 100,
+	                    title: {
+	                        display: true,
+	                        text: 'Return Rate (%)'
+	                    },
+	                    grid: {
+	                        drawOnChartArea: false
+	                    },
+	                    padding: {
+	                        top: 30  // Thêm padding cho y axis
+	                    }
+	                }
+	            }
+	        },
+	        plugins: [ChartDataLabels, {
+	            id: 'revenueLabels',
+	            afterDatasetsDraw(chart, args, options) {
+	                const {ctx, data, scales} = chart;
+	                const unitsSold = data.datasets[0].data;
+	                const avgPrices = data.datasets[1].data;
+
+	                ctx.save();
+	                ctx.font = 'bold 11px Arial';
+	                ctx.textAlign = 'center';
+	                ctx.fillStyle = '#666';
+
+	                unitsSold.forEach((value, index) => {
+	                    if (value) {  // Only draw if there's a value
+	                        const revenue = value * avgPrices[index];
+	                        const xPos = scales.x.getPixelForValue(index);
+	                        const yPos = scales.y.getPixelForValue(value);
+
+	                        ctx.fillText(
+	                            '$' + revenue.toLocaleString(undefined, {
+	                                minimumFractionDigits: 2,
+	                                maximumFractionDigits: 2
+	                            }),
+	                            xPos,
+	                            yPos - 15
+	                        );
+	                    }
+	                });
+	                ctx.restore();
+	            }
+	        }]
+	    });
+	}
+	function updateTopProductsChart(topProducts) {
+	    if (!topProducts || !topProducts.length) return;
+
+	    const ctx = document.getElementById('topProductsChart');
+	    if (topProductsChart) {
+	        topProductsChart.destroy();
+	    }
+
+	    // Tổ chức data theo sản phẩm và tính toán
+	    const productTimelines = {};
+	    const periods = [...new Set(topProducts.map(item => item.timePeriod))].sort();
+	    const periodTotals = {};
+	    let totalRevenue = 0;
+
+	    // Tính tổng doanh thu từng period và tổng doanh thu
+	    periods.forEach(period => {
+	        const periodData = topProducts.filter(item => item.timePeriod === period);
+	        periodTotals[period] = periodData[0]?.periodTotalRevenue || 0;
+	        totalRevenue += periodTotals[period];
+	    });
+
+	    // Tổ chức dữ liệu cho từng sản phẩm
+	    topProducts.forEach(item => {
+	        if (!productTimelines[item.productName]) {
+	            productTimelines[item.productName] = {
+	                revenue: Array(periods.length).fill(0),
+	                totalRevenue: 0
+	            };
+	        }
+	        const periodIndex = periods.indexOf(item.timePeriod);
+	        productTimelines[item.productName].revenue[periodIndex] = item.revenue;
+	        productTimelines[item.productName].totalRevenue += item.revenue;
+	    });
+
+	    // Tạo datasets cho chart
+	    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'];
+	    const datasets = Object.entries(productTimelines)
+	        .sort((a, b) => b[1].totalRevenue - a[1].totalRevenue)
+	        .slice(0, 5)
+	        .map(([name, data], index) => {
+	            const percentage = ((data.totalRevenue / totalRevenue) * 100).toFixed(1);
+	            return {
+	                label: `${name} (${percentage}%)`,
+	                data: data.revenue,
+	                borderColor: colors[index],
+	                backgroundColor: `${colors[index]}33`,
+	                fill: true,
+	                tension: 0.4,
+	                yAxisID: 'y'
+	            };
+	        });
+
+	    // Tạo chart
+	    topProductsChart = new Chart(ctx, {
+	        type: 'line',
+	        data: {
+	            labels: periods.map(p => formatProductPeriodLabel(p)),
+	            datasets: datasets
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            layout: {
+	                padding: {
+	                    top: 20,
+	                    right: 25,
+	                    bottom: 20,
+	                    left: 25
+	                }
+	            },
+	            interaction: {
+	                mode: 'nearest',
+	                axis: 'x',
+	                intersect: false
+	            },
+	            plugins: {
+	                title: {
+	                    display: true,
+	                    text: `Top 5 Products Revenue Trends (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})`,
+	                    font: { 
+	                        size: 18,
+	                        weight: 'bold' 
+	                    },
+	                    padding: 20
+	                },
+	                subtitle: {
+                        display: true,
+                        text: getPeriodDescription(currentPeriod),
+                        font: { size: 12, style: 'italic' },
+                        color: '#666666'
+                    },
+	                legend: {
+	                    position: 'top',
+	                    labels: {
+	                        padding: 20,
+	                        usePointStyle: true,
+	                        pointStyle: 'circle'
+	                    }
+	                },
+	                tooltip: {
+	                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+	                    padding: 12,
+	                    titleFont: {
+	                        size: 14
+	                    },
+	                    bodyFont: {
+	                        size: 13
+	                    },
+	                    callbacks: {
+	                        label: function(context) {
+	                            const value = context.raw;
+	                            const period = periods[context.dataIndex];
+	                            const percentage = ((value / periodTotals[period]) * 100).toFixed(1);
+	                            return `${context.dataset.label.split(' (')[0]}: $${value.toLocaleString()} (${percentage}%)`;
+	                        },
+	                        afterBody: function(context) {
+	                            const period = periods[context[0].dataIndex];
+	                            return [`Total: $${periodTotals[period].toLocaleString()}`];
+	                        }
+	                    }
+	                }
+	            },
+	            scales: {
+	                x: {
+	                    title: {
+	                        display: true,
+	                        text: 'Time Period',
+	                        font: {
+	                            size: 14
+	                        },
+	                        padding: 10
+	                    },
+	                    grid: {
+	                        display: true,
+	                        color: 'rgba(0, 0, 0, 0.05)'
+	                    }
+	                },
+	                y: {
+	                    type: 'linear',
+	                    position: 'left',
+	                    title: {
+	                        display: true,
+	                        text: 'Revenue ($)',
+	                        font: {
+	                            size: 14
+	                        },
+	                        padding: 10
+	                    },
+	                    ticks: {
+	                        callback: function(value) {
+	                            return '$' + value.toLocaleString();
+	                        },
+	                        padding: 8
+	                    },
+	                    grid: {
+	                        color: 'rgba(0, 0, 0, 0.05)'
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+	// Helper function nếu chưa có
+	function truncateString(str, length) {
+	    if (!str) return '';
+	    if (str.length <= length) return str;
+	    return str.substring(0, length - 3) + '...';
+	}
+	function updateTopProductsTable(topProducts) {
+	    if (!topProducts || !topProducts.length) return;
+
+	    const tableBody = $('#topProductsTable');
+	    let currentPeriod = null;
+	    let isEvenGroup = true;
+	    let periodTotal = {};
+	    
+	    // Calculate totals for each period
+	    topProducts.forEach(product => {
+	        if (!periodTotal[product.timePeriod]) {
+	            periodTotal[product.timePeriod] = {
+	                revenue: 0,
+	                unitsSold: 0
+	            };
+	        }
+	        periodTotal[product.timePeriod].revenue += parseFloat(product.revenue || 0);
+	        periodTotal[product.timePeriod].unitsSold += parseInt(product.unitsSold || 0);
+	    });
+
+	    // Sort products by timePeriod in descending order
+	    const sortedProducts = [...topProducts].sort((a, b) => b.timePeriod.localeCompare(a.timePeriod));
+
+	    const rows = sortedProducts.map(product => {
+	        let rowHtml = '';
+	        
+	        if (currentPeriod !== product.timePeriod) {
+	            currentPeriod = product.timePeriod;
+	            isEvenGroup = !isEvenGroup;
+	            const total = periodTotal[currentPeriod];
+	            
+	            rowHtml += `
+	                <tr class="period-header ${isEvenGroup ? 'even-period' : 'odd-period'}">
+	                    <td colspan="2"><strong>${formatPeriodLabel(product.timePeriod)}</strong></td>
+	                    <td><strong>$${formatNumber(total.revenue)}</strong></td>
+	                    <td><strong>${total.unitsSold}</strong></td>
+	                </tr>
+	            `;
+	        }
+	        
+	        rowHtml += `
+	            <tr class="${isEvenGroup ? 'even-period' : 'odd-period'}">
+	                <td></td>
+	                <td>${product.productName || 'N/A'}</td>
+	                <td>$${formatNumber(product.revenue || 0)}</td>
+	                <td>${parseInt(product.unitsSold || 0)}</td>
+	            </tr>
+	        `;
+	        
+	        return rowHtml;
+	    }).join('');
+	    
+	    tableBody.html(rows);
+	}
+
+	document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+	    tab.addEventListener('click', function (e) {
+	        const targetTab = this.getAttribute('href');
+	        if (targetTab === '#productsTab') {
+	            setTimeout(() => {
+	                loadProductStats(currentPeriod); // Will use currentPeriod for products stats
+	            }, 100);
+	        }
+	    });
+	});
+
+	// Products Tab Initialization
+	document.addEventListener('DOMContentLoaded', function() {
+	    if (document.querySelector('#productsTab').classList.contains('active')) {
+	        loadProductStats('monthly'); // Default to monthly
+	    }
+	});
+	
+	// ===== WAREHOUSE TAB =====
+	let warehouseChart = null;
+
+	function loadWarehouseData(period) {
+	    if (period) currentPeriod = period;  // Update currentPeriod if provided
+	    
+	    fetch(`/admin/statistics/api/warehouse-revenue/${currentPeriod}`)
+	        .then(response => {
+	            if (!response.ok) {
+	                throw new Error(`HTTP error! status: ${response.status}`);
+	            }
+	            return response.json();
+	        })
+	        .then(data => {
+	            if (data && data.data) {
+	                updateWarehouseChart(data);
+	                updateWarehouseTable(data);
+	                
+	                // Update active button state
+	                document.querySelectorAll('.period-btn').forEach(btn => {
+	                    btn.classList.remove('active');
+	                });
+	                document.querySelector(`.period-btn[onclick*="${currentPeriod}"]`).classList.add('active');
+	            }
+	        })
+	        .catch(error => {
+	            console.error('Error:', error);
+	            const tableBody = document.getElementById('warehouseTableBody');
+	            if (tableBody) {
+	                tableBody.innerHTML = '<tr><td colspan="6">Error loading data. Please try again later.</td></tr>';
+	            }
+	        });
+	}
+
+	function updateWarehouseChart(data) {
+	    if (!data || !data.data || data.data.length === 0) return;
+
+	    const ctx = document.getElementById('warehouseChart');
+	    if (warehouseChart) {
+	        warehouseChart.destroy();
+	    }
+
+	    const warehouses = data.warehouses;
+	    const timePeriods = data.labels;
+	    
+	    // Calculate total for each period
+	    const periodTotals = {};
+	    timePeriods.forEach(period => {
+	        const total = data.data
+	            .filter(item => item.timePeriod === period)
+	            .reduce((sum, item) => sum + item.NetRevenue, 0);
+	        periodTotals[period] = total;
+	    });
+	    
+	    const datasets = warehouses.map((warehouse, index) => {
+	        return {
+	            label: warehouse,
+	            data: timePeriods.map(period => {
+	                const record = data.data.find(item => 
+	                    item.timePeriod === period && 
+	                    item.warehouseName === warehouse
+	                );
+	                return record ? record.NetRevenue : 0;
+	            }),
+	            backgroundColor: getColor(index, 0.7),
+	            borderColor: getColor(index, 1),
+	            borderWidth: 1,
+	            datalabels: {
+	                anchor: 'center',
+	                align: 'center',
+	                formatter: function(value, context) {
+	                    if (value === 0) return '';
+	                    const percentage = data.data.find(item => 
+	                        item.timePeriod === timePeriods[context.dataIndex] && 
+	                        item.warehouseName === warehouse
+	                    ).percentage;
+	                    return `${percentage.toFixed(1)}%\n$${value.toLocaleString()}`;
+	                },
+	                font: { weight: 'bold', size: 12 },
+	                color: '#000'
+	            }
+	        };
+	    });
+
+	    warehouseChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	            labels: timePeriods,
+	            datasets: datasets
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            plugins: {
+	                title: {
+	                    display: true,
+	                    text: `Warehouse Revenue Statistics (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})`,
+	                    font: { size: 16 }
+	                },
+	                subtitle: {
+                        display: true,
+                        text: getPeriodDescription(currentPeriod),
+                        font: { size: 12, style: 'italic' },
+                        color: '#666666'
+                    },
+	                legend: { position: 'right' },
+	                tooltip: {
+	                    callbacks: {
+	                        label: function(context) {
+	                            const warehouse = context.dataset.label;
+	                            const value = context.raw;
+	                            const record = data.data.find(item => 
+	                                item.timePeriod === context.label && 
+	                                item.warehouseName === warehouse
+	                            );
+	                            return `${warehouse}: $${value.toLocaleString()} (${record.percentage.toFixed(1)}%)`;
+	                        }
+	                    }
+	                }
+	            },
+	            scales: {
+	                x: { stacked: true },
+	                y: {
+	                    stacked: true,
+	                    beginAtZero: true,
+	                    ticks: {
+	                        callback: value => '$' + value.toLocaleString()
+	                    }
+	                }
+	            }
+	        },
+	        plugins: [ChartDataLabels, {
+	            id: 'totalLabel',
+	            afterDatasetsDraw(chart, args, pluginOptions) {
+	                const {ctx, data, scales: {x, y}} = chart;
+	                
+	                ctx.save();
+	                ctx.font = 'bold 12px Arial';
+	                ctx.textAlign = 'center';
+	                ctx.fillStyle = '#000';
+	                
+	                data.labels.forEach((label, index) => {
+	                    const total = periodTotals[label];
+	                    const xPos = x.getPixelForValue(index);
+	                    
+	                    // Tìm y-coordinate của điểm cao nhất trong cột stacked
+	                    const yPos = y.getPixelForValue(total) - 10;
+	                    
+	                    // Vẽ tổng doanh thu
+	                    ctx.fillText(`Total: $${total.toLocaleString()}`, xPos, yPos);
+	                });
+	                
+	                ctx.restore();
+	            }
+	        }]
+	    });
+
+	    ctx.parentElement.style.height = '500px';
+	    ctx.parentElement.style.width = '100%';
+	}
+
+	function updateWarehouseTable(data) {
+	    const tableBody = document.getElementById('warehouseTableBody');
+	    if (!tableBody || !data.data.length) return;
+
+	    // Group data by period
+	    const groupedData = data.data.reduce((acc, item) => {
+	        if (!acc[item.timePeriod]) {
+	            acc[item.timePeriod] = {
+	                items: [],
+	                totalRevenue: 0,
+	                totalOrders: 0,
+	                totalUnits: 0
+	            };
+	        }
+	        acc[item.timePeriod].items.push(item);
+	        acc[item.timePeriod].totalRevenue += item.NetRevenue;
+	        acc[item.timePeriod].totalOrders += item.totalOrders;
+	        acc[item.timePeriod].totalUnits += item.totalUnits;
+	        return acc;
+	    }, {});
+
+	    // Sort periods in descending order
+	    const sortedPeriods = Object.keys(groupedData).sort((a, b) => b.localeCompare(a));
+
+	    let isEvenGroup = true;
+	    let html = '';
+
+	    sortedPeriods.forEach(period => {
+	        isEvenGroup = !isEvenGroup;
+	        const periodData = groupedData[period];
+
+	        // Add period summary row
+	        html += `
+	            <tr class="period-header ${isEvenGroup ? 'even-period' : 'odd-period'}">
+	                <td><strong>${period}</strong></td>
+	                <td><strong></strong></td>
+	                <td><strong>$${periodData.totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+	                <td><strong>${periodData.totalOrders}</strong></td>
+	                <td><strong>${periodData.totalUnits}</strong></td>
+	                <td><strong></strong></td>
+	            </tr>
+	        `;
+
+	        // Sort items within period by NetRevenue
+	        const sortedItems = periodData.items.sort((a, b) => b.NetRevenue - a.NetRevenue);
+
+	        // Add warehouse rows
+	        sortedItems.forEach(item => {
+	            html += `
+	                <tr class="${isEvenGroup ? 'even-period' : 'odd-period'}">
+	                    <td></td>
+	                    <td>${item.warehouseName}</td>
+	                    <td>$${item.NetRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+	                    <td>${item.totalOrders}</td>
+	                    <td>${item.totalUnits}</td>
+	                    <td>${item.percentage.toFixed(1)}%</td>
+	                </tr>
+	            `;
+	        });
+	    });
+
+	    tableBody.innerHTML = html;
+	}
+	function getColor(index, alpha) {
+	    const colors = [
+	        `rgba(255, 99, 132, ${alpha})`,   // Red
+	        `rgba(54, 162, 235, ${alpha})`,    // Blue
+	        `rgba(255, 206, 86, ${alpha})`,    // Yellow
+	        `rgba(75, 192, 192, ${alpha})`,    // Green
+	        `rgba(153, 102, 255, ${alpha})`,   // Purple
+	        `rgba(255, 159, 64, ${alpha})`,    // Orange
+	        `rgba(201, 203, 207, ${alpha})`    // Grey
+	    ];
+	    return colors[index % colors.length];
+	}
+
+	// Warehouse Tab Event Listeners
+	document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+	    tab.addEventListener('click', function (e) {
+	        const targetTab = this.getAttribute('href');
+	        if (targetTab === '#warehouseTab') {
+	            setTimeout(() => {
+	                loadWarehouseData();
+	            }, 100);
+	        }
+	    });
+	});
+
+	// Warehouse Tab Initialization
+	document.addEventListener('DOMContentLoaded', function() {
+	    if (document.querySelector('#warehouseTab').classList.contains('active')) {
+	        loadWarehouseData('monthly'); // Default to monthly
+	    }
+	});
+	//=========================================================================
+	//=========================================================================
+	//=========================================================================
+
+
+//Constants
+const REVENUE_BREAKS = [0, 5000, 10000, 15000, 20000];
+const REVENUE_COLORS = ['#fee5d9','#fcae91','#fb6a4a','#de2d26','#a50f15'];
+let currentData = [];
+let provinceDetailChart;
+let map;
+const PROVINCE_MAPPING = {
+    'vn-hc': {id: 202, name: 'Ho Chi Minh'},    
+    'vn-hn': {id: 201, name: 'Ha Noi'},    
+    'vn-da': {id: 203, name: 'Da Nang'},    
+    'vn-3655': {id: 248, name: 'Bac Giang'},  
+    'vn-qn': {id: 230, name: 'Quang Ninh'},    
+    'vn-kh': {id: 208, name: 'Khanh Hoa'},    
+    'vn-tg': {id: 212, name: 'Tien Giang'},    
+    'vn-bv': {id: 206, name: 'Ba Ria - Vung Tau'},    
+    'vn-bu': {id: 239, name: 'Binh Phuoc'},    
+    'vn-br': {id: 205, name: 'Binh Duong'},    
+    'vn-st': {id: 218, name: 'Soc Trang'},    
+    'vn-pt': {id: 229, name: 'Phu Tho'},    
+    'vn-yb': {id: 263, name: 'Yen Bai'},    
+    'vn-hd': {id: 225, name: 'Hai Duong'},    
+    'vn-bn': {id: 249, name: 'Bac Ninh'},    
+    'vn-nb': {id: 233, name: 'Ninh Binh'},    
+    'vn-hm': {id: 232, name: 'Ha Nam'},    
+    'vn-ho': {id: 267, name: 'Hoa Binh'},    
+    'vn-vc': {id: 221, name: 'Vinh Phuc'},    
+    'vn-bg': {id: 248, name: 'Bac Giang'},    
+    'vn-tb': {id: 226, name: 'Thai Binh'},    
+    'vn-ld': {id: 209, name: 'Lam Dong'},    
+    'vn-bp': {id: 239, name: 'Binh Phuoc'},    
+    'vn-py': {id: 260, name: 'Phu Yen'},    
+    'vn-bd': {id: 262, name: 'Binh Dinh'},    
+    'vn-qg': {id: 242, name: 'Quang Ngai'},    
+    'vn-dt': {id: 216, name: 'Dong Thap'},    
+    'vn-la': {id: 264, name: 'Lai Chau'},    
+    'vn-bl': {id: 253, name: 'Bac Lieu'},    
+    'vn-vl': {id: 215, name: 'Vinh Long'},    
+    'vn-tn': {id: 240, name: 'Tay Ninh'},    
+    'vn-ty': {id: 244, name: 'Thai Nguyen'},    
+    'vn-li': {id: 269, name: 'Lao Cai'},    
+    'vn-hg': {id: 227, name: 'Ha Giang'},    
+    'vn-nd': {id: 231, name: 'Nam Dinh'},    
+    'vn-na': {id: 235, name: 'Nghe An'},    
+    'vn-qb': {id: 237, name: 'Quang Binh'},    
+    'vn-nt': {id: 261, name: 'Ninh Thuan'},    
+    'vn-qt': {id: 238, name: 'Quang Tri'},    
+    'vn-tt': {id: 223, name: 'Thua Thien Hue'},    
+    'vn-ag': {id: 217, name: 'An Giang'},    
+    'vn-cm': {id: 252, name: 'Ca Mau'},    
+    'vn-tv': {id: 214, name: 'Tra Vinh'},    
+    'vn-cb': {id: 246, name: 'Cao Bang'},    
+    'vn-kg': {id: 219, name: 'Kien Giang'},    
+    'vn-lo': {id: 266, name: 'Son La'},    
+    'vn-db': {id: 265, name: 'Dien Bien'},    
+    'vn-ls': {id: 247, name: 'Lang Son'},    
+    'vn-th': {id: 234, name: 'Thanh Hoa'},    
+    'vn-tq': {id: 228, name: 'Tuyen Quang'},    
+    'vn-bi': {id: 245, name: 'Bac Kan'}    
+};
+function initMap() {
+    (async () => {
+        const topology = await fetch(
+            "https://code.highcharts.com/mapdata/countries/vn/vn-all.topo.json"
+        ).then(response => response.json());
+
+        map = Highcharts.mapChart("vietnamMap", {
+            chart: {
+                map: topology,
+                zoomType: 'xy',
+                panning: true,
+                panKey: 'shift'
+            },
+            title: {
+                text: "Revenue by Province"
+            },
+            plotOptions: {
+                series: {
+                    point: {
+                        events: {
+                            click: function() {
+                                // Tìm provinceId từ PROVINCE_MAPPING
+                                const provinceMapping = PROVINCE_MAPPING[this['hc-key']];
+                                if (provinceMapping) {
+                                    updateProvinceDetailChart(provinceMapping.id, this.name);
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            colorAxis: {
+                min: 0,
+                minColor: '#FFFFFF',
+                maxColor: '#006400',
+                stops: [
+                    [0, '#FFFFFF'],
+                    [0.2, '#EFF7DA'],
+                    [0.4, '#C7E6B8'],
+                    [0.6, '#7BC96F'],
+                    [0.8, '#239A3B'],
+                    [1, '#006400']
+                ]
+            },
+            mapNavigation: {
+                enabled: true,
+                enableButtons: true,
+                enableDoubleClickZoom: true,
+                enableMouseWheelZoom: true,
+                enableTouchZoom: true,
+                buttonOptions: {
+                    verticalAlign: 'bottom',
+                    align: 'right',
+                    style: {
+                        fontSize: '15px'
+                    }
+                },
+                buttons: {
+                    zoomIn: {
+                        text: '+',
+                        onclick: function() { this.mapZoom(0.5); }
+                    },
+                    zoomOut: {
+                        text: '-',
+                        onclick: function() { this.mapZoom(2); }
+                    },
+                    resetZoom: {
+                        text: '↺',
+                        onclick: function() { this.mapZoom(1); }
+                    }
+                }
+            },
+            tooltip: {
+                useHTML: true,
+                formatter: function() {
+                    const point = this.point;
+                    return `<b>${point.name}</b><br>
+                        Net Revenue: ${Highcharts.numberFormat(point.revenue || 0, 2)} $<br>
+                        Gross Revenue: ${Highcharts.numberFormat(point.grossRevenue || 0, 2)} $<br>
+                        Return Amount: ${Highcharts.numberFormat(point.returnAmount || 0, 2)} $<br>
+                        Orders: ${point.orders || 0}<br>
+                        Customers: ${point.customers || 0}`;
+                }
+            },
+            series: [{
+                data: [],
+                name: "Province",
+                states: {
+                    hover: {
+                        brightness: 0.2
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }]
+        });
+
+        // Load data ban đầu
+        loadRevenueData(currentPeriod);
+    })();
+}
+
+function loadRevenueData(period) {
+    
+    
+    fetch(`/admin/statistics/province-revenue/${period}`)
+        .then(response => response.json())
+        .then(response => {
+            currentData = response;
+            
+            updateVisualization(response.mapData);
+        })
+        .catch(error => {
+            console.error('Error loading revenue data:', error);
+        });
+}
+
+
+function updateVisualization(data) {
+    updateMapData(data);
+    updateTopRegions(data);
+    updateTotalSummary(data);
+}
+function updateMapData(revenueData) {
+    const data = Object.entries(PROVINCE_MAPPING).map(([key, value]) => {
+        const provinceData = revenueData.find(d => d.provinceId === value.id);
+        return {
+            'hc-key': key,
+            'name': value.name,
+            'value': provinceData ? provinceData.netRevenue : 0,
+            'revenue': provinceData ? provinceData.netRevenue : 0,
+            'grossRevenue': provinceData ? provinceData.grossRevenue : 0,
+            'returnAmount': provinceData ? provinceData.returnAmount : 0,
+            'orders': provinceData ? provinceData.totalOrders : 0,
+            'customers': provinceData ? provinceData.uniqueCustomers : 0
+        };
+    });
+
+    if (map && map.series[0]) {
+        // Update data
+        map.series[0].setData(data, false);
+        
+        // Format period display
+        let periodDisplay;
+        if (revenueData && revenueData.length > 0) {
+            // Lấy timePeriod từ data đầu tiên
+            periodDisplay = revenueData[0].timePeriod;
+        }
+        
+        // Update title
+        map.setTitle({
+            text: `Revenue by Province (${periodDisplay || period})`
+        });
+        
+        map.redraw();
+    }
+}
+function renderProvinceChart(container, provinceId) {
+    if (!currentData.historicalData[provinceId]) return;
+
+    const historicalData = currentData.historicalData[provinceId];
+    
+    Highcharts.chart(container, {
+        chart: {
+            type: 'line',
+            height: 150,
+            width: 200
+        },
+        title: {
+            text: 'Historical Revenue',
+            style: { fontSize: '10px' }
+        },
+        xAxis: {
+            categories: historicalData.map(d => d.timePeriod),
+            labels: { style: { fontSize: '8px' } }
+        },
+        yAxis: {
+            title: { text: null },
+            labels: { style: { fontSize: '8px' } }
+        },
+        series: [{
+            name: 'Revenue',
+            data: historicalData.map(d => d.netRevenue)
+        }],
+        credits: { enabled: false },
+        legend: { enabled: false }
+    });
+}
+function initProvinceDetailChart() {
+    provinceDetailChart = Highcharts.chart('provinceDetailChart', {
+        chart: {
+            type: 'line',
+            height: 400
+        },
+        title: {
+            text: 'Select a province to view revenue history',
+            style: {
+                fontSize: '16px'
+            }
+        },
+        subtitle: {
+            display: true,
+            text: getPeriodDescription(currentPeriod),
+            font: { size: 12, style: 'italic' },
+            color: '#666666'
+        },
+        xAxis: {
+            type: 'category',
+            title: {
+                text: 'Period'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Revenue ($)'
+            },
+            labels: {
+                formatter: function() {
+                    return '$' + Highcharts.numberFormat(this.value, 2);
+                }
+            }
+        },
+        series: [{
+            name: 'Net Revenue',
+            color: '#239A3B',
+            data: [],
+            dataLabels: {
+                enabled: true,
+                formatter: function() {
+                    return '$' + Highcharts.numberFormat(this.y, 2);
+                }
+            }
+        }, {
+            name: 'Gross Revenue',
+            color: '#7BC96F',
+            data: [],
+            dataLabels: {
+                enabled: true,
+                formatter: function() {
+                    return '$' + Highcharts.numberFormat(this.y, 2);
+                }
+            }
+        }, {
+            name: 'Return Amount',
+            color: '#DE2D26',
+            data: [],
+            dataLabels: {
+                enabled: true,
+                formatter: function() {
+                    return '$' + Highcharts.numberFormat(this.y, 2);
+                }
+            }
+        }],
+        tooltip: {
+            shared: true,
+            formatter: function() {
+                let tooltip = `<b>${this.x}</b><br/>`;
+                this.points.forEach(point => {
+                    tooltip += `${point.series.name}: $${Highcharts.numberFormat(point.y, 2)}<br/>`;
+                });
+                return tooltip;
+            }
+        },
+        plotOptions: {
+            series: {
+                label: {
+                    connectorAllowed: false
+                },
+                marker: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            enabled: true,
+            align: 'center',
+            verticalAlign: 'bottom'
+        },
+        credits: {
+            enabled: false
+        }
+    });
+}
+function updateProvinceDetailChart(provinceId, provinceName) {
+    if (!currentData?.historicalData) return;
+
+    // Lấy dữ liệu của tỉnh được chọn
+    const provinceData = currentData.historicalData[provinceId];
+    if (!provinceData || !provinceData.length) return;
+
+    // Xác định khoảng thời gian cần hiển thị
+    const sortedData = [...provinceData].sort((a, b) => a.timePeriod.localeCompare(b.timePeriod));
+    const firstPeriod = sortedData[0].timePeriod;
+    const lastPeriod = sortedData[sortedData.length - 1].timePeriod;
+
+    // Tạo mảng đầy đủ các period
+    let allPeriods = [];
+    if (currentPeriod === 'quarterly') {
+        // Xử lý cho quarterly
+        const [firstYear, firstQ] = firstPeriod.split('-Q').map(n => parseInt(n));
+        const [lastYear, lastQ] = lastPeriod.split('-Q').map(n => parseInt(n));
+        
+        let currentYear = firstYear;
+        let currentQ = firstQ;
+        
+        while (currentYear < lastYear || (currentYear === lastYear && currentQ <= lastQ)) {
+            allPeriods.push(`${currentYear}-Q${currentQ}`);
+            currentQ++;
+            if (currentQ > 4) {
+                currentQ = 1;
+                currentYear++;
+            }
+        }
+    } else {
+        // Xử lý cho monthly
+        const [firstYear, firstMonth] = firstPeriod.split('-').map(n => parseInt(n));
+        const [lastYear, lastMonth] = lastPeriod.split('-').map(n => parseInt(n));
+        
+        let currentYear = firstYear;
+        let currentMonth = firstMonth;
+        
+        while (currentYear < lastYear || (currentYear === lastYear && currentMonth <= lastMonth)) {
+            allPeriods.push(`${currentYear}-${String(currentMonth).padStart(2, '0')}`);
+            currentMonth++;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            }
+        }
+    }
+
+    // Map dữ liệu với đầy đủ các period
+    const dataByPeriod = {};
+    provinceData.forEach(d => {
+        dataByPeriod[d.timePeriod] = d;
+    });
+
+    // Chuẩn bị dữ liệu cho chart
+    const netRevenue = allPeriods.map(period => dataByPeriod[period]?.netRevenue || 0);
+    const grossRevenue = allPeriods.map(period => dataByPeriod[period]?.grossRevenue || 0);
+    const returnAmount = allPeriods.map(period => dataByPeriod[period]?.returnAmount || 0);
+
+    // Cập nhật chart
+    provinceDetailChart.setTitle({ 
+        text: `Revenue History - ${provinceName}`
+    });
+    provinceDetailChart.setSubtitle({
+        text: getPeriodDescription(currentPeriod)
+    });
+
+    provinceDetailChart.xAxis[0].setCategories(allPeriods);
+    provinceDetailChart.series[0].setData(netRevenue, false);
+    provinceDetailChart.series[1].setData(grossRevenue, false);
+    provinceDetailChart.series[2].setData(returnAmount, true);
+}
+
+// Hàm helper để update chart
+
+function updateTopRegions(data) {
+    const topProvinces = [...data]
+        .sort((a, b) => b.netRevenue - a.netRevenue)
+        .slice(0, 5);
+    const latestData = data[0];
+    const periodDisplay = latestData.timePeriod;
+    document.querySelector('.top-provinces .geoperiod-note').textContent = `(${periodDisplay})`;
+    document.getElementById('topRegionsTable').innerHTML = `
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Province</th>
+                    <th>Revenue</th>
+                    <th>Orders</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${topProvinces.map(p => `
+                    <tr>
+                        <td>${getProvinceName(p.provinceId)}</td>
+                        <td>${formatCurrency(p.netRevenue)}</td>
+                        <td>${p.totalOrders}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+    
+}
+
+function updateTotalSummary(data) {
+    const totals = data.reduce((acc, curr) => ({
+        revenue: acc.revenue + curr.netRevenue,
+        orders: acc.orders + curr.totalOrders,
+        customers: acc.customers + curr.uniqueCustomers
+    }), { revenue: 0, orders: 0, customers: 0 });
+
+    document.getElementById('totalRegionRevenue').textContent = formatCurrency(totals.revenue);
+    document.getElementById('totalRegionOrders').textContent = totals.orders;
+    document.getElementById('totalRegionCustomers').textContent = totals.customers;
+    const latestData = data[0];
+    const periodDisplay = latestData.timePeriod;
+    document.querySelector('.summarygeo .geoperiod-note').textContent = `(${periodDisplay})`;
+}
+function getPeriodDisplay(period) {
+    // Giả sử period có format như "2024-12" hoặc "Q4-2024"
+    if (period.includes('-Q')) {
+        return period; // Quarterly
+    } else if (period.includes('-')) {
+        const [year, month] = period.split('-');
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December'];
+        return monthNames[parseInt(month) - 1];
+    } else {
+        return period; // Yearly
+    }
+}
+//Helper function để lấy tên tỉnh từ ID
+function getProvinceName(provinceId) {
+    const province = Object.values(PROVINCE_MAPPING).find(p => p.id === provinceId);
+    return province ? province.name : `Province ${provinceId}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initProvinceDetailChart();
+});
+
+document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('click', function (e) {
+        const targetTab = this.getAttribute('href');
+        if (targetTab === '#mapTab') {
+            setTimeout(() => {
+                if (!map) {
+                    initMap();
+                } else {
+                    loadRevenueData(currentPeriod);
+                }
+            }, 100);
+        }
+    });
+});
+
+// Map Tab Initialization
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('#mapTab').classList.contains('active')) {
+        initMap(); 
+    }
+});
+
+//===================================================================================
+
+let profitChart = null;
+let productProfitChart = null;
+
+function loadProfitAnalysis(period = 'monthly') {
+    currentPeriod = period;
+    $.ajax({
+        url: `/admin/statistics/gross-profit/${period}`,
+        method: "GET",
+        success: function(data) {
+            renderProfitChart(data.monthlySummary);
+            renderProductProfitChart(data.productPerformance); 
+            renderProfitDetailsTable(data.productPerformance); 
+        },
+        error: function(error) {
+            console.error("Error:", error);
+        }
+    });
+}
+
+function renderProfitChart(summaryData) {
+    const ctx = document.getElementById('profitChart');
+    
+    const sortedData = [...summaryData].sort((a, b) => 
+        new Date(a.period) - new Date(b.period)
+    );
+
+    if (profitChart) {
+        profitChart.destroy();
+    }
+
+    profitChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: sortedData.map(item => formatPeriodLabel(item.period)),  // Sử dụng hàm mới
+            datasets: [
+                {
+                    label: 'Cost',
+                    data: sortedData.map(item => item.cost),
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    stack: 'Stack 0',
+                    order: 2,
+                    datalabels: {
+                        display: false
+                    }
+                },
+                {
+                    label: 'Revenue',
+                    data: sortedData.map(item => item.revenue),
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    stack: 'Stack 0',
+                    order: 3,
+                    datalabels: {
+                        align: 'top',
+                        anchor: 'end',
+                        formatter: (value) => `$${value.toFixed(2)}`,
+                        font: { weight: 'bold', size: 11 },
+                        color: '#000'
+                    }
+                },
+                {
+                    label: 'Gross Profit',
+                    data: sortedData.map(item => item.profit),
+                    type: 'line',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    order: 1,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    datalabels: {
+                        align: 'center',
+                        formatter: value => `$${value.toFixed(2)}`,
+                        font: { weight: 'bold', size: 11 },
+                        color: '#000',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderRadius: 4,
+                        padding: { top: 4, bottom: 4, left: 6, right: 6 }
+                    }
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    display: true
+                },
+                title: {
+                    display: true,
+                    text: `Profit Analysis (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})`,
+                    font: { size: 16, weight: 'bold' }
+                },
+                subtitle: {
+                    display: true,
+                    text: getPeriodDescription(currentPeriod),
+                    font: { size: 12, style: 'italic' },
+                    color: '#666666'
+                },
+                legend: {
+                    position: 'top',
+                    align: 'center',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const dataIndex = context.dataIndex;
+                            const margin = sortedData[dataIndex].margin;
+                            
+                            if (context.dataset.label === 'Gross Profit') {
+                                return [
+                                    `Gross Profit: $${value.toFixed(2)}`,
+                                    `Margin: ${margin.toFixed(1)}%`
+                                ];
+                            }
+                            if (context.dataset.label === 'Revenue') {
+                                return [
+                                    `Revenue: $${value.toFixed(2)}`,
+                                    `Margin: ${margin.toFixed(1)}%`
+                                ];
+                            }
+                            if (context.dataset.label === 'Cost') {
+                                return [
+                                    `Cost: $${value.toFixed(2)}`,
+                                    `Cost %: ${(100 - margin).toFixed(1)}%`
+                                ];
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount ($)'
+                    },
+                    ticks: {
+                        callback: value => '$' + value.toFixed(2)
+                    },
+                    stacked: true
+                }
+            }
+        }
+    });
+}
+function renderProductProfitChart(data) {
+    const ctx = document.getElementById('productProfitChart');
+    
+    // Tính tổng lợi nhuận cho mỗi sản phẩm
+    const productTotals = {};
+    data.forEach(item => {
+        if (!productTotals[item.productName]) {
+            productTotals[item.productName] = 0;
+        }
+        productTotals[item.productName] += item.grossProfit;
+    });
+
+    // Lấy top N sản phẩm
+    const topN = 10;
+    const sortedProducts = Object.entries(productTotals)
+        .sort(([,a], [,b]) => b - a);
+    const topProducts = sortedProducts.slice(0, topN).map(([name]) => name);
+    const otherProducts = sortedProducts.slice(topN).map(([name]) => name);
+
+    // Màu sắc cho mỗi sản phẩm (không phân biệt revenue/cost)
+    const colors = [
+        'rgba(54, 162, 235, 0.7)',  // Product 20
+        'rgba(255, 99, 132, 0.7)',  // Product 11
+        'rgba(75, 192, 192, 0.7)',  // Product 18
+        'rgba(255, 159, 64, 0.7)',  // Product 17
+        'rgba(153, 102, 255, 0.7)', // BOBEO
+        'rgba(169, 169, 169, 0.7)'  // Others
+    ];
+
+    // Group data theo thời gian
+    const timeLabels = [...new Set(data.map(item => item.timePeriod))].sort();
+    
+    // Tạo datasets với cùng màu cho revenue và cost
+    const datasets = [];
+    
+    topProducts.forEach((productName, index) => {
+        // Revenue bars
+        datasets.push({
+            label: productName,
+            data: timeLabels.map(time => {
+                const item = data.find(d => d.timePeriod === time && d.productName === productName);
+                return item ? item.grossRevenue : 0;
+            }),
+            backgroundColor: colors[index],
+            borderColor: colors[index],
+            borderWidth: 1,
+            stack: 'Revenue'
+        });
+
+        // Cost bars
+        datasets.push({
+            label: productName,
+            data: timeLabels.map(time => {
+                const item = data.find(d => d.timePeriod === time && d.productName === productName);
+                return item ? item.totalCost : 0;
+            }),
+            backgroundColor: colors[index],
+            borderColor: colors[index],
+            borderWidth: 1,
+            stack: 'Cost',
+            showInLegend: false
+        });
+    });
+
+    // Others với cùng màu
+    datasets.push({
+        label: 'Others',
+        data: timeLabels.map(time => {
+            return data.filter(d => d.timePeriod === time && otherProducts.includes(d.productName))
+                       .reduce((sum, item) => sum + item.grossRevenue, 0);
+        }),
+        backgroundColor: colors[5],
+        borderColor: colors[5],
+        borderWidth: 1,
+        stack: 'Revenue'
+    });
+
+    datasets.push({
+        label: 'Others',
+        data: timeLabels.map(time => {
+            return data.filter(d => d.timePeriod === time && otherProducts.includes(d.productName))
+                       .reduce((sum, item) => sum + item.totalCost, 0);
+        }),
+        backgroundColor: colors[5],
+        borderColor: colors[5],
+        borderWidth: 1,
+        stack: 'Cost',
+        showInLegend: false
+    });
+
+    if (productProfitChart) {
+        productProfitChart.destroy();
+    }
+
+    productProfitChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: timeLabels.map(label => `${label}\nRevenue\nCost`),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: `Top Products Profit Analysis (${currentPeriod.charAt(0).toUpperCase() + currentPeriod.slice(1)})`,
+                    font: { 
+                        size: 16, 
+                        weight: 'bold'
+                    },
+                    subtitle: {
+                        display: true,
+                        text: getPeriodDescription(currentPeriod),
+                        font: { size: 12, style: 'italic' },
+                        color: '#666666'
+                    },
+                    padding: 20
+                },
+                legend: {
+                    position: 'right',
+                    align: 'start',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'rect',
+                        generateLabels: function(chart) {
+                            const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            return labels.filter(label => 
+                                chart.data.datasets[label.datasetIndex].stack === 'Revenue'
+                            );
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label.split('\n')[0];
+                        },
+                        label: function(context) {
+                            const productName = context.dataset.label;
+                            const type = context.dataset.stack;
+                            
+                            // Tìm dữ liệu tương ứng từ data gốc
+                            const timeLabel = context.chart.data.labels[context.dataIndex].split('\n')[0];
+                            const productData = data.find(d => 
+                                d.timePeriod === timeLabel && 
+                                d.productName === productName
+                            );
+
+                            if (!productData || type === 'Cost') {
+                                return null;
+                            }
+
+                            return [
+                                `${productName} (${productData.quantitySold} units)`,
+                                `Revenue: $${productData.grossRevenue.toFixed(2)}`,
+                                `Cost: $${productData.totalCost.toFixed(2)}`,
+                                `Profit: $${productData.grossProfit.toFixed(2)} (${productData.grossProfitMargin.toFixed(2)}%)`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Amount ($)',
+                        padding: {
+                            bottom: 10
+                        }
+                    },
+                    
+                    ticks: {
+                        callback: value => '$' + value.toFixed(2)
+                    },
+                    grid: {
+                        drawBorder: false
+                    },
+                    stacked: true
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time Period',
+                        padding: {
+                            top: 10
+                        }
+                    },
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            const label = this.getLabelForValue(value);
+                            const [period] = label.split('\n');
+                            return [
+                                'Revenue          Cost',
+                                period
+                            ];
+                        },
+                        align: 'center',
+                        padding: 10
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 30,
+                    top: 0,
+                    bottom: 10
+                }
+            }
+        }
+    });
+}
+function renderProfitDetailsTable(data) {
+	const tbody = document.getElementById('profitDetailsTable');
+    tbody.innerHTML = '';
+
+    // Group data by quarter
+    const groupedByQuarter = {};
+    data.forEach(item => {
+        const quarter = item.timePeriod;
+        if (!groupedByQuarter[quarter]) {
+            groupedByQuarter[quarter] = {
+                items: [],
+                totalRevenue: 0,
+                totalCost: 0,
+                totalProfit: 0
+            };
+        }
+        groupedByQuarter[quarter].items.push(item);
+        groupedByQuarter[quarter].totalRevenue += item.grossRevenue;
+        groupedByQuarter[quarter].totalCost += item.totalCost;
+        groupedByQuarter[quarter].totalProfit += item.grossProfit;
+    });
+
+    // Sort quarters
+    const sortedQuarters = Object.keys(groupedByQuarter).sort().reverse();
+
+    // Render table
+    sortedQuarters.forEach(quarter => {
+        const quarterData = groupedByQuarter[quarter];
+        
+        // Add quarter summary row
+        const summaryRow = `
+            <tr class="table-light">
+                <td><strong>${quarter}</strong></td>
+                <td></td>
+                <td>${quarterData.items.reduce((sum, item) => sum + item.quantitySold, 0)}</td>
+                <td><strong>$${quarterData.totalRevenue.toFixed(2)}</strong></td>
+                <td><strong>$${quarterData.totalCost.toFixed(2)}</strong></td>
+                <td><strong>$${quarterData.totalProfit.toFixed(2)}</strong></td>
+                <td></td>
+            </tr>
+        `;
+        tbody.innerHTML += summaryRow;
+
+        // Add product detail rows
+        quarterData.items.forEach(item => {
+            const detailRow = `
+                <tr>
+                    <td></td>
+                    <td>${item.productName}</td>
+                    <td>${item.quantitySold}</td>
+                    <td>$${item.grossRevenue.toFixed(2)}</td>
+                    <td>$${item.totalCost.toFixed(2)}</td>
+                    <td>$${item.grossProfit.toFixed(2)}</td>
+                    <td>${item.grossProfitMargin.toFixed(2)}%</td>
+                </tr>
+            `;
+            tbody.innerHTML += detailRow;
+        });
+    });
+}
+
+document.querySelectorAll('a[data-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('click', function (e) {
+        const targetTab = this.getAttribute('href');
+        if (targetTab === '#profitTab') {
+            setTimeout(() => {
+               
+            	loadProfitAnalysis(currentPeriod);
+                
+            }, 100);
+        }
+    });
+});
+
+// Initialize when document is ready
+$(document).ready(function() {
+    loadProfitAnalysis();
+});
+
+
+let profitAnalysisChart = null;
+let revenueDetailChart = null;
+let expenseDetailChart = null;
+
+function loadProfitAnalysisData(period) {
+    currentPeriod = period;
+    $("#loading").show();
+    
+    $.ajax({
+        url: '/admin/statistics/profit-analysis',
+        method: 'GET',
+        data: { period: period },
+        success: function(data) {
+            console.log("Received data:", data);
+            renderProfitAnalysisCharts(data);
+            renderProfitAnalysisTable(data);
+            
+            // Load initial detail charts
+            if (data && data.length > 0) {
+                updateDetailCharts(data[0]);
+            }
+        },
+        error: function(error) {
+            console.error("Error loading profit analysis:", error);
+        },
+        complete: function() {
+            $("#loading").hide();
+        }
+    });
+}
+function renderProfitAnalysisCharts(data) {
+    if (profitAnalysisChart) profitAnalysisChart.destroy();
+    
+    const chartData = [...data].reverse();
+    
+    profitAnalysisChart = new Chart(document.getElementById('profitAnalysisChart'), {
+        type: 'line',
+        data: {
+            labels: chartData.map(item => item.period),
+            datasets: [
+                {
+                    label: 'Revenue',
+                    data: chartData.map(item => Number(item.Revenue).toFixed(2)),
+                    borderColor: '#36A2EB',
+                    backgroundColor: '#36A2EB',
+                    tension: 0.4
+                },
+                {
+                    label: 'Total Cost',
+                    data: chartData.map(item => {
+                        const totalCost = (
+                            Number(item.Revenue) - Number(item.GrossProfit) + // Product Cost
+                            Number(item.Expenses) + // Operating Expenses
+                            Number(item.VAT) // VAT
+                        ).toFixed(2);
+                        return totalCost;
+                    }),
+                    borderColor: '#FF6384',
+                    backgroundColor: '#FF6384',
+                    tension: 0.4
+                },
+                {
+                    label: 'Net Profit',
+                    data: chartData.map(item => Number(item.GrossProfit - item.Expenses - item.VAT).toFixed(2)),
+                    type: 'bar',
+                    backgroundColor: '#9966FF',
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    updateDetailCharts(chartData[index]);
+                }
+            },
+            scales: {
+                y: {
+                    grid: {
+                        color: '#e0e0e0',
+                        drawBorder: false
+                    },
+                    border: {
+                        dash: [4,4]
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + Number(value).toFixed(2);
+                        }
+                    },
+                    beginAtZero: true,
+                    zero: {
+                        color: '#666',
+                        lineWidth: 2
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.raw;
+                            return context.dataset.label + ': $' + Number(value).toFixed(2);
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                }
+            }
+        }
+    });
+}
+function updateDetailCharts(periodData) {
+    $("#selectedPeriod").text(periodData.period);
+    
+    $.ajax({
+        url: '/admin/statistics/profit-analysis-details',
+        method: 'GET',
+        data: { 
+            period: currentPeriod,
+            selectedPeriod: periodData.period 
+        },
+        success: function(details) {
+        	console.log(details)
+            renderRevenueDetailChart(periodData);
+            renderExpenseDetailChart(details,periodData);
+            renderRevenueDetailsTable(periodData);
+            renderCostDetailsTable(details,periodData);
+        },
+        error: function(error) {
+            console.error("Error loading details:", error);
+        }
+    });
+}
+
+function setupChartClickHandler(chartData) {
+    profitAnalysisChart.options.onClick = function(event, elements) {
+        if (elements.length > 0) {
+            const index = elements[0].index;
+            updateDetailCharts(chartData[index]);
+        }
+    };
+}
+
+
+
+f
+function getColorForCostType(type) {
+    const colors = {
+        'Product Cost': 'rgba(255, 99, 132, 0.6)',
+        'Operating Expense': 'rgba(255, 159, 64, 0.6)',
+        'Tax': 'rgba(255, 205, 86, 0.6)'
+    };
+    return colors[type] || 'rgba(201, 203, 207, 0.6)';
+}
+
+
+
+function renderExpenseDetailChart(details,periodData) {
+    if (expenseDetailChart) expenseDetailChart.destroy();
+    
+    // Lấy operating expenses
+    let expenseData = [];
+    if (details.costDetails && details.costDetails['Operating Expense']) {
+        expenseData = details.costDetails['Operating Expense'].map(item => ({
+            name: item.name,
+            amount: Number(item.amount)
+        }));
+    }
+    const backgroundColors = [
+        'rgba(255, 99, 132, 0.8)',    // Hồng - Staff Salary
+        'rgba(255, 159, 64, 0.8)',    // Cam - Store Rent
+        'rgba(255, 205, 86, 0.8)',    // Vàng - Shipping Cost
+        'rgba(75, 192, 192, 0.8)',    // Xanh ngọc - VAT
+        'rgba(54, 162, 235, 0.8)',    // Xanh dương - Marketing
+        'rgba(153, 102, 255, 0.8)',   // Tím - Utilities
+        'rgba(201, 203, 207, 0.8)',   // Xám - Office Supplies
+        'rgba(255, 138, 164, 0.8)',   // Hồng nhạt - Training
+        'rgba(142, 229, 238, 0.8)',   // Xanh nhạt - Maintenance
+        'rgba(204, 153, 255, 0.8)',   // Tím nhạt - Insurance
+        'rgba(255, 177, 101, 0.8)',   // Cam nhạt - Others
+    ];
+    // Thêm VAT vào expense data
+    const vatAmount = details.costDetails.Tax?.[0]?.amount || 0;
+    expenseData.push({
+        name: 'VAT',
+        amount: Number(vatAmount)
+    });
+    
+    // Tính toán
+    const operatingExpenses = expenseData
+        .filter(item => item.name !== 'VAT')
+        .reduce((sum, item) => sum + item.amount, 0);
+    const totalExpense = operatingExpenses + Number(vatAmount);
+    const revenue = Number(periodData.Revenue);
+    const productCost = revenue - Number(periodData.GrossProfit);
+    const grossProfit = Number(periodData.GrossProfit);
+  
+    
+    // Net Profit = Gross Profit - Operating Expenses - VAT
+    const netProfit = grossProfit - operatingExpenses - vatAmount;
+    
+    expenseDetailChart = new Chart(document.getElementById('expenseDetailChart'), {
+        type: 'doughnut',
+        data: {
+            labels: expenseData.map(item => item.name),
+            datasets: [{
+                data: expenseData.map(item => item.amount),
+                backgroundColor: backgroundColors.slice(0, expenseData.length),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Cost Breakdown'
+                },
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const percentage = ((value / totalExpense) * 100).toFixed(1);
+                            return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Expense Summary & Profit Calculation
+    document.getElementById('expenseDetailSummary').innerHTML = `
+        <div class="text-center mt-3">
+            <h5>Total Expenses: ${formatCurrency(totalExpense)}</h5>
+            <div class="profit-calculation mt-3">
+                <div>Gross Profit: ${formatCurrency(grossProfit)}</div>
+                <div>- Operating Expenses: ${formatCurrency(operatingExpenses)}</div>
+                <div>- VAT: ${formatCurrency(vatAmount)}</div>
+                <div class="mt-2 ${netProfit >= 0 ? 'text-success' : 'text-danger'}">
+                    = Net Profit: ${formatCurrency(netProfit)}
+                </div>
+            </div>
+        </div>
+    `;
+}
+function renderRevenueDetailChart(periodData) {
+    if (revenueDetailChart) revenueDetailChart.destroy();
+    
+    const revenue = Number(periodData.Revenue);
+    const productCost = revenue - Number(periodData.GrossProfit);
+    const grossProfit = Number(periodData.GrossProfit);
+    
+    revenueDetailChart = new Chart(document.getElementById('revenueDetailChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Product Cost', 'Gross Profit'],
+            datasets: [{
+                data: [
+                    productCost.toFixed(2),
+                    grossProfit.toFixed(2)
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',  // Red for Cost
+                    'rgba(75, 192, 192, 0.8)'   // Green for Profit
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Revenue Breakdown'
+                },
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const percentage = ((value / revenue) * 100).toFixed(1);
+                            return `${context.label}: ${formatCurrency(value)} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Revenue Summary
+    document.getElementById('revenueDetailSummary').innerHTML = `
+        <div class="text-center mt-3">
+            <h5>Total Revenue: ${formatCurrency(revenue)}</h5>
+        </div>
+    `;
+}
+
+function renderRevenueDetailsTable(periodData) {
+    if (!periodData) return;
+
+    const tbody = document.getElementById('revenueDetailsTableBody');
+    if (!tbody) return;
+
+    const revenue = Number(periodData.Revenue || 0);
+    const grossProfit = Number(periodData.GrossProfit || 0);
+    const productCost = revenue - grossProfit;
+
+    tbody.innerHTML = `
+        <tr class="table-info">
+            <td>Revenue</td>
+            <td class="text-end">${formatCurrency(revenue)}</td>
+            <td class="text-end">100.0%</td>
+        </tr>
+        <tr>
+            <td>Product Cost</td>
+            <td class="text-end">${formatCurrency(productCost)}</td>
+            <td class="text-end">${((productCost/revenue)*100).toFixed(1)}%</td>
+        </tr>
+        <tr class="table-success">
+            <td>Gross Profit</td>
+            <td class="text-end">${formatCurrency(grossProfit)}</td>
+            <td class="text-end">${((grossProfit/revenue)*100).toFixed(1)}%</td>
+        </tr>
+    `;
+}
+
+function renderCostDetailsTable(details, periodData) {
+    if (!details || !periodData) return; // Check null/undefined
+
+    const costTable = document.getElementById('costDetailsTable');
+    if (!costTable) return; // Check if element exists
+
+    const revenue = Number(periodData.Revenue || 0);
+    const grossProfit = Number(periodData.GrossProfit || 0);
+    const productCost = revenue - grossProfit;
+    
+    let tableHTML = `
+        <h5>Cost Details</h5>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-end">%</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-info">
+                        <td>Revenue</td>
+                        <td class="text-end">${formatCurrency(revenue)}</td>
+                        <td class="text-end">100%</td>
+                    </tr>
+    `;
+
+    // Operating Expenses
+    const operatingExpenses = details.costDetails['Operating Expense']?.reduce((sum, item) => sum + Number(item.amount), 0) || 0;
+    if (details.costDetails && details.costDetails['Operating Expense']) {
+        tableHTML += `
+            <tr class="table-secondary">
+                <td>Operating Expense</td>
+                <td class="text-end">${formatCurrency(operatingExpenses)}</td>
+                <td class="text-end">${((operatingExpenses/revenue)*100).toFixed(1)}%</td>
+            </tr>
+        `;
+        
+        details.costDetails['Operating Expense'].forEach(item => {
+            tableHTML += `
+                <tr>
+                    <td class="ps-4">${item.name}</td>
+                    <td class="text-end">${formatCurrency(item.amount)}</td>
+                    <td class="text-end">${((item.amount/revenue)*100).toFixed(1)}%</td>
+                </tr>
+            `;
+        });
+    }
+
+    // Product Cost
+    tableHTML += `
+        <tr class="table-secondary">
+            <td>Product Cost</td>
+            <td class="text-end">${formatCurrency(productCost)}</td>
+            <td class="text-end">${((productCost/revenue)*100).toFixed(1)}%</td>
+        </tr>
+    `;
+
+    // Tax/VAT
+    const vatAmount = details.costDetails.Tax?.[0]?.amount || 0;
+    tableHTML += `
+        <tr class="table-secondary">
+            <td>Tax</td>
+            <td class="text-end">${formatCurrency(vatAmount)}</td>
+            <td class="text-end">${((vatAmount/revenue)*100).toFixed(1)}%</td>
+        </tr>
+    `;
+
+    // Total Cost & Net Profit
+    const totalCost = productCost + operatingExpenses + Number(vatAmount);
+    const netProfit = grossProfit - operatingExpenses - vatAmount;
+    
+    tableHTML += `
+            <tr class="table-danger">
+                <td>Total Cost</td>
+                <td class="text-end">${formatCurrency(totalCost)}</td>
+                <td class="text-end">${((totalCost/revenue)*100).toFixed(1)}%</td>
+            </tr>
+            <tr class="${netProfit >= 0 ? 'table-success' : 'table-danger'}">
+                <td>Net Profit</td>
+                <td class="text-end">${formatCurrency(netProfit)}</td>
+                <td class="text-end">${((netProfit/revenue)*100).toFixed(1)}%</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    `;
+
+    costTable.innerHTML = tableHTML;
+}
+function renderProfitAnalysisTable(data) {
+    const tbody = document.getElementById('profitAnalysisTableBody');
+    if (!tbody || !data) return;
+
+    tbody.innerHTML = data.map(item => {
+        const revenue = Number(item.Revenue || 0);
+        const grossProfit = Number(item.GrossProfit || 0);
+        const expenses = Number(item.Expenses || 0);
+        const vat = Number(item.VAT || 0);
+        const netProfit = grossProfit - expenses - vat;
+        const margin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+
+        return `
+            <tr>
+                <td>${item.period}</td>
+                <td class="text-end">${formatCurrency(revenue)}</td>
+                <td class="text-end">${formatCurrency(grossProfit)}</td>
+                <td class="text-end">${formatCurrency(expenses)}</td>
+                <td class="text-end">${formatCurrency(vat)}</td>
+                <td class="text-end ${netProfit >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(netProfit)}</td>
+                <td class="text-end ${margin >= 0 ? 'text-success' : 'text-danger'}">${margin.toFixed(1)}%</td>
+            </tr>
+        `;
+    }).join('');
+}
+function loadProfitAnalysisTab() {
+    setTimeout(() => {
+        loadProfitAnalysisData(currentPeriod);
+    }, 100);
+}
+
+// Khởi tạo khi document ready
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelector('#profitAnalysisTab').classList.contains('active')) {
+        loadProfitAnalysisData(currentPeriod || 'monthly');
+    }
+});
+	</script>
+</div>

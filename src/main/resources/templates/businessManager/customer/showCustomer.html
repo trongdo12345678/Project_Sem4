@@ -1,0 +1,110 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="input-group input-group-sm"
+								style="width: 75%; margin-left: 15%;">
+								<input type="text" name="table_search" id="searchInput" style="height: 40px;"
+									class="form-control float-right" placeholder="Search by Email">
+								<div class="input-group-append">
+									<button type="submit" class="btn btn-default">
+										<i class="fas fa-search"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body table-responsive p-0">
+							<table class="table table-hover text-nowrap">
+								<thead>
+									<tr class="text-center">
+										<th>First Name</th>
+										<th>Last Name</th>
+										<th>Email</th>
+										<th>Address</th>
+										<th>Creation Time</th>
+									</tr>
+								</thead>
+								<tbody id="warehouseTable">
+							<tr th:each="item : ${customers}" class="text-center">
+							    <td th:onclick="'goToDetail(' + ${item.id} + ')'">
+							        <span th:text="${item.First_name}"></span>
+							    </td>
+							    <td th:onclick="'goToDetail(' + ${item.id} + ')'">
+							        <span th:text="${item.Last_name}"></span>
+							    </td>
+							    <td th:onclick="'goToDetail(' + ${item.id} + ')'">
+							        <span th:text="${item.Email}"></span>
+							    </td>
+							    <td th:onclick="'goToDetail(' + ${item.id} + ')'">
+							        <span th:text="${item.Address}"></span>
+							    </td>
+							    <td th:onclick="'goToDetail(' + ${item.id} + ')'">
+							        <span th:text="${#temporals.format(item.Creation_time, 'yyyy-MM-dd')}"></span>
+							    </td>							    
+							</tr>
+				    </tbody>
+							</table>
+
+							<table style="margin-left: 42%">
+								<tfoot id="paginationFooter">
+									<tr class="pagination">
+										<td><a th:href="@{/businessManager/showCustomer(cp=1)}"
+											title="First page">&laquo;</a></td>
+										<td th:if="${pv.Page_current > 1}"><a
+											th:href="@{/businessManager/showCustomer(cp=${pv.Page_current - 1})}"
+											title="Previous page">&lt;</a></td>
+										<td th:each="i : ${#numbers.sequence(0, pv.Total_page - 1)}"
+											th:if="${i < 3 or (i >= (pv.Page_current - 2) and i <= (pv.Page_current + 2))}">
+											<a th:href="@{/businessManager/showCustomer(cp=${i + 1})}"
+											th:class="${i + 1 == pv.Page_current ? 'active' : ''}"> <span
+												th:text="${i + 1}"></span>
+										</a>
+										</td>
+										<td th:if="${pv.Page_current < pv.Total_page}"><a
+											th:href="@{/businessManager/showCustomer(cp=${pv.Page_current + 1})}"
+											title="Next page">&gt;</a></td>
+										<td><a
+											th:href="@{/businessManager/showCustomer(cp=${pv.Total_page})}"
+											title="Last page">&raquo;</a></td>
+									</tr>
+								</tfoot>
+							</table>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/cusOrderDetail.js}"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+<script>
+document.getElementById("searchInput").addEventListener("input", function () {
+    const searchValue = this.value.toLowerCase(); // Lấy giá trị nhập vào và chuyển thành chữ thường
+    const tableRows = document.querySelectorAll("#warehouseTable tr"); // Lấy tất cả các hàng trong bảng
+
+    tableRows.forEach(row => {
+        const emailCell = row.querySelector("td:nth-child(3)"); // Lấy ô Email (cột thứ 3)
+        if (emailCell) {
+            const emailText = emailCell.textContent.toLowerCase(); // Lấy nội dung email và chuyển thành chữ thường
+            if (emailText.includes(searchValue)) {
+                row.style.display = ""; // Hiển thị hàng nếu khớp
+            } else {
+                row.style.display = "none"; // Ẩn hàng nếu không khớp
+            }
+        }
+    });
+});
+
+</script>
+</html>

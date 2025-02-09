@@ -1,0 +1,88 @@
+@charset "UTF-8";
+
+.pagination {
+	display: wrap;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+td:nth-child(4) {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+    }
+	td:nth-child(1) {
+	        word-wrap: break-word;
+	        overflow-wrap: break-word;
+	        white-space: normal;
+	    }	
+.pagination a {
+	display: inline-block;
+	padding: 8px 16px;
+	text-decoration: none;
+	color: black;
+	border: 1px solid #ddd;
+	background-color: #f1f1f1;
+}
+
+.pagination a:hover {
+	background-color: #ddd;
+}
+
+.pagination .active {
+	background-color: #4CAF50;
+	color: white;
+}
+
+.card-title {
+	margin-left: 200px;
+}
+
+table tr {
+	cursor: pointer;
+}
+
+.custom-alert {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.custom-alert.success {
+    border: 1px solid rgba(0, 128, 0, 0.8);
+    background-color: #ffffff;
+    color: rgba(0, 128, 0, 0.8);
+}
+
+.custom-alert.error {
+    border: 2px solid rgba(255, 0, 0, 0.8);
+    background-color: #ffffff;
+    color: rgba(255, 0, 0, 0.8);
+}
+
+
+.btn.disabled {
+	pointer-events: none;
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+.highlighted-row {
+    background-color: rgb(128, 255, 255);
+    animation: fadeOutHighlight 2s ease-in-out forwards;
+}
+
+@keyframes fadeOutHighlight {
+    0% {
+        background-color: rgb(128, 255, 255);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+td {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+

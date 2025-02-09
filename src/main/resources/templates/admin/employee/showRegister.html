@@ -1,0 +1,77 @@
+
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Employee</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Employee</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Register Employee</h3>
+							</div>
+							<form th:object="${employee}" action="registerEmp" method="post">
+								<div class="card-body">
+									<div class="form-group">
+										<label for="finame">First Name</label> <input type="text"
+											id="finame" required name="finame" class="form-control"
+											placeholder="Enter First Name">
+									</div>
+									<div class="form-group">
+										<label for="laname">Last Name</label> <input type="text"
+											id="laname" required name="laname" class="form-control"
+											placeholder="Enter Last Name">
+									</div>
+									<div class="form-group">
+										<label for="phone">Phone</label> <input type="text"
+											name="phone" required class="form-control"
+											placeholder="Enter Phone">
+									</div>
+									<div class="form-group">
+										<label for="pwd">Password</label> <input type="password"
+											name="pwd" required class="form-control"
+											placeholder="Enter Password">
+									</div>
+									<div class="form-group">
+										<label for="roleId">Role</label> <select name="roleId"
+											id="roleId" required class="form-control">
+											<option th:each="item : ${roles}" th:value="${item.id}"
+												th:text="${item.name}"></option>
+										</select>
+									</div>
+									<div th:if="${errorMessage}" class="alert alert-danger">
+										<p th:text="${errorMessage}"></p>
+									</div>
+								</div>
+								<div class="card-footer">
+									<a th:href="@{/admin/employee/showEmp}" class="btn btn-danger">Back
+										to employee list</a>
+									<button type="submit" class="btn btn-primary">Register</button>
+								</div>
+							</form>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="admin/layout/footer_admin"></div>
+	<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script th:src="@{/js/js_index.js}"></script>
+</body>

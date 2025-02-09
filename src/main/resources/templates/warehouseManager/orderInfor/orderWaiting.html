@@ -1,0 +1,289 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<style>
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	/* Tạo khoảng cách giữa searcher và nút */
+	align-items: center; /* Căn giữa theo trục dọc */
+	padding: 10px;
+}
+
+.input-group {
+	flex: 1; /* Cho phép searcher chiếm không gian còn lại */
+	max-width: 70%; /* Giới hạn chiều rộng searcher */
+}
+
+#confirmButton {
+	margin-left: 15px; /* Khoảng cách giữa searcher và nút */
+	white-space: nowrap; /* Giữ văn bản nút trên một dòng */
+}
+
+table {
+	table-layout: fixed;
+	width: 100%;
+}
+
+th, td {
+	text-align: left;
+	padding: 8px;
+	border: 1px solid #ddd;
+	overflow: hidden; /* Ẩn nội dung tràn */
+	text-overflow: ellipsis; /* Thêm dấu "..." nếu nội dung quá dài */
+	white-space: nowrap; /* Không xuống dòng */
+}
+
+th {
+	background-color: #f2f2f2;
+}
+
+.table-container {
+	max-height: 400px; /* Giới hạn chiều cao bảng nếu cần */
+	overflow-y: auto; /* Thêm thanh cuộn dọc nếu bảng dài */
+}
+
+#prevButton, #nextButton {
+	color: black;
+	background-color: white;
+	border: 1px solid #ccc;
+}
+
+#prevButton:hover, #nextButton:hover {
+	background-color: #f0f0f0; /* Màu nền khi hover */
+}
+</style>
+
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12">
+					<div class="card" style="margin-top: 20px;">
+						<div
+							class="card-header d-flex justify-content-between align-items-center">
+							<!-- Phần Searcher -->
+							<div class="input-group input-group-sm"
+								style="width: 60%; height: 45px;">
+								<input type="text" id="searchInput"
+									placeholder="Search orders..." class="form-control"
+									style="height: 45px;">
+								<div class="input-group-append">
+									<button type="button" class="btn btn-primary" id="searchButton">
+										<i class="fas fa-search"></i> Search
+									</button>
+								</div>
+							</div>
+
+							<!-- Nút Confirm Selected -->
+							<button class="btn btn-primary" id="confirmButton">Confirm
+								Selected</button>
+						</div>
+
+					</div>
+					<!-- /.card-header -->
+					<div class="card-body table-responsive p-0">
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th style="width: 65px;"><input type="checkbox"
+										id="selectAll" title="Select All"></th>
+									<th>Order ID</th>
+									<th>Customer Name</th>
+									<th>Phone</th>
+									<th>Address</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+							<tbody id="orderTable">
+							</tbody>
+						</table>
+						<div class="pagination mt-3 d-flex justify-content-center"
+							id="paginationControls" style="margin-bottom: 20px;"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
+</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+
+<script>
+    $(document).ready(function () {
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let orders = [];
+        let filteredOrders = []; // Danh sách đơn hàng sau khi lọc
+        const searchParams = {}; // Tham số tìm kiếm
+
+        // Hàm tải dữ liệu đơn hàng từ server
+        function loadOrders() {
+            $.ajax({
+                url: "/warehouseManager/OrderWaiting",
+                method: "GET",
+                success: function (data) {
+                    orders = data;
+                    filteredOrders = orders; // Gán dữ liệu gốc vào danh sách lọc
+                    displayPage(currentPage);
+                    setupPagination();
+                },
+                error: function () {
+                    alert("Error loading orders.");
+                }
+            });
+        }
+
+        // Hàm hiển thị dữ liệu cho trang hiện tại
+        function displayPage(page) {
+            const startIndex = (page - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const orderTable = $("#orderTable");
+            orderTable.empty();
+
+            filteredOrders.slice(startIndex, endIndex).forEach(order => {
+                const row = `
+                    <tr>
+                        <td><input type="checkbox" class="orderCheckbox" value="${order.id}"></td>
+                        <td>${order.orderID}</td>
+                        <td>${order.cus_Name}</td>
+                        <td>${order.phone}</td>
+                        <td>${order.address}</td>
+                        <td>${order.status}</td>
+                    </tr>`;
+                orderTable.append(row);
+            });
+        }
+
+        // Hàm thiết lập thanh điều hướng phân trang
+        function setupPagination() {
+            const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
+            const maxVisiblePages = 5;
+            const paginationControls = $("#paginationControls");
+            paginationControls.empty();
+
+            if (totalPages > 1) {
+                let paginationHtml = '';
+
+                // Nút Previous
+                if (currentPage > 1) {
+                    paginationHtml += `<button class="btn btn-secondary" id="prevButton"><</button>`;
+                }
+
+                // Hiển thị trang
+                let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
+                let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+                if (startPage > 1) {
+                    paginationHtml += `<button class="btn btn-light pageButton" data-page="1">1</button>`;
+                    if (startPage > 2) paginationHtml += `<span class="dots">...</span>`;
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHtml += `<button class="btn ${i === currentPage ? 'btn-primary' : 'btn-light'} pageButton" data-page="${i}">${i}</button>`;
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) paginationHtml += `<span class="dots">...</span>`;
+                    paginationHtml += `<button class="btn btn-light pageButton" data-page="${totalPages}">${totalPages}</button>`;
+                }
+
+                // Nút Next
+                if (currentPage < totalPages) {
+                    paginationHtml += `<button class="btn btn-secondary" id="nextButton">></button>`;
+                }
+
+                paginationControls.html(paginationHtml);
+
+                // Gắn sự kiện cho nút
+                $(".pageButton").click(function () {
+                    currentPage = $(this).data("page");
+                    displayPage(currentPage);
+                    setupPagination();
+                });
+
+                $("#prevButton").click(function () {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        displayPage(currentPage);
+                        setupPagination();
+                    }
+                });
+
+                $("#nextButton").click(function () {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        displayPage(currentPage);
+                        setupPagination();
+                    }
+                });
+            }
+        }
+
+        // Hàm lọc dữ liệu theo từ khóa tìm kiếm
+        function searchOrders(keyword) {
+            filteredOrders = orders.filter(order =>
+                order.orderID.includes(keyword) ||
+                order.cus_Name.toLowerCase().includes(keyword.toLowerCase()) ||
+                order.phone.includes(keyword) ||
+                order.address.toLowerCase().includes(keyword.toLowerCase()) ||
+                order.status.toLowerCase().includes(keyword.toLowerCase())
+            );
+            currentPage = 1; // Reset về trang đầu tiên
+            displayPage(currentPage);
+            setupPagination();
+        }
+
+        // Xử lý chọn tất cả
+        $("#selectAll").click(function () {
+            $(".orderCheckbox").prop("checked", $(this).prop("checked"));
+        });
+
+        $("#confirmButton").click(function () {
+            const selectedOrders = [];
+            $(".orderCheckbox:checked").each(function () {
+                selectedOrders.push($(this).val());
+            });
+
+            if (selectedOrders.length === 0) {
+                alert("Please select at least one order.");
+                return;
+            }
+
+            let completedCount = 0; 
+            const totalOrders = selectedOrders.length; 
+
+            selectedOrders.forEach(orderId => {
+                $.ajax({
+                    url: `/warehouseManager/completeDelivery/${orderId}`,
+                    method: "POST",
+                    success: function () {
+                        completedCount++;
+                       
+                        if (completedCount === totalOrders) {
+                            alert("Confirmed successfully");
+                            loadOrders(); 
+                        }
+                    },
+                    error: function () {
+                        alert(`Failed to update Order ID ${orderId}.`);
+                    }
+                });
+            });
+        });
+
+
+        // Xử lý sự kiện tìm kiếm
+        $("#searchInput").on("input", function () {
+            const keyword = $(this).val();
+            searchOrders(keyword);
+        });
+
+        // Gọi hàm loadOrders ban đầu
+        loadOrders();
+    });
+</script>
+
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+</html>

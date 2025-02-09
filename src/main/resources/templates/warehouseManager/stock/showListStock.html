@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stock</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" th:href=@{/css/stockAll.css}>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+	<div th:replace="warehouseManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+
+							<!-- /.card-header -->
+							<div class="card-header p-2" style="margin-top: 25px;">
+								<ul class="nav nav-pills">
+									<li class="nav-item"><a class="nav-link active"
+										href="#stocklist" data-toggle="pill">inventory list</a></li>
+									<li class="nav-item"><a class="nav-link"
+										href="#sotcklistdetail" data-toggle="pill">detailed
+											inventory list</a></li>
+									<li class="nav-item"
+										style="display: flex; margin-left: auto; align-items: center;">
+										<form id="filterForm"
+											th:action="@{/warehouseManager/showStock}" method="get">
+											<label for="startDate"></label> <input type="date"
+												id="startDate" name="startDate"
+												th:value="${startDate != null ? startDate : '2020-01-01'}">
+
+											<label for="endDate">-- --</label> <input type="date"
+												id="endDate" name="endDate"
+												th:value="${endDate != null ? endDate : T(java.time.LocalDate).now()}">
+
+											<button type="submit">Filter</button>
+										</form>
+									</li>
+								</ul>
+							</div>
+
+
+							<div class="card-body">
+							    <div class="tab-content">
+							        <!-- Tab for Inventory List -->
+							        <div class="tab-pane fade show active" id="stocklist">
+							            <div id="stockTableContainer1" class="col-12 col-md-8 col-lg-6"
+							                 style="overflow-x: auto; max-width: 100%; padding: 10px; box-sizing: border-box;">
+							                <table style="width: 100%; border-collapse: collapse;">
+							                    <!-- Table content here -->
+							                </table>
+							            </div>
+							            <nav aria-label="Page navigation">
+							                <ul id="pagination1" class="pagination"
+							                    style="height: 50px; display: flex; justify-content: center; align-items: center; overflow: hidden;"></ul>
+							            </nav>
+							        </div>
+							
+							        <!-- Tab for Detailed Inventory List -->
+							        <div class="tab-pane fade" id="sotcklistdetail">
+							            <div id="stockTableContainer2" class="col-12 col-md-8 col-lg-6"
+							                 style="overflow-x: auto; max-width: 100%; padding: 10px; box-sizing: border-box;">
+							                <table style="width: 100%; border-collapse: collapse;">
+							                    <!-- Table content here -->
+							                </table>
+							            </div>
+							            <nav aria-label="Page navigation">
+							                <ul id="pagination2" class="pagination"
+							                    style="height: 50px; display: flex; justify-content: center; align-items: center; overflow: hidden;"></ul>
+							            </nav>
+							        </div>
+							    </div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+
+	<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script th:inline="javascript">
+var data1 = /*[[${stocks}]]*/ {}; 
+var data2 = /*[[${stockdetail}]]*/ {};
+
+var pageSize1 = 8; 
+var currentPage1 = 0;
+
+function renderStockTable1(stockList) {
+    let tableHtml = `
+        <table class="table table-hover text-nowrap">
+            <thead>
+                <tr class="text-center">
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date</th>
+                    <th>Conversion</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    stockList.forEach(stock => {
+        tableHtml += `
+            <tr class="text-center">
+                <td>${stock.productName}</td>
+                <td>${stock.unitName}</td>
+                <td>${stock.price}</td>
+                <td>${stock.quantity}</td>
+                <td>${stock.date}</td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-conversion1" 
+                        data-product-id="${stock.productId}">
+                        Show Conversion
+                    </button>
+                    <div class="conversion-div conversion-container" style="display: none;">
+                        <ul>
+                            ${stock.conversions.length > 0 
+                                ? stock.conversions.map(conversion => `
+                                    <li>
+                                        <span class="conversion-label">Unit: ${conversion.fromUnitName}</span> 
+                                        <span class="quantity-label">Quantity: ${conversion.converSionQuantity}</span>
+                                    </li>
+                                `).join('')
+                                : `<li class="no-conversion-message">No Conversion Available</li>`
+                            }
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableHtml += `</tbody></table>`;
+    document.getElementById('stockTableContainer1').innerHTML = tableHtml;
+
+    // Click button for table 1
+    document.querySelectorAll('#stockTableContainer1 .btn-conversion1').forEach(button => {
+        button.addEventListener('click', function(event) {
+        	event.stopPropagation();
+            const conversionDiv = this.nextElementSibling;
+            if (conversionDiv) {
+                conversionDiv.style.display = (conversionDiv.style.display === 'none') ? 'block' : 'none';
+            }
+        });
+    });
+    
+    document.addEventListener('click', function(event) {
+        const conversionDivs = document.querySelectorAll('.conversion-div');
+        const buttons = document.querySelectorAll('.btn-conversion1');
+        
+        conversionDivs.forEach(conversionDiv => {           
+            if (!conversionDiv.contains(event.target) && !event.target.classList.contains('btn-conversion1')) {
+                conversionDiv.style.display = 'none';  
+            }
+        });
+    });
+    
+}
+
+function renderPagination1(totalPages, currentPage) {
+    let paginationHtml = '';
+
+    paginationHtml += `
+        <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+            <button class="page-link" onclick="loadPage1(${currentPage - 1})">&lt;</button>
+        </li>
+    `;
+
+    for (let i = 0; i < totalPages; i++) {
+        paginationHtml += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <button class="page-link" onclick="loadPage1(${i})">${i + 1}</button>
+            </li>
+        `;
+    }
+
+    paginationHtml += `
+        <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
+            <button class="page-link" onclick="loadPage1(${currentPage + 1})">&gt;</button>
+        </li>
+    `;
+
+    document.getElementById('pagination1').innerHTML = paginationHtml;
+}
+
+function loadPage1(page) {
+    if (page < 0 || page >= Math.ceil(data1.length / pageSize1)) return;
+
+    currentPage1 = page;
+    const startIndex = page * pageSize1;
+    const endIndex = startIndex + pageSize1;
+    const pageData = data1.slice(startIndex, endIndex);
+
+    renderStockTable1(pageData);
+
+    const totalPages = Math.ceil(data1.length / pageSize1);
+    renderPagination1(totalPages, currentPage1);
+}
+
+var pageSize2 = 8;
+var currentPage2 = 0;
+
+function renderStockTable2(stockList) {
+    let tableHtml = `
+        <table class="table table-hover text-nowrap">
+            <thead>
+                <tr class="text-center">
+                    <th>Product Name</th>
+                    <th>Unit</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Date</th>
+                    <th>Conversion</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    stockList.forEach(stock => {
+        tableHtml += `
+            <tr class="text-center">
+                <td>${stock.productName}</td>
+                <td>${stock.unitName}</td>
+                <td>${stock.whPrice}</td>
+                <td>${stock.quantity}</td>
+                <td>${stock.date}</td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-conversion2" 
+                        data-product-id="${stock.product_id}">
+                        Show Conversion
+                    </button>
+                    <div class="conversion-div conversion-container" style="display: none;">
+                        <ul>
+                            ${stock.listconversion.length > 0 
+                                ? stock.listconversion.map(conversion => `
+                                    <li>
+                                        <span class="conversion-label">Unit: ${conversion.fromUnitName}</span> 
+                                        <span class="quantity-label">Quantity: ${conversion.converSionQuantity}</span>
+                                    </li>
+                                `).join('')
+                                : `<li class="no-conversion-message">No Conversion Available</li>`
+                            }
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableHtml += `</tbody></table>`;
+    document.getElementById('stockTableContainer2').innerHTML = tableHtml;
+
+    // Click button for table 2
+    document.querySelectorAll('#stockTableContainer2 .btn-conversion2').forEach(button => {
+        button.addEventListener('click', function(even) {
+        	event.stopPropagation();
+            const conversionDiv = this.nextElementSibling;
+            if (conversionDiv) {
+                conversionDiv.style.display = (conversionDiv.style.display === 'none') ? 'block' : 'none';
+            }
+        });
+    });
+    
+    document.addEventListener('click', function(event) {
+        const conversionDivs = document.querySelectorAll('.conversion-div');
+        const buttons = document.querySelectorAll('.btn-conversion2');
+        
+        conversionDivs.forEach(conversionDiv => {           
+            if (!conversionDiv.contains(event.target) && !event.target.classList.contains('btn-conversion2')) {
+                conversionDiv.style.display = 'none';  
+            }
+        });
+    });
+}
+
+function renderPagination2(totalPages, currentPage) {
+    let paginationHtml = '';
+
+    paginationHtml += `
+        <li class="page-item ${currentPage === 0 ? 'disabled' : ''}">
+            <button class="page-link" onclick="loadPage2(${currentPage - 1})">&lt;</button>
+        </li>
+    `;
+
+    for (let i = 0; i < totalPages; i++) {
+        paginationHtml += `
+            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                <button class="page-link" onclick="loadPage2(${i})">${i + 1}</button>
+            </li>
+        `;
+    }
+
+    paginationHtml += `
+        <li class="page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}">
+            <button class="page-link" onclick="loadPage2(${currentPage + 1})">&gt;</button>
+        </li>
+    `;
+
+    document.getElementById('pagination2').innerHTML = paginationHtml;
+}
+
+function loadPage2(page) {
+    if (page < 0 || page >= Math.ceil(data2.length / pageSize2)) return;
+
+    currentPage2 = page;
+    const startIndex = page * pageSize2;
+    const endIndex = startIndex + pageSize2;
+    const pageData = data2.slice(startIndex, endIndex);
+
+    renderStockTable2(pageData);
+
+    const totalPages = Math.ceil(data2.length / pageSize2);
+    renderPagination2(totalPages, currentPage2);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadPage1(currentPage1); 
+    loadPage2(currentPage2); 
+});
+
+</script>
+
+</body>
+</html>

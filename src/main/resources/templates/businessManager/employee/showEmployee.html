@@ -1,0 +1,108 @@
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="businessManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6"></div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Details Employee</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Wrapper for 2 sections -->
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<!-- Personal Information Section -->
+					<div class="col-md-6">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Personal Information</h3>
+							</div>
+							<form th:object="${employee}"
+								action="/businessManager/updateEmployee" method="post">
+								<div class="card-body row">
+									<div class="form-group col-md-6">
+										<input type="hidden" id="id" th:field="*{id}"> <label
+											for="firstName">First Name</label> <input
+											style="background: #e9ecef;" type="text" id="firstName"
+											th:field="*{first_name}" class="form-control">
+									</div>
+									<div class="form-group col-md-6">
+										<label for="lastName">Last Name</label> <input type="text"
+											id="lastName" th:field="*{last_name}" class="form-control"
+											style="background: #e9ecef;">
+									</div>
+									<div class="form-group col-md-6">
+										<label for="roleName">Position</label> <input type="text"
+											id="roleName" disabled readonly
+											th:value="${employee.role_name}" class="form-control">
+									</div>
+									<div class="form-group col-md-12">
+										<button type="submit" class="btn btn-primary">Save</button>
+									</div>
+									<input type="hidden" id="message" th:value="${message}">
+								</div>
+							</form>
+						</div>
+					</div>
+
+					<!-- Change Password Section -->
+					<div class="col-md-6">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Change Password</h3>
+							</div>
+							<form th:object="${employee}"
+								action="/businessManager/changePassword" method="post">
+								<div class="card-body row">
+									<div class="form-group col-md-6">
+										<label for="phone">Phone</label> <input type="text" id="phone"
+											th:field="*{phone}" disabled readonly class="form-control">
+									</div>
+									<div class="form-group col-md-12">
+										<label for="oldPassword">Old Password</label> <input
+											type="password" id="oldPassword" name="oldPassword"
+											class="form-control" required>
+											 <div th:if="${message1}" style="color:red;">
+							                    <p th:text="${message1}"></p>
+							                </div>
+									</div>
+									<div class="form-group col-md-12">
+										<label for="newPassword">New Password</label> <input
+											type="password" id="newPassword" name="newPassword"
+											class="form-control" required>
+											<div th:if="${message2}" style="color:red;">
+							                    <p th:text="${message2}"></p>
+							                </div>
+									</div>
+									<div class="form-group col-md-12">
+										<label for="confirmPassword">Confirm Password</label> <input
+											type="password" id="confirmPassword" name="confirmPassword"
+											class="form-control" required>
+											<div th:if="${message3}" style="color:red;">
+							                    <p th:text="${message3}"></p>
+							                </div>
+									</div>
+									<div class="form-group col-md-12">
+										<button type="submit" class="btn btn-primary">Change
+											Password</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="businessManager/layout/footer_admin"></div>
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>

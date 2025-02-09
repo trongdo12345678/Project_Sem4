@@ -1,0 +1,48 @@
+
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+<div th:replace="admin/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+<section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Brand</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Brand</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+        <section class="content-header">
+      <div class="container-fluid">
+	<div class="row">
+          <div class="col-md-12">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Update Brand</h3>
+              </div>
+              <form th:object="${up_item}" action="updateBr" method="post">
+			    <div class="card-body">
+			     <input type="hidden" id="id" th:field="*{id}">
+			        <div class="form-group">
+			            <label for="title">Brand Name</label>
+			            <input type="text" id="name" required th:field="*{name}" class="form-control" placeholder="Enter Name">
+			        </div>
+			    </div>
+				    <div class="card-footer">
+				    	<a th:href="@{/admin/brand/showBrand}" class="btn btn-danger">Back to list brand</a>
+				        <button type="submit" class="btn btn-primary">Add brand</button>
+				    </div>
+				</form>
+            </div>
+          </div>
+        </div>
+        </div>
+        </section>
+        </div>
+        <div th:replace="admin/layout/footer_admin"></div>
+</body>

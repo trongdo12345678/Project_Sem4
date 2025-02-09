@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+
+<body>
+
+  	<div th:replace="~{customer/layout/header_customer}"></div>
+
+   	
+ 		<!-- Checkout Start -->
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-lg-12">
+                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Billing Address</span></h5>
+				<div class="bg-light p-30 mb-5">
+					<form class="row" method="post" th:action="@{/account/saveprofile}"
+						th:object="${cusinfo}">
+						<input th:field="*{id}" class="form-control" type="hidden"
+							placeholder="John">
+
+						<div class="col-md-6 form-group">
+							<label>First Name</label> <input th:field="*{first_name}"
+								class="form-control" type="text" placeholder="John">
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Last Name</label> <input th:field="*{last_name}"
+								class="form-control" type="text" placeholder="Doe">
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>E-mail</label> <input th:field="*{email}" readonly
+								class="form-control" type="text" placeholder="example@email.com">
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Address</label> <input th:field="*{address}"
+								class="form-control" type="text" placeholder="123 Street">
+						</div>
+
+						<div class="col-md-6 form-group">
+							<label>Day of birth</label> <input th:field="*{birthDay}"
+								id="birthDayInput" class="form-control" type="text"
+								placeholder="dd/MM/yyyy" th:value="${cusinfo.birthDay}" />
+						</div>
+						<div class="col-md-3 form-group">
+							<label>&nbsp;</label>
+							<button class="btn btn-block btn-primary font-weight-bold py-3"
+								type="submit">Save</button>
+						</div>
+						<div class="col-md-3 form-group">
+							<label>&nbsp;</label> <a href="/account/gochangepassword"
+								class="btn btn-block btn-primary font-weight-bold py-3">Change
+								Password</a>
+						</div>
+
+
+					</form>
+
+				</div>
+
+
+			</div>
+           
+        </div>
+    </div>
+    <!-- Checkout End -->
+ 		
+
+
+    <!-- Footer Start -->
+   <div th:replace="~{customer/layout/footer_customer}"></div>
+    <!-- Footer End -->
+
+    
+</body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+
+<script>
+    $(document).ready(function() {
+        // Initialize the datepicker
+        $("#birthDayInput").datepicker({
+            dateFormat: 'dd/mm/yy', // Set the format to match your placeholder
+            onSelect: function(dateText) {
+                $(this).val(dateText); // Update the input field with selected date
+            }
+        });
+    });
+</script>
+</html>

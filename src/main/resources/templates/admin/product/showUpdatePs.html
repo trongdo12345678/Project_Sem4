@@ -1,0 +1,57 @@
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+<div th:replace="admin/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Product specifications</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Product specifications</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Update Product specifications</h3>
+                        </div>
+                        <form th:object="${ps}" action="updatePs" method="post">
+						    <div class="card-body row">
+						        <input type="hidden" id="product_id" name="product_id" th:value="${ps.product_id}" readonly>
+						        <input type="hidden" id="id" name="id" th:value="${ps.id}" readonly>
+						        <div class="form-group col-12">
+						            <label for="title">Name specifications</label>
+						            <input type="text" id="name_spe" name="name_spe" th:value="${ps.name_spe}" class="form-control" placeholder="Enter name specifications" required>
+						        </div>
+						
+						        <div class="form-group col-12">
+						            <label for="price">Des specifications</label>
+						            <textarea id="des_spe" th:field="*{des_spe}" class="form-control" placeholder="Enter des specifications" required></textarea>
+						        </div>
+						    </div>
+						
+						    <div class="card-footer">
+						        <a th:href="@{/admin/product/showProductDetail(id=${ps.product_id})}" class="btn btn-danger">Back to Product Details</a>
+						        <button type="submit" class="btn btn-primary">Update specifications</button>
+						    </div>
+						</form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div th:replace="admin/layout/footer_admin"></div>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script th:src="@{/js/addProduct.js}"></script>
+</body>

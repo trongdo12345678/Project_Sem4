@@ -1,0 +1,442 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<link rel="stylesheet" th:href="@{/css/showDetailProduct.css}">
+<link rel="stylesheet" th:href="@{/css/Conversionzz.css}">
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+	rel="stylesheet">
+</head>
+<body>
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Product</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Details Product</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card">
+							<div>
+								<p th:if="${message}" th:text="${message}"
+									class="custom-alert success"></p>
+								<p th:if="${error}" th:text="${error}"
+									class="custom-alert error"></p>
+							</div>
+							<div class="card-header p-2">
+								<ul class="nav nav-pills">
+									<li class="nav-item"><a class="nav-link active"
+										href="#productimage-tab" data-toggle="pill">Product image
+											details</a></li>
+									<li class="nav-item"><a class="nav-link"
+										href="#productdetails-tab" data-toggle="pill">Product
+											details</a></li>
+									<li class="nav-item"><a class="nav-link"
+										href="#conversion" data-toggle="pill">Conversion</a></li>
+									<li class="nav-item"><a class="nav-link"
+										href="#productSpecifications-tab" data-toggle="pill">Product
+											specifications</a></li>
+									<li class="nav-item"><a class="nav-link"
+										href="#changeprice-tab" data-toggle="pill">Product change
+											price</a></li>
+								</ul>
+							</div>
+							<div class="card-body">
+								<div class="tab-content">
+									<!-- Product Image Tab -->
+									<div class="tab-pane active" id="productimage-tab">
+										<div>
+											<a th:href="@{/admin/product/showAddPImg(id=${product.id})}"
+												class="btn btn-primary" id="addProductBtn"> Add Images
+												Details </a>
+											<button class="btn btn-danger" id="deleteSelectedBtn"
+												onclick="deleteSelectedImg()" disabled>Delete
+												Selected</button>
+										</div>
+
+										<div class="card-body row">
+											<div class="col-12 mb-3">
+												<input type="checkbox" id="selectAll"
+													onclick="toggleSelectAll(this)"> <label
+													for="selectAll">Select all</label>
+											</div>
+											<div th:each="img : ${images}" class="col-md-3 mb-3">
+												<div class="card">
+													<img
+														th:src="@{/uploads/{imageName}(imageName=${img.img_url})}"
+														class="card-img-top" alt="Product Image"
+														style="max-width: 200px; height: auto; margin: 0 auto;">
+													<div class="card-body">
+														<p class="card-text" th:text="${img.product_name}"></p>
+														<input type="checkbox" class="productCheckbox"
+															th:value="${img.id}" onclick="toggleDeleteButton()">
+													</div>
+												</div>
+											</div>
+											<div th:if="${#lists.isEmpty(images)}"
+												class="col-12 text-center">
+												<p>No product images found.</p>
+											</div>
+										</div>
+
+										<!-- Giới hạn số lượng ảnh -->
+										<div th:if="${images.size() >= 10}" class="col-12 text-center">
+											<p>You can only add up to 10 images.</p>
+											<a class="btn btn-secondary disabled">Add Images Details</a>
+										</div>
+
+										<div class="card-footer">
+											<a th:href="@{/admin/product/showProduct}"
+												class="btn btn-danger">Back to list product</a>
+										</div>
+									</div>
+
+									<!-- Product Details Tab -->
+									<div class="tab-pane" id="productdetails-tab">
+										<form th:object="${product}">
+											<div class="card">
+												<div
+													class="card-header d-flex justify-content-center align-items-center">
+													<h3 class="mb-0" style="color: black;">Product Details</h3>
+												</div>
+
+												<div class="card-body">
+													<div class="row">
+														<!-- Hình ảnh sản phẩm -->
+														<div class="col-md-3 text-center">
+															<label>Image</label>
+															<div class="product-image">
+																<img th:if="${product.img != null}"
+																	th:src="@{/uploads/{imageName}(imageName=${product.img})}"
+																	class="img-fluid rounded shadow">
+															</div>
+														</div>
+
+														<!-- Thông tin sản phẩm -->
+														<div class="col-md-9">
+															<div class="row">
+																<div class="col-md-6">
+																	<label>Product Name</label> <input type="text"
+																		class="form-control" disabled readonly
+																		th:value="${product.product_name}">
+																</div>
+																<div class="col-md-6">
+																	<label>Status</label> <input class="form-control"
+																		disabled readonly th:value="${product.status}">
+																</div>
+																<div class="col-md-6">
+																	<label>Price</label> <input type="text"
+																		class="form-control" disabled readonly
+																		th:value="${formattedPrice}">
+																</div>
+																<div class="col-md-6">
+																	<label>Warranty Period</label> <input type="text"
+																		class="form-control" disabled readonly
+																		th:value="${product.warranty_period} + ' months'">
+																</div>
+																<div class="col-md-6">
+																	<label>Unit</label> <input class="form-control"
+																		disabled readonly th:value="${product.unit_name}">
+																</div>
+																<div class="col-md-6">
+																	<label>Brand</label> <input class="form-control"
+																		disabled readonly th:value="${product.brandName}">
+																</div>
+																<div class="col-md-12">
+																	<label>Category</label> <input class="form-control"
+																		disabled readonly th:value="${product.categoryName}">
+																</div>
+															</div>
+														</div>
+
+														<!-- Mô tả sản phẩm -->
+														<div class="col-md-12 mt-3">
+															<label>Description</label>
+															<textarea class="form-control" disabled readonly
+																th:field="*{description}"></textarea>
+														</div>
+
+														<!-- Kích thước sản phẩm -->
+														<div class="col-md-12 mt-3">
+															<div class="row">
+																<div class="col-md-3">
+																	<label>Length</label> <input class="form-control"
+																		disabled readonly th:value="${product.length} + ' cm'">
+																</div>
+																<div class="col-md-3">
+																	<label>Height</label> <input class="form-control"
+																		disabled readonly th:value="${product.height} + ' cm'">
+																</div>
+																<div class="col-md-3">
+																	<label>Width</label> <input class="form-control"
+																		disabled readonly th:value="${product.width} + ' cm'">
+																</div>
+																<div class="col-md-3">
+																	<label>Weight</label> <input class="form-control"
+																		disabled readonly th:value="${product.weight} + ' g'">
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+
+												<!-- Nút điều hướng -->
+												<div class="card-footer">
+													<a th:href="@{/admin/product/showProduct}"
+														class="btn btn-danger"> Back to Product List </a> <a
+														th:href="@{/admin/product/showUpdateProduct(id=${product.id})}"
+														class="btn btn-warning"> Update Product </a>
+												</div>
+											</div>
+										</form>
+
+									</div>
+
+									<!-- Conversion Tab -->
+									<div class="tab-pane" id="conversion">
+
+										<div class="infopro row gx-3 gy-3">
+											<!-- Khối Product Information -->
+											<div class="col-12 col-md-5">
+												<div class="card">
+													<div class="card-header text-white"
+														style="background-color: #1E90FF;">Product
+														Information</div>
+													<div class="card-body d-flex flex-wrap align-items-center">
+														<!-- Hình ảnh -->
+														<div
+															style="flex: 0 0 120px; text-align: center; margin-right: 20px;">
+
+															<img th:if="${product.img != null}"
+																th:src="@{/uploads/{imageName}(imageName=${product.img})}"
+																style="width: 120px; height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+														</div>
+
+														<!-- Thông tin sản phẩm -->
+														<div class="flex-grow-1 d-flex flex-column gap-3">
+															<div style="display: flex; flex-wrap: wrap; gap: 20px;">
+																<div style="min-width: 150px;">
+																	<label class="fw-bold">Product Name</label> <input
+																		type="text" id="proName" disabled readonly
+																		th:value="${product.product_name}"
+																		class="form-control">
+																</div>
+																<div style="min-width: 150px;">
+																	<label class="fw-bold">Unit</label> <input
+																		class="form-control" disabled readonly
+																		th:value="${product.unit_name}">
+																</div>
+																<div style="min-width: 150px;">
+																	<label class="fw-bold">Price</label> <input type="text"
+																		id="price" disabled readonly
+																		th:value="${formattedPrice}" class="form-control">
+																</div>
+
+															</div>
+														</div>
+													</div>
+
+												</div>
+											</div>
+
+											<!-- Khối Conversion -->
+											<div class="col-12 col-md-7">
+												<div class="card">
+													<div class="card-header text-white"
+														style="background-color: #1E90FF;">Add Conversion</div>
+													<form id="add-conversion-form" method="post">
+														<div class="card-body">
+															<input type="hidden" name="product_id" id="product_id"
+																th:value="${product.id}" />
+															<div class="form-group mb-3">
+																<label>Main Unit</label> <span
+																	th:text="${product.unit_name}"
+																	class="d-block p-2 bg-light rounded border"></span> <input
+																	type="hidden" name="to_unit_name" id="to_unit_id"
+																	th:value="${product.unit_id}">
+															</div>
+															<div class="mb-3">
+																<label for="from_unit_name">From Unit</label> <select
+																	name="from_unit_name" id="from_unit_name"
+																	class="form-control" required>
+																	<option th:each="unit : ${units}" th:value="${unit.id}"
+																		th:text="${unit.name}"></option>
+																</select>
+															</div>
+															<div class="mb-3">
+																<label for="conversion_rate">Conversion Rate</label> <input
+																	type="number" id="conversion_rate"
+																	name="conversion_rate" class="form-control"
+																	placeholder="Enter Conversion Rate" required min="0">
+															</div>
+															<button type="submit"
+																style="display: inline-flex; align-items: center; padding: 8px 16px; font-size: 14px; font-weight: 500; color: #333; background-color: #fff; border: 1px dashed #007bff; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; width: auto;"
+																onmouseover="this.style.backgroundColor='#e6f7ff'; this.style.color='#007bff'; this.style.borderColor='#007bff';"
+																onmouseout="this.style.backgroundColor='#fff'; this.style.color='#333'; this.style.borderColor='#007bff';">
+																<i class="fas fa-plus"
+																	style="margin-right: 8px; font-size: 16px; color: #007bff;"></i>
+																Add New Conversion
+															</button>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+
+										<!-- Conversion Table -->
+										<div style="flex: 1; overflow-y: auto; margin-top: 20px;">
+											<div class="card" style="width: 100%;">
+												<div class="card-header" style="background-color: #1E90FF;">Conversions</div>
+												<div class="card-body">
+													<table class="table table-striped" id="conversionTable">
+														<thead style="text-align: center;">
+															<tr>
+																<th>#</th>
+																<th>From Unit</th>
+																<th>Main Unit</th>
+																<th>Conversion Rate</th>
+															</tr>
+														</thead>
+														<tbody style="text-align: center;">
+														</tbody>
+													</table>
+													<nav class="d-flex justify-content-center"
+														style="margin-top: 22px;">
+														<ul class="pagination" id="pagination"></ul>
+													</nav>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Product Specifications Tab -->
+									<div class="tab-pane" id="productSpecifications-tab">
+										<div class="infopro row gx-3 gy-3">
+											<!-- Khối Specification -->
+											<div class="col-12 col-md-12">
+												<div class="card">
+													<div class="card-header text-white"
+														style="background-color: #1E90FF;">Add Specification</div>
+													<form id="add-specification-form" method="post">
+														<div class="card-body row">
+															<input type="hidden" name="product_id" id="product_id"
+																th:value="${product.id}" />
+															<div class="mb-3 col-12">
+																<label for="name_spe">Name specifications</label> <input
+																	type="text" id="name_spe" name="name_spe"
+																	class="form-control"
+																	placeholder="Enter name specifications" required>
+															</div>
+															<div class="mb-3 col-12">
+																<label for="des_spe">Description specifications</label>
+																<textarea id="des_spe" name="des_spe"
+																	class="form-control"
+																	placeholder="Enter description specifications" required></textarea>
+															</div>
+															<button type="submit" id="submitButton"
+																class="btn btn-primary"
+																style="display: inline-flex; align-items: center; padding: 8px 16px; font-size: 14px; font-weight: 500; border-radius: 4px; transition: all 0.3s ease;"
+																onmouseover="this.style.backgroundColor='#0056b3';"
+																onmouseout="this.style.backgroundColor='#007bff';">
+																<i class="fas fa-plus"
+																	style="margin-right: 8px; font-size: 16px;"></i> Add
+																specification
+															</button>
+
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+
+										<table id="specificationTable"
+											class="table table-hover text-nowrap">
+											<thead>
+												<tr class="text-center">
+													<th>STT</th>
+													<th>Name specification</th>
+													<th>Description specification</th>
+													<th><a
+														th:href="@{/admin/product/showAddPs(id=${product.id})}"
+														class="btn btn-primary">Add product specification</a></th>
+												</tr>
+											</thead>
+											<tbody id="specificationsTableBody" class="text-center">
+
+											</tbody>
+										</table>
+										<nav class="d-flex justify-content-center"
+											style="margin-top: 22px;">
+											<ul class="pagination" id="pagination1"></ul>
+										</nav>
+
+										<div class="card-footer">
+											<a th:href="@{/admin/product/showProduct}"
+												class="btn btn-danger">Back to list product</a>
+										</div>
+									</div>
+
+									<!-- Change Price Tab -->
+									<div class="tab-pane" id="changeprice-tab">
+										<div class="d-flex justify-content-end mb-3">
+											<label for="sortPriceChanges" class="mr-2">Sort by:</label> <select
+												id="sortPriceChanges" class="form-control w-auto">
+												<option value="normal">Normal</option>
+												<option value="asc">Small to Large</option>
+												<option value="desc">Big to Small</option>
+											</select>
+										</div>
+										<table class="table table-hover text-nowrap">
+											<thead>
+												<tr class="text-center">
+													<th>STT</th>
+													<th>Price</th>
+													<th>Start Date</th>
+													<th>End Date</th>
+												</tr>
+											</thead>
+											<tbody id="priceChangesTableBody" class="text-center">
+											</tbody>
+										</table>
+										<div class="card-footer">
+											<nav class="d-flex justify-content-center">
+												<ul class="pagination" style="margin-top: 22px;"
+													id="Pagination2">
+												</ul>
+											</nav>
+											<a th:href="@{/admin/product/showProduct}"
+												class="btn btn-danger">Back to list product</a>
+										</div>
+									</div>
+
+
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="admin/layout/footer_admin"></div>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script th:src="@{/js/showProduct.js}"></script>
+	<script th:src="@{/js/phantrangspe.js}"></script>
+	<script th:src="@{/js/conversionbuid.js}"></script>
+	<script th:src="@{/js/phantrangPrice.js}"></script>
+	<script th:src="@{/js/conversionAdd.js}"></script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stock</title>
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" th:href=@{/css/showOrderInWarehouseDetail.css}>
+
+</head>
+<body>
+
+    <div th:replace="warehouseManager/layout/header_admin"></div>
+    <div class="content-wrapper" style="min-height: 1302.4px;">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Completed Return Orders</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active">Completed Return Orders</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <!-- Table Return Orders -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Completed Return Orders List</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Return ID</th>
+                                    <th>Order ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Return Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="returnOrder : ${returnOrders}">
+                                    <td th:text="${returnOrder.id}"></td>
+                                    <td th:text="${returnOrder.orderId}"></td>
+                                    <td th:text="${returnOrder.order.Cus_Name}"></td>
+                                    <td
+                                        th:text="${#temporals.format(returnOrder.returnDate, 'dd-MM-yyyy')}"></td>
+                                    <td><span class="badge badge-success"
+                                        th:text="${returnOrder.status}"></span></td>
+                                    <td>
+                                        <button type="button" class="btn btn-info btn-sm"
+                                            data-toggle="modal" data-target="#returnDetailModal"
+                                            th:onclick="'showReturnDetail(' + ${returnOrder.id} + ')'">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <nav th:if="${pv.total_page > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item"><a class="page-link"
+                                th:href="@{/warehouseManager/returnorders/showreturnlistcomplete(cp=1)}"
+                                title="First page">&laquo;</a></li>
+
+                            <li class="page-item" th:if="${pv.page_current > 1}"><a
+                                class="page-link"
+                                th:href="@{/warehouseManager/returnorders/showreturnlistcomplete(cp=${pv.page_current - 1})}"
+                                title="Previous page">&lt;</a></li>
+
+                            <li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+                                th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+                                th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+                                <a class="page-link"
+                                th:href="@{/warehouseManager/returnorders/showreturnlistcomplete(cp=${i + 1})}"
+                                th:text="${i + 1}"></a>
+                            </li>
+
+                            <li class="page-item" th:if="${pv.page_current < pv.total_page}">
+                                <a class="page-link"
+                                th:href="@{/warehouseManager/returnorders/showreturnlistcomplete(cp=${pv.page_current + 1})}"
+                                title="Next page">&gt;</a>
+                            </li>
+
+                            <li class="page-item" th:if="${pv.total_page > 1}"><a
+                                class="page-link"
+                                th:href="@{/warehouseManager/returnorders/showreturnlistcomplete(cp=${pv.total_page})}"
+                                title="Last page">&raquo;</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                
+            </div>
+            <div class="modal fade" id="returnDetailModal" tabindex="-1"
+                    role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Return Order Details</h5>
+                                <button type="button" class="close" data-dismiss="modal">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Return Order Info -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong>Return ID:</strong> <span id="modalReturnId"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Order ID:</strong> <span id="modalOrderId"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Return Date:</strong> <span id="modalReturnDate"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Status:</strong> <span id="modalStatus"></span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>
+                                            <strong>Customer Name:</strong> <span id="modalCustomerName"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Phone:</strong> <span id="modalPhone"></span>
+                                        </p>
+                                        <p>
+                                            <strong>Address:</strong> <span id="modalAddress"></span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Return Items Table -->
+                                <div class="mt-4">
+                                    <h6>Return Items</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Return Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="modalReturnItems">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </section>
+    </div>
+
+
+    <div th:replace="warehouseManager/layout/footer_admin"></div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    function showReturnDetail(returnId) {
+        $.ajax({
+            url: `/warehouseManager/returnorders/return-order/${returnId}`,
+            type: 'GET',
+            success: function(response) {
+                const returnOrder = response.returnOrder;
+                
+                // Hiển thị thông tin return order
+                $('#modalReturnId').text(returnOrder.id);
+                $('#modalOrderId').text(returnOrder.orderId);
+                $('#modalReturnDate').text(new Date(returnOrder.returnDate).toLocaleDateString());
+                $('#modalStatus').text(returnOrder.status);
+                $('#modalCustomerName').text(returnOrder.order?.cus_Name || 'N/A');
+                $('#modalPhone').text(returnOrder.order?.phone || 'N/A');
+                $('#modalAddress').text(returnOrder.order?.address || 'N/A');
+
+                // Hiển thị thông tin employee nếu có
+                if (returnOrder.employee) {
+                    $('#employeeInfo').show();
+                    $('#modalEmployeeName').text(`${returnOrder.employee.first_name} ${returnOrder.employee.last_name}`);
+                    $('#modalEmployeePhone').text(returnOrder.employee.phone);
+                } else {
+                    $('#employeeInfo').hide();
+                }
+
+                // Hiển thị return items
+                const itemsBody = $('#modalReturnItems');
+                itemsBody.empty();
+
+                returnOrder.returnDetails.forEach(detail => {
+                    itemsBody.append(`
+                        <tr>
+                            <td>${detail.productName}</td>
+                            <td>${detail.quantity}</td>
+                            <td>$${detail.productPrice.toFixed(2)}</td>
+                            <td>$${(detail.quantity * detail.productPrice).toFixed(2)}</td>
+                        </tr>
+                    `);
+                });
+
+                $('#returnDetailModal').modal('show');
+            },
+            error: function(xhr) {
+                console.error("Error:", xhr);
+                alert('Error loading return order details');
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Order Request</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/css/addWarehouseReleasenote.css}">
+    <link rel="stylesheet" th:href=@{/css/showOrderInWarehouseDetail.css}>
+    
+</head>
+<body>
+
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Order Request Information</h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="table-container">
+
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td th:text="${request.name}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td th:text="${request.statusRequest}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                                <table class="table table-bordered table-sm mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>Product ID</th>
+                                            <th>Unit</th>
+                                            <th>Quantity requested</th>
+                                            <th>Quantity exported</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="detail : ${details}">
+                                            <td>
+                                                <span th:text="${detail.productName}"></span>
+                                            </td>
+                                            <td>
+                                            	<span th:text="${detail.unit_name}"></span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${detail.quantity_requested}"></span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${detail.quantity_exported}"></span>
+                                            </td>                                            
+                                            <td>
+                                                <span th:text="${detail.status}"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div th:if="${errorMessage}" class="alert alert-danger mt-3">
+								    <span th:text="${error}"></span>
+								</div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row">      								
+            <form th:action="@{/warehouseManager/addWarehouseRelesenote}" method="post" onsubmit="return validateForm()" enctype="multipart/form-data" class="w-100">
+                <div class="row">
+                    <div class="col-md-6"> 
+                        <div class="card card-primary" style="margin-top: 30px;">
+                            <div class="card-header">
+                                <h3 class="card-title">Add Warehouse Release note</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr><th colspan="2">Warehouse Release note</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><label for="name">Name</label></td>
+                                            <td><input type="text" id="name" name="name" th:value="${request.name}" class="form-control" placeholder="Enter Name" readonly></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="statusWr">Status</label></td>
+                                            <td><input type="text" name="statusWr" value="Completed" class="form-control" readonly></td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+                                <input type="hidden" id="employeeId" name="employeeId" th:value="${employeeId}">
+								<input type="hidden" id="requestId" name="requestId" th:value="${requestId}">
+                                
+                            </div>
+		                    <div class="card-footer">
+		                        <button type="submit" class="btn btn-primary">Submit</button>
+		                    </div>
+                        </div>
+                    </div>
+
+					<div class="col-md-6">
+                        <div class="card card-secondary" style="margin-top: 30px;"> 
+                            <div class="card-header" style="background-color: #6C75EC;">
+                                <h3 class="card-title" >Warehouse Release note Details</h3>
+                            </div>
+                            <div class="card-body">
+							    <table class="table table-bordered table-sm mt-3">
+							        <thead style="position: sticky; top: 0; background: #f8f9fa; z-index: 1;">
+							            <tr>
+							                <th style="width: 30%;">Product Name</th>
+							                <th style="width: 20%;">Unit</th>
+							                <th style="width: 25%;">Quantity Request</th>
+							                <th style="width: 25%;">Quantity Exported</th>
+							            </tr>
+							        </thead>
+							    </table>
+							    
+							    <div style="max-height: 300px; overflow-y: auto; display: block;">
+							        <table class="table table-bordered table-sm mt-3">
+							            <tbody>
+							                <tr th:each="filteredDetail : ${filteredDetails}">
+							                    <td style="width: 28%;"> 
+							                        <span th:text="${filteredDetail.productName}"></span>
+							                        <input type="hidden" name="Id[]" th:value="${filteredDetail.id}">
+							                        <input type="hidden" name="id_product[]" th:value="${filteredDetail.id_product}" />
+							                    </td>
+							                    <td style="width: 19%;"> 
+							                        <span th:text="${filteredDetail.unit_name}"></span>
+							                    </td>
+							                    <td style="width: 23%;"> 
+							                        <span class="remainingQuantity" th:text="${filteredDetail.quantity_requested - filteredDetail.quantity_exported}"></span>
+							                    </td>
+							                    <td style="width: 26%;"> 
+							                        <input type="number" name="quantity[]" value="0" class="form-control quantityInput">
+							                        <input type="hidden" name="status[]" value="Completed" class="statusInput">
+							                    </td>
+							                </tr>
+							            </tbody>
+							        </table>
+							    </div>
+							
+							    <div style="font-size:15px; color: red">
+							        <span th:text="${error}"></span>
+							    </div>
+							</div>
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+</div>
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+	document.querySelectorAll('input[name="quantity[]"]').forEach(input => {
+	    input.addEventListener('input', function (e) {
+	        const quantityValue = parseInt(e.target.value, 10); 
+	
+	        if (isNaN(quantityValue)) {
+	            alert("Invalid input! Please enter a valid number.");
+	            e.target.value = 0;
+	            return; 
+	        }
+	
+	        const row = e.target.closest('tr'); 
+	        const remainingQuantity = parseInt(row.querySelector('.remainingQuantity').textContent, 10); 
+	        const statusInput = row.querySelector('input[name="status[]"]'); 
+
+
+	        if (quantityValue < 0) {
+	            alert("Quantity entered cannot be a negative number! Please enter a valid quantity.");
+	            e.target.value = 0; 
+	        } else if (quantityValue > remainingQuantity) {
+	            alert("Quantity entered exceeds remaining quantity! Please enter a valid quantity.");
+	            e.target.value = remainingQuantity; 	            
+	        }
+	                 	        	              	        
+	    });
+	});
+	
+	function validateForm() {
+	    const quantities = document.querySelectorAll('input[name="quantity[]"]');
+	    
+	    
+	    const allZero = Array.from(quantities).every(input => parseInt(input.value, 10) === 0);
+
+	    if (allZero) {
+	        alert("Please enter at least one quantity greater than 0 before submitting.");
+	        return false; 
+	    }
+	    
+	    return true; 
+	}
+	
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Unassigned Chat Requests</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Chat Requests</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<!-- Comment List -->
+				<div th:each="chat : ${chatRooms}" class="col-12 mb-2">
+					<div class="chat-request-item p-3">
+						<div class="d-flex justify-content-between align-items-center">
+							<!-- Left side: Order and Customer Info -->
+							<div class="d-flex align-items-center" style="width: 80%;">
+								<div class="chat-content">
+									<div class="order-info">
+										<span class="font-weight-bold">Order ID: </span> <a
+											th:href="@{'/order/detail?id=' + ${chat.orderId}}"
+											class="order-link" th:text="${chat.orderId}"></a>
+									</div>
+									<div class="customer-info">
+										<i class="fas fa-user-circle text-secondary"></i> <span
+											class="font-weight-bold">Customer Request</span> <small
+											class="text-muted ml-2" th:text="${chat.lastActivity}"></small>
+									</div>
+								</div>
+							</div>
+
+							<!-- Right side: Accept Button -->
+							<div class="text-right">
+								<button class="btn btn-primary btn-sm accept-chat-btn"
+									th:onclick="'acceptChat(' + ${chat.id} + ')'"
+									title="Accept chat request">
+									<i class="fas fa-headset"></i> <span>Accept Chat</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12">
+					<nav th:if="${pv.total_page > 1}">
+						<!-- Only show the pagination if there's more than one page -->
+						<ul class="pagination justify-content-center">
+							<!-- First Page -->
+							<li class="page-item"><a class="page-link"
+								th:href="@{/businessManager/chat/unassigned(cp=1)}"
+								title="First page">&laquo;</a></li>
+
+							<!-- Previous Page -->
+							<li class="page-item" th:if="${pv.page_current > 1}"><a
+								class="page-link"
+								th:href="@{/businessManager/chat/unassigned(cp=${pv.page_current - 1})}"
+								title="Previous page">&lt;</a></li>
+
+							<!-- Page Number Links -->
+							<li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+								th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+								th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+								<a class="page-link"
+								th:href="@{/businessManager/chat/unassigned(cp=${i + 1})}"
+								th:text="${i + 1}"></a>
+							</li>
+
+							<!-- Next Page -->
+							<li class="page-item" th:if="${pv.page_current < pv.total_page}">
+								<a class="page-link"
+								th:href="@{/businessManager/chat/unassigned(cp=${pv.page_current + 1})}"
+								title="Next page">&gt;</a>
+							</li>
+
+							<!-- Last Page -->
+							<li class="page-item" th:if="${pv.total_page > 1}"><a
+								class="page-link"
+								th:href="@{/businessManager/chat/unassigned(cp=${pv.total_page})}"
+								title="Last page">&raquo;</a></li>
+						</ul>
+					</nav>
+				</div>
+
+
+			</div>
+
+			<style>
+.chat-item {
+	background-color: #f8f9fa;
+	border-radius: 6px;
+	margin-bottom: 10px;
+	transition: all 0.2s ease;
+	border-left: 4px solid #ffc107;
+}
+
+.chat-content {
+	margin-left: 10px;
+	flex-grow: 1;
+}
+
+.order-link {
+	color: #007bff;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.status-info {
+	font-size: 0.9rem;
+	color: #666;
+	margin: 3px 0;
+}
+
+.time-info {
+	font-size: 0.85rem;
+	color: #888;
+}
+
+.accept-chat-btn {
+	transition: all 0.3s ease;
+}
+
+.accept-chat-btn:hover {
+	transform: scale(1.05);
+	background-color: #0056b3;
+}
+</style>
+
+			<script>
+				function acceptChat(chatId) {
+					$.ajax({
+						url : '/businessManager/chat/accept',
+						type : 'POST',
+						data : {
+							chatId : chatId
+						},
+						success : function(response) {
+							// Redirect to chat window or update UI
+							window.location.href = '/businessManager/chat/room'
+									
+						},
+						error : function(xhr) {
+							toastr.error('Error accepting chat request');
+						}
+					});
+				}
+			</script>
+			
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+</html>
+

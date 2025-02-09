@@ -1,0 +1,137 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Order Request</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Order Request</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="input-group input-group-sm"
+								style="width: 80%; margin-left: 15%;">
+								<input type="text" name="table_search" id="searchInput"
+									class="form-control float-right" oninput="searchrequests()"
+									placeholder="Search by Name or Date">
+								<div class="input-group-append">
+									<button type="submit" class="btn btn-default">
+										<i class="fas fa-search"></i>
+									</button>
+								</div>
+							</div>
+
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body table-responsive p-0">
+							<table class="table table-hover text-nowrap">
+								<thead>
+									<tr class="text-center">
+										<th>Name</th>
+										<th>date</th>
+										<th>Status</th>
+										<th><a th:href="@{/businessManager/showAddRequestOrder}"
+											class="btn btn-primary">Add Order Request</a></th>
+									</tr>
+								</thead>
+								<tbody id="OrderRequestTable">
+									<tr th:if="${#lists.isEmpty(requests)}" class="text-center">
+										<td colspan="5">No employees found</td>
+									</tr>
+									<tr th:each="item : ${requests}" class="text-center">
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+											th:text="${item.name}"></span></td>
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+											th:text="${#temporals.format(item.date, 'yyyy-MM-dd')}"></span>
+										</td>
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+											th:text="${item.statusRequest}"></span></td>
+										<td><a th:href="@{deleteOrderRequest(id=${item.id})}"
+											onclick="return confirmDelete();" class="btn btn-danger">Delete</a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+
+							<table style="margin-left: 42%">
+								<tfoot id="paginationFooter">
+									<tr class="pagination">
+										<td><a
+											th:href="@{/businessManager/showOrderRequest(cp=1)}"
+											title="First page">&laquo;</a></td>
+										<td th:if="${pv.Page_current > 1}"><a
+											th:href="@{/businessManager/showOrderRequest(cp=${pv.Page_current - 1})}"
+											title="Previous page">&lt;</a></td>
+										<td th:each="i : ${#numbers.sequence(0, pv.Total_page - 1)}"
+											th:if="${i < 3 or (i >= (pv.Page_current - 2) and i <= (pv.Page_current + 2))}">
+											<a
+											th:href="@{/businessManager/showOrderRequest(cp=${i + 1})}"
+											th:class="${i + 1 == pv.Page_current ? 'active' : ''}"> <span
+												th:text="${i + 1}"></span>
+										</a>
+										</td>
+										<td th:if="${pv.Page_current < pv.Total_page}"><a
+											th:href="@{/businessManager/showOrderRequest(cp=${pv.Page_current + 1})}"
+											title="Next page">&gt;</a></td>
+										<td><a
+											th:href="@{/businessManager/showOrderRequest(cp=${pv.Total_page})}"
+											title="Last page">&raquo;</a></td>
+									</tr>
+								</tfoot>
+							</table>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/ShowOrderRequest.js}"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+<script>
+function searchrequests() {
+    const searchValue = document.getElementById("searchInput").value.toLowerCase(); // Lấy giá trị từ ô tìm kiếm và chuyển thành chữ thường
+    const tableRows = document.querySelectorAll("#OrderRequestTable tr"); // Lấy tất cả các hàng trong bảng
+
+    tableRows.forEach(row => {
+        const nameCell = row.querySelector("td:nth-child(1)"); // Lấy ô Name (cột 1)
+        const dateCell = row.querySelector("td:nth-child(2)"); // Lấy ô Date (cột 2)
+
+        if (nameCell && dateCell) { // Kiểm tra nếu các ô tồn tại
+            const nameText = nameCell.textContent.toLowerCase();
+            const dateText = dateCell.textContent.toLowerCase();
+
+            // Kiểm tra nếu Name hoặc Date khớp với giá trị tìm kiếm
+            if (nameText.includes(searchValue) || dateText.includes(searchValue)) {
+                row.style.display = ""; // Hiển thị hàng nếu khớp
+            } else {
+                row.style.display = "none"; // Ẩn hàng nếu không khớp
+            }
+        }
+    });
+}
+
+</script>
+</html>
+
