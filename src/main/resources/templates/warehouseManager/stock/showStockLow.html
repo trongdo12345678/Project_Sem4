@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <title>Low Stock Data</title>
+    <script th:src="@{/js/lowStock.js}"></script>
+<style>
+    #updateChart {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #007bff; /* Màu xanh dương nổi bật */
+        color: #fff; /* Chữ trắng */
+        border: none; /* Bỏ viền */
+        border-radius: 5px; /* Bo góc */
+        cursor: pointer; /* Thay đổi con trỏ khi hover */
+        transition: background-color 0.3s ease, transform 0.2s ease; /* Hiệu ứng chuyển đổi */
+    }
+
+    #updateChart:hover {
+        background-color: #0056b3; /* Màu xanh đậm hơn khi hover */
+        transform: scale(1.05); 
+    }
+
+    #updateChart:active {
+        background-color: #004085; /* Màu đậm hơn khi nhấn */
+        transform: scale(0.95); /* Giảm nhẹ kích thước khi nhấn */
+    }
+    
+
+    
+</style>
+
+	</head>
+	<body>
+
+		<div th:replace="warehouseManager/layout/header_admin"></div>
+		<div class="content-wrapper" style="min-height: 1302.4px;">
+		    <section class="content-header">
+		        <div class="container-fluid">
+		            <div class="row mb-2">
+		                <div class="col-sm-6">                   
+		                </div>
+		               
+		            </div>
+		        </div>
+    		</section>
+    		<div>
+			    <div style="text-align: center; margin-bottom: 20px;">
+				    
+				    <input type="number" id="minQuantity" value="" placeholder="Enter quantity" style="
+								        width: 200px; 
+								        padding: 10px; 
+								        margin-right: 10px; 
+								        border: 2px solid #ccc; 
+								        border-radius: 5px; 
+								        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+								        font-size: 14px;"
+								>
+								    <button id="updateChart" style="padding: 5px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+								        Confirm
+								    </button>				
+				    </div>
+				
+				<div style="width: 80%; margin: 0 auto;">
+				    <canvas id="lowStockChart"></canvas>
+				</div>
+			</div>
+
+
+<script src="inventory-chart.js"></script>
+    
+</div>
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

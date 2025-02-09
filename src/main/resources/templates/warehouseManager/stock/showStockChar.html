@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script th:src="@{/js/lowStock.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<style>
+ #lowStockChart {
+    width: 100%;   /* Chiếm toàn bộ chiều rộng của container */
+    height: 100%;  /* Chiếm toàn bộ chiều cao của container */
+}
+#inventoryChart{
+	width: 100%;   /* Chiếm toàn bộ chiều rộng của container */
+    height: 100%; 
+}
+#lowStockChartContainer {
+    width: 100%;
+    height: auto; /* Đảm bảo chiều cao tự động mở rộng */
+    max-width: 100%; /* Đảm bảo không vượt quá kích thước màn hình */
+    margin: 0 auto;
+    position: relative; /* Cho phép biểu đồ mở rộng trong container */
+}
+
+
+    
+    #paginationControls button {
+        margin: 0 ;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        cursor: pointer;
+    }
+    #paginationControls button.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    #paginationControls button:disabled {
+        background-color: #e9ecef;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+
+
+
+    
+</style>
+<body>
+
+<div th:block th:replace="warehouseManager/layout/header_admin"></div>
+
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <div class="card-header p-2" style="margin-top: 25px;">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" href="#stocklist" data-toggle="tab">List of stocks by date</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#stocklistdetail" data-toggle="tab">Check inventory quantity</a>
+            </li>
+
+        </ul>
+    </div>
+    <div id="inventoryStatsContainer"></div>
+    
+    <div class="tab-content" style="margin-top: 40px;">
+        <!-- Tab Inventory List -->
+        <div class="tab-pane fade show active" id="stocklist">
+        	<div id="" style="display: flex;justify-content: center;margin-bottom: 15px;">
+        		<label for="startDate"></label>
+				<input type="date" id="startDate" name="startDate" 
+				th:value="${startDate != null ? startDate : '2020-01-01'}" onchange="applyFilter()">
+				
+				<label for="endDate">--  --</label>
+				<input type="date" id="endDate" name="endDate" 
+				th:value="${endDate != null ? endDate : T(java.time.LocalDate).now()}" onchange="applyFilter()">
+        	</div>
+            
+            <div id="lowStockChartContainer" style="width: 100%; max-width: 1200px; margin: 25px auto;">
+            	<canvas id="inventoryChart" style="width: 1400px; height: 700px;"></canvas>
+            </div>
+            <div id="paginationControls" style="height: 50px; display: flex; justify-content: center; align-items: center; overflow: hidden;"></div>
+        </div>
+        
+        <!-- Tab Detailed Inventory List -->
+        <div class="tab-pane fade" id="stocklistdetail">
+            <div style="text-align: center;margin-bottom: 20px;display: flex;justify-content: right;margin-top: 10px;">
+                <input type="number" id="minQuantity" placeholder="Enter quantity" style="
+                    width: 200px; 
+                    padding: 10px; 
+                    margin-right: 10px; 
+                    border: 2px solid #ccc; 
+                    border-radius: 5px; 
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+                    font-size: 14px;">
+                <button id="updateChart" style="
+                    padding: 5px 15px; 
+                    background-color: #007bff; 
+                    color: white; 
+                    border: none; 
+                    border-radius: 5px; 
+                    cursor: pointer;">
+                    Confirm
+                </button>
+            </div>
+			<div id="lowStockChartContainer" style="width: 100%; max-width: 1200px; margin: 25px auto;">
+			    <canvas id="lowStockChart" style="width: 1400px; height: 700px;" ></canvas>
+			</div>
+        </div>
+    </div>
+</div>
+
+<div th:block th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

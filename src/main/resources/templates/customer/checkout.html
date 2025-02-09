@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+
+<body>
+
+	<div th:replace="~{customer/layout/header_customer}"></div>
+
+	<!-- Breadcrumb Start -->
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-12">
+				<nav class="breadcrumb bg-light mb-30">
+					<a class="breadcrumb-item text-dark" href="/">Home</a> <a
+						class="breadcrumb-item text-dark" href="/shoppingpage/reset">Shop</a>
+					<a class="breadcrumb-item text-dark" href="/cart/showcart">Cart</a>
+					<span class="breadcrumb-item active">Checkout</span>
+				</nav>
+			</div>
+		</div>
+	</div>
+	<!-- Breadcrumb End -->
+
+
+	<!-- Checkout Start -->
+	<form method="post" th:action="@{/checkout/gocheckout}"
+		id="checkoutForm" th:object="${cusinfo}" class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-lg-8">
+				<div class="row">
+					<input th:field="*{id}" class="form-control" type="hidden">
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">First
+							Name</label> <input required th:field="*{first_name}"
+							class="form-control" type="text" placeholder="John"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; transition: all 0.3s">
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Last
+							Name</label> <input required th:field="*{last_name}" class="form-control"
+							type="text" placeholder="Doe"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; transition: all 0.3s">
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">E-mail</label>
+						<input required th:field="*{email}" readonly class="form-control"
+							type="text"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; background-color: #f8f9fa;">
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Phone</label>
+						<input required class="form-control" type="text"
+							placeholder="+123456789" pattern="^(\+\d{10,15}|\d{10,15})$"
+							name="phoneco"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; transition: all 0.3s">
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Province</label>
+						<select required class="form-control" id="province"
+							name="province"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; cursor: pointer; max-height: 250px; overflow-y: auto;">
+							<option value="">Select Province</option>
+						</select>
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">District</label>
+						<select required class="form-control" id="district"
+							name="district"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; cursor: pointer; max-height: 250px; overflow-y: auto;">
+							<option value="">Select District</option>
+						</select>
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Ward</label>
+						<select required class="form-control" id="ward" name="ward"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; cursor: pointer; max-height: 250px; overflow-y: auto;">
+							<option value="">Select Ward</option>
+						</select>
+					</div>
+					<div class="col-md-6 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Address
+							Detail</label> <input required th:field="*{address}" class="form-control"
+							type="text" placeholder="House number, Street name"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; transition: all 0.3s">
+					</div>
+					<div class="col-md-12 form-group">
+						<label style="font-weight: 500; margin-bottom: 8px;">Note</label>
+						<textarea class="form-control" name="notes"
+							placeholder="Note here"
+							style="padding: 10px; border-radius: 5px; border: 1px solid #ddd; width: 100%; min-height: 100px; resize: vertical;"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<h5 class="section-title position-relative text-uppercase mb-3">
+					<span class="bg-secondary pr-3">Order Total</span>
+				</h5>
+				<div class="bg-light p-30 mb-5">
+					<div class="border-bottom">
+						<h6 class="mb-3">Products</h6>
+						<div th:each="item : ${carts}"
+							class="d-flex justify-content-between">
+							<p th:text="${item.product_name}+ ' x' + ${item.Quantity}"></p>
+
+							<p
+								th:text="${'$' + #numbers.formatDecimal(item.Price * item.Quantity, 1, 'COMMA', 2, 'POINT')}"></p>
+						</div>
+						<div class="d-flex justify-content-between mt-2">
+							<h5>Sub total</h5>
+							<h5 th:text="'$' + ${totalCartorigin}"></h5>
+						</div>
+					</div>
+					<div class="border-bottom pt-3 pb-2">
+						<div class="d-flex justify-content-between mb-3">
+							<h6>Discount</h6>
+							<h6 class="text-danger" th:text="'- $' + ${discount}"></h6>
+						</div>
+						<div class="d-flex justify-content-between">
+							<h6 class="font-weight-medium">Shipping</h6>
+							<h6 class="font-weight-medium shipping-fee">$0</h6>
+						</div>
+					</div>
+					<div class="pt-2">
+						<div class="d-flex justify-content-between mt-2">
+							<h5>Total</h5>
+							<h5 class="text-success cart-total"
+								th:text="'$' + ${totalCartValue}"></h5>
+						</div>
+					</div>
+				</div>
+				<div class="mb-5">
+					<h5 class="section-title position-relative text-uppercase mb-3">
+						<span class="bg-secondary pr-3">Payment</span>
+					</h5>
+					<div class="bg-light p-30">
+						<div th:each="item : ${listco}" class="form-group">
+							<div class="custom-control custom-radio">
+								<input required type="radio" class="custom-control-input"
+									name="payment" th:value="${item.Id}"
+									th:id="'payment-' + ${item.Name}"> <label
+									class="custom-control-label" th:for="'payment-' +${item.Name}"
+									th:text="${item.Name}"></label>
+							</div>
+						</div>
+						<input type="hidden" th:value="${couponId}" name="couponId">
+						<input type="hidden" th:value="${discount}" name="discount">
+						<input type="hidden" class="cart-total-input"
+							th:value="${totalCartValue}" name="totalCartValue"> <input
+							type="hidden" class="warehouse-id-input" name="warehouseId">
+						<input type="hidden" class="shipping-fee-input" name="shippingFee">
+						<button
+							class="btn btn-block btn-primary font-weight-bold py-3 checkout-btn"
+							type="submit" style="position: relative;">
+							<span class="button-text">Checkout</span> <span
+								class="spinner-border spinner-border-sm d-none" role="status"
+								style="margin-left: 8px; width: 1rem; height: 1rem;"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<!-- Checkout End -->
+	<!-- Footer Start -->
+	<div th:replace="~{customer/layout/footer_customer}"></div>
+	<!-- Footer End -->
+
+	<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog"
+		aria-labelledby="confirmModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="confirmModalLabel">Confirm
+						Checkout</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">Are you sure you want to proceed with
+					the checkout?</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" id="confirmCheckout">Confirm</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		$(document).ready(
+				function() {
+					var checkoutForm = document.getElementById('checkoutForm');
+					checkoutForm.addEventListener('submit', function(event) {
+						if (checkoutForm.checkValidity()) {
+							event.preventDefault();
+							$('#confirmModal').modal('show');
+						}
+					});
+					document.getElementById('confirmCheckout')
+							.addEventListener('click', function() {
+								checkoutForm.submit();
+							});
+				});
+		$
+				.ajax({
+					url : '/checkout/api/provinces',
+					method : 'GET',
+					success : function(response) {
+						const provinces = response;
+						provinces
+								.forEach(function(province) {
+									$('#province')
+											.append(
+													`<option value="${province.ProvinceID}|${province.ProvinceName}">${province.ProvinceName}</option>`);
+								});
+					}
+				});
+
+		$('#province')
+				.change(
+						function() {
+							const provinceValue = $(this).val();
+							const provinceId = provinceValue.split('|')[0];
+							$('#district')
+									.empty()
+									.append(
+											'<option value="">Select District</option>');
+							$('#ward').empty().append(
+									'<option value="">Select Ward</option>');
+
+							if (provinceId) {
+								$
+										.ajax({
+											url : '/checkout/api/districts',
+											method : 'GET',
+											data : {
+												provinceId : provinceId
+											},
+											success : function(response) {
+												const districts = response;
+												districts
+														.forEach(function(
+																district) {
+															$('#district')
+																	.append(
+																			`<option value="${district.DistrictID}|${district.DistrictName}">${district.DistrictName}</option>`);
+														});
+											}
+										});
+							}
+						});
+
+		$('#district')
+				.change(
+						function() {
+							const districtValue = $(this).val();
+							const districtId = districtValue.split('|')[0];
+							$('#ward').empty().append(
+									'<option value="">Select Ward</option>');
+
+							if (districtId) {
+								$
+										.ajax({
+											url : '/checkout/api/wards',
+											method : 'GET',
+											data : {
+												districtId : districtId
+											},
+											success : function(response) {
+												const wards = response;
+												wards
+														.forEach(function(ward) {
+															$('#ward')
+																	.append(
+																			`<option value="${ward.WardCode}|${ward.WardName}">${ward.WardName}</option>`);
+														});
+											}
+										});
+							}
+						});
+		function removeAccents(str) {
+			return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+					.replace(/đ/g, 'd').replace(/Đ/g, 'D');
+		}
+		const originalTotal = parseFloat($('.cart-total-input').val());
+		$('#ward')
+				.change(
+						function() {
+							const provinceValue = $('#province').val();
+							const provinceName = provinceValue ? removeAccents(provinceValue
+									.split('|')[1])
+									: '';
+							const districtValue = $('#district').val();
+							const districtId = districtValue ? districtValue
+									.split('|')[0] : '';
+							const districtName = districtValue ? removeAccents(districtValue
+									.split('|')[1])
+									: '';
+							const wardValue = $(this).val();
+							const wardName = wardValue ? removeAccents(wardValue
+									.split('|')[1])
+									: '';
+							const fullAddress = [ wardName, districtName,
+									provinceName, "Vietnam" ].filter(Boolean)
+									.join(', ');
+							const checkoutBtn = $('.checkout-btn');
+							const buttonText = checkoutBtn.find('.button-text');
+							const spinner = checkoutBtn.find('.spinner-border');
+							buttonText.addClass('d-none');
+							spinner.removeClass('d-none');
+							checkoutBtn.prop('disabled', true);
+
+							if (fullAddress && districtId) {
+								$
+										.ajax({
+											url : '/checkout/api/nearest',
+											method : 'GET',
+											data : {
+												address : fullAddress,
+												districtId : districtId
+											},
+											success : function(response) {
+												var shippingFeeUSD = (response.shippingFee / 23000)
+														.toFixed(2);
+												$('.shipping-fee').text(
+														'$' + shippingFeeUSD);
+
+												var newTotal = (originalTotal + parseFloat(shippingFeeUSD))
+														.toFixed(2);
+												$('.cart-total').text(
+														'$' + newTotal);
+												$('.cart-total-input').val(
+														newTotal);
+												$('.warehouse-id-input').val(
+														response.id);
+												$('.shipping-fee-input').val(
+														shippingFeeUSD);
+												buttonText
+														.removeClass('d-none');
+												spinner.addClass('d-none');
+												checkoutBtn.prop('disabled',
+														false);
+											},
+											error : function(xhr) {
+												console.error('Error:', xhr);
+												$('#warehouse-info')
+														.html(
+																'<p class="text-danger">Không tìm thấy kho phù hợp</p>');
+												$('.shipping-fee')
+														.text('$0.00');
+												$('.warehouse-id-input')
+														.val('');
+												$('.shipping-fee-input').val(
+														'0.00');
+												buttonText
+														.removeClass('d-none');
+												spinner.addClass('d-none');
+												checkoutBtn.prop('disabled',
+														false);
+											},
+											complete : function() {
+												buttonText
+														.removeClass('d-none');
+												spinner.addClass('d-none');
+												checkoutBtn.prop('disabled',
+														false);
+											}
+										});
+							} else {
+								buttonText.removeClass('d-none');
+								spinner.addClass('d-none');
+								checkoutBtn.prop('disabled', false);
+							}
+						});
+	</script>
+
+</body>
+
+</html>

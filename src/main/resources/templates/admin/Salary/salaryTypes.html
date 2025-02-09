@@ -1,0 +1,189 @@
+
+<body xmlns:th="http://www.thymeleaf.org">
+	<script src="/plugins/jquery/jquery.min.js"></script>
+	<!-- Bootstrap 4 -->
+	<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<!-- AdminLTE App -->
+	<script src="/dist/js/adminlte.min.js"></script>
+	<!-- Header -->
+	<div th:replace="admin/layout/header_admin"></div>
+
+	<!-- Main Content -->
+	<div class="content-wrapper">
+    <!-- Content Header -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Salary Types</h1>
+                </div>
+                <div class="col-sm-6">
+                    <button class="btn btn-primary float-right" data-toggle="modal" data-target="#addTypeModal">
+                        <i class="fas fa-plus"></i> Add New Type
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Alert Messages -->
+            <div th:if="${param.success}" class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>Success!</strong> <span th:text="${param.success}"></span>
+            </div>
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <strong>Error!</strong> <span th:text="${param.error}"></span>
+            </div>
+
+            <!-- Salary Types Table -->
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="type : ${salaryTypes}">
+                                <td th:text="${type.id}"></td>
+                                <td th:text="${type.name}"></td>
+                                <td th:text="${type.description}"></td>
+                                <td>
+                                    <span th:if="${type.isActive == 'true'}" class="badge badge-success">Active</span>
+                                    <span th:if="${type.isActive == 'false'}" class="badge badge-danger">Inactive</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-info btn-sm" 
+                                            th:onclick="'editType(' + ${type.id} + ')'">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form th:action="@{/admin/salary/type/toggle/{id}(id=${type.id})}" 
+                                          method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-toggle-on"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+<div class="modal fade" id="addTypeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/salary/add-type}" method="post" th:object="${salaryType}">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add New Salary Type</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" th:field="*{name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" th:field="*{isActive}">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Type Modal -->
+<div class="modal fade" id="editTypeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/salary/update-type}" method="post">
+                <input type="hidden" id="editId" name="id">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Salary Type</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="editIsActive" name="isActive">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+	<!-- Add Expense Modal -->
+	
+	<!-- Footer -->
+	<div th:replace="admin/layout/footer_admin"></div>
+
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+	<script>
+function editType(id) {
+    $.get('/admin/salary/type/' + id, function(type) {
+        $('#editId').val(type.id);
+        $('#editName').val(type.name);
+        $('#editDescription').val(type.description);
+        $('#editIsActive').val(type.isActive);
+        $('#editTypeModal').modal('show');
+    });
+}
+
+// Initialize DataTable
+$(document).ready(function() {
+    $('.table').DataTable({
+        "paging": true,
+        "lengthChange": false,
+        "searching": true,
+        "ordering": true,
+        "info": true,
+        "autoWidth": false,
+        "responsive": true
+    });
+});
+</script>
+</body>

@@ -1,0 +1,70 @@
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+    <div th:replace="businessManager/layout/header_admin"></div>
+    <div class="content-wrapper" style="min-height: 1302.4px;">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Order Request Detail</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active">Order Request Detail</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">Order Request Detail</h3>
+                            </div>
+                            <form th:object="${requests}">
+                                <div class="card-body row">
+                                    <div class="form-group col-md-6">
+                                        <label for="name">Name</label>
+                                        <input type="text" id="name" disabled readonly th:value="${requests.name}" class="form-control">
+                                    </div>
+                                </div>
+
+                                <!-- Display list of details -->
+                                <div class="card-body">
+                                    <h5>Release Note Details</h5>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Quantity</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="detail : ${requests.details}">
+                                                <td th:text="${detail.productName}">Product Name</td>
+                                                <td th:text="${detail.quantity_requested}">Quantity</td>
+                                                <td th:text="${detail.status}">Status</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="card-footer">
+                                    <a th:href="@{/businessManager/showOrderRequest}" class="btn btn-danger">Back to List</a>
+                                    <a th:href="@{/deleteOrderRequest(id=${requests.id})}" class="btn btn-danger" onclick="return confirmDelete();">Delete</a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div th:replace="businessManager/layout/footer_admin"></div>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+</body>

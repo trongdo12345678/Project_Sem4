@@ -1,0 +1,288 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Comment</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Reply comment</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<!-- Comment List -->
+				<div th:each="comment : ${comments}" class="col-12 mb-2">
+					<div class="comment-item p-3"
+						th:classappend="${!comment.hasEmployeeReply() ? 'unreplied' : 'replied'}">
+						<div class="d-flex justify-content-between align-items-center">
+							<!-- Left side: Product and Comment -->
+							<div class="d-flex align-items-center" style="width: 80%;">
+								<img class="product-thumb mr-2"
+									th:src="'/uploads/' + ${comment.productImage}" alt="product">
+								<div class="comment-content">
+									<div class="product-info">
+										<a
+											th:href="@{'/detailproduct/product?id=' + ${comment.productId}}"
+											class="product-link" th:text="${comment.productName}"></a>
+									</div>
+									<div class="user-info">
+										<i
+											th:class="${comment.employeeId > 0 ? 'fas fa-user-tie text-primary' : 'fas fa-user-circle text-secondary'}"></i>
+										<span class="font-weight-bold"
+											th:text="${comment.employeeId > 0 ? 
+                                          comment.employeeFirstName + ' ' + comment.employeeLastName : 
+                                          comment.customerFirstName + ' ' + comment.customerLastName}">
+										</span> <small class="text-muted ml-2"
+											th:text="${#temporals.format(comment.createdAt, 'dd-MM-yyyy')}"></small>
+									</div>
+									<p class="comment-text mb-0" th:text="${comment.content}"></p>
+								</div>
+							</div>
+
+							<!-- Right side: Reply Button -->
+							<div class="text-right">
+								<button class="btn btn-sm"
+									th:classappend="${!comment.hasEmployeeReply() ? 'btn-danger' : 'btn-secondary'}"
+									th:onclick="'toggleReplies(' + ${comment.id} + ')'"
+									th:title="${!comment.hasEmployeeReply() ? 'Not replied' : 'View replies'}">
+									<i class="fas fa-reply"></i> <span
+										th:text="${!comment.hasEmployeeReply() ? 'Reply now' : 'View replies'}"></span>
+								</button>
+							</div>
+						</div>
+
+						<!-- Replies Section -->
+						<div th:id="'replies-' + ${comment.id}"
+							class="replies-section collapse">
+							<div class="replies-container mt-2">
+								<div th:each="reply : ${comment.replies}"
+									class="reply-item p-2 mb-1">
+									<div class="d-flex justify-content-between align-items-center">
+										<div class="user-info">
+											<i
+												th:class="${reply.employeeId > 0 ? 'fas fa-user-tie text-primary' : 'fas fa-user-circle text-secondary'}"></i>
+											<span class="font-weight-bold"
+												th:text="${reply.employeeId > 0 ? 
+                                              reply.employeeFirstName + ' ' + reply.employeeLastName : 
+                                              reply.customerFirstName + ' ' + reply.customerLastName}">
+											</span> <small class="text-muted ml-2"
+												th:text="${#temporals.format(reply.createdAt, 'dd-MM-yyyy')}"></small>
+										</div>
+									</div>
+									<p class="reply-text mb-0 mt-1" th:text="${reply.content}"></p>
+								</div>
+								<div class="reply-form mt-2">
+									<div class="input-group">
+										<input type="text" class="form-control"
+											th:id="'replyInput-' + ${comment.id}"
+											placeholder="Type your reply...">
+										<div class="input-group-append">
+											<button class="btn btn-primary"
+												th:onclick="'submitReply(' + ${comment.id} + ',' + ${comment.productId} + ')'">
+												<i class="fas fa-paper-plane"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12">
+					<nav th:if="${pv.total_page > 1}">
+						<!-- Only show the pagination if there's more than one page -->
+						<ul class="pagination justify-content-center">
+							<!-- First Page -->
+							<li class="page-item"><a class="page-link"
+								th:href="@{/businessManager/comment/showcomment(cp=1)}"
+								title="First page">&laquo;</a></li>
+
+							<!-- Previous Page -->
+							<li class="page-item" th:if="${pv.page_current > 1}"><a
+								class="page-link"
+								th:href="@{/businessManager/comment/showcomment(cp=${pv.page_current - 1})}"
+								title="Previous page">&lt;</a></li>
+
+							<!-- Page Number Links -->
+							<li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+								th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+								th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+								<a class="page-link"
+								th:href="@{/businessManager/comment/showcomment(cp=${i + 1})}"
+								th:text="${i + 1}"></a>
+							</li>
+
+							<!-- Next Page -->
+							<li class="page-item" th:if="${pv.page_current < pv.total_page}">
+								<a class="page-link"
+								th:href="@{/businessManager/comment/showcomment(cp=${pv.page_current + 1})}"
+								title="Next page">&gt;</a>
+							</li>
+
+							<!-- Last Page -->
+							<li class="page-item" th:if="${pv.total_page > 1}"><a
+								class="page-link"
+								th:href="@{/businessManager/comment/showcomment(cp=${pv.total_page})}"
+								title="Last page">&raquo;</a></li>
+						</ul>
+					</nav>
+				</div>
+
+
+			</div>
+
+			<style>
+.comment-item {
+	border-radius: 6px;
+	margin-bottom: 10px;
+	transition: all 0.2s ease;
+}
+
+.unreplied {
+	background-color: #f8f9fa;
+}
+
+.replied {
+	background-color: #fff;
+}
+
+.product-thumb {
+	width: 50px;
+	height: 50px;
+	object-fit: cover;
+	border-radius: 4px;
+}
+
+.comment-content {
+	margin-left: 10px;
+	flex-grow: 1;
+}
+
+.product-link {
+	color: #333;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.user-info {
+	font-size: 0.9rem;
+	color: #666;
+	margin: 3px 0;
+}
+
+.comment-text {
+	color: #333;
+}
+
+.replies-section {
+	margin-left: 60px;
+	border-left: 2px solid #e9ecef;
+	padding-left: 15px;
+}
+
+.reply-item {
+	background: #f8f9fa;
+	border-radius: 4px;
+	margin-bottom: 8px;
+}
+
+.reply-text {
+	color: #555;
+	margin-left: 25px;
+}
+
+.badge {
+	font-size: 0.7rem;
+	padding: 0.2em 0.5em;
+}
+</style>
+
+			<script>
+function toggleReplies(commentId) {
+    $('#replies-' + commentId).collapse('toggle');
+}
+
+
+function submitReply(commentId, productId) {
+    const replyInput = document.getElementById('replyInput-' + commentId);
+    const content = replyInput.value.trim();
+    
+    if (content) {
+        $.ajax({
+            url: '/businessManager/comment/staffreply',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                parentId: commentId,
+                content: content,
+                productId: productId
+            }),
+            success: function(response) {
+                // Clear input
+                replyInput.value = '';
+                
+                // Create new reply HTML
+                const replyHtml = `
+                    <div class="reply-item p-2 mb-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="user-info">
+                                <i class="fas fa-user-tie text-primary"></i>
+                                <span class="font-weight-bold">${response.employeeName}</span>
+                                <small class="text-muted ml-2">${response.createdAt}</small>
+                            </div>
+                        </div>
+                        <p class="reply-text mb-0 mt-1">${response.content}</p>
+                    </div>
+                `;
+                
+                // Add new reply to container
+                const repliesContainer = $(`#replies-${commentId} .replies-container`);
+                repliesContainer.append(replyHtml);
+                
+                // Update button style if this is first employee reply
+                const commentButton = $(`button[onclick="toggleReplies(${commentId})"]`);
+                commentButton.removeClass('btn-danger').addClass('btn-secondary');
+                commentButton.attr('title', 'View replies');
+                commentButton.find('span').text('View replies');
+                
+                // Show success message
+                toastr.success('Reply sent successfully');
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 401) {
+                    toastr.error('Please login to reply');
+                } else {
+                    toastr.error('Error sending reply');
+                }
+                console.error('Error:', error);
+            }
+        });
+    } else {
+        toastr.warning('Please enter a reply');
+    }
+}
+</script>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+</html>
+

@@ -1,0 +1,156 @@
+
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Employee</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Employee</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Update register Employee</h3>
+							</div>
+							<form th:object="${employee}" action="updateEmp" method="post">
+								<div class="card-body">
+									<input type="hidden" id="id" required th:field="*{id}"
+										class="form-control" placeholder="Enter FirstName">
+									<div class="form-group">
+										<label for="title">First Name</label> <input type="text"
+											id="finame" required th:field="*{first_name}"
+											class="form-control" placeholder="Enter FirstName">
+									</div>
+									<div class="form-group">
+										<label for="title">Last Name</label> <input type="text"
+											id="laname" required th:field="*{last_name}"
+											class="form-control" placeholder="Enter LastName">
+									</div>
+									<div class="form-group">
+										<label for="price">Phone</label> <input type="text"
+											th:field="*{phone}" required class="form-control"
+											placeholder="Enter Phone">
+									</div>
+									<div class="form-group">
+										<label for="price">Password(Enter the password you want to change)</label> <input type="password"
+											th:field="*{password}" required class="form-control"
+											placeholder="Enter Password">
+									</div>
+									<div class="form-group">
+										<label for="exampleInputEmail1">Role</label> <select
+											th:field="*{role_id}" id="roleId" required
+											class="form-control">
+											<option th:each="item : ${roles}" th:value="${item.id}"
+												th:text="${item.name}"></option>
+										</select>
+									</div>
+									<div th:if="${errorMessage}" class="alert alert-danger">
+										<p th:text="${errorMessage}"></p>
+									</div>
+								</div>
+								<div class="card-footer">
+									<a th:href="@{/admin/employee/showEmp}" class="btn btn-danger">Back
+										to List</a>
+									<button type="submit" class="btn btn-primary">Submit</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				<!-- Salary start -->
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-header">
+								<h3 class="card-title">Employee Salary Details</h3>
+							</div>
+							<div class="card-body">
+								<table class="table table-bordered">
+									<thead>
+										<tr>
+											<th>Salary Type</th>
+											<th>Current Amount</th>
+											<th>New Amount</th>
+											<th>Action</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="salary : ${currentSalaries}">
+											<td
+												th:text="${salary.salaryType != null ? salary.salaryType.name : 'N/A'}"></td>
+											<td
+												th:text="${#numbers.formatDecimal(salary.amount, 0, 'COMMA', 0, 'POINT')} + ' $'"></td>
+											<td><input type="number" class="form-control"
+												th:name="'salary_' + ${salary.salaryTypeId}"
+												th:data-employee-id="${employee.id}"
+												placeholder="Enter new amount"></td>
+											<td>
+												<button type="button" class="btn btn-primary btn-sm"
+													th:onclick="'updateSalary(' + ${salary.salaryTypeId} + ')'">
+													<i class="fas fa-save"></i> Update
+												</button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Salary end -->
+
+			</div>
+		</section>
+	</div>
+	<div th:replace="admin/layout/footer_admin"></div>
+	<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script th:src="@{/js/js_index.js}"></script>
+	<script th:inline="javascript">
+		function updateSalary(salaryTypeId) {
+			var inputElement = $(`input[name='salary_${salaryTypeId}']`);
+			var newAmount = inputElement.val();
+			var employeeId = inputElement.data('employee-id');
+
+			if (!newAmount) {
+				alert('Please enter an amount');
+				return;
+			}
+
+			$.ajax({
+				url : '/admin/salary/update-salary',
+				type : 'POST',
+				data : {
+					employeeId : employeeId,
+					salaryTypeId : salaryTypeId,
+					newAmount : newAmount
+				},
+				success : function(response) {
+					if (response.status === 'success') {
+						alert('Updated successfully');
+						location.reload();
+					} else {
+						alert(response.message);
+					}
+				},
+				error : function(xhr, status, error) {
+					alert('Error updating salary: ' + error);
+				}
+			});
+		}
+	</script>
+</body>
+
+</body>

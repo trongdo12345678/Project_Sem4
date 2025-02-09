@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+<style>
+.out-of-stock {
+	background-color: #cccccc;
+}
+
+.align-middle .out-of-stock:hover {
+	background-color: #cccccc;
+}
+</style>
+<body>
+
+	<div th:replace="~{customer/layout/header_customer}"></div>
+
+	<!-- Breadcrumb Start -->
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-12">
+				<nav class="breadcrumb bg-light mb-30">
+					<a class="breadcrumb-item text-dark" href="/">Home</a> <a
+						class="breadcrumb-item text-dark" href="/shoppingpage/reset">Shop</a>
+					<a class="breadcrumb-item text-dark" href="/cart/showcart">Cart</a>
+				</nav>
+			</div>
+		</div>
+	</div>
+	<!-- Breadcrumb End -->
+
+
+	<!-- Cart Start -->
+	<div class="container-fluid">
+		<div class="row px-xl-5">
+			<div class="col-lg-8 table-responsive mb-5">
+				<table
+					class="table table-light table-borderless table-hover text-center mb-0">
+					<thead class="thead-dark">
+						<tr>
+							<th></th>
+							<th>Products</th>
+							<th>Price</th>
+							<th>Quantity</th>
+							<th>Total</th>
+							<th>Remove</th>
+						</tr>
+					</thead>
+					<tbody class="align-middle tbodycart"
+						th:if="${#lists.isEmpty(carts)}">
+						<tr>
+							<td colspan="6" class="text-center">You haven't added
+								anything to the cart yet.</td>
+						</tr>
+					</tbody>
+
+					<tbody class="align-middle tbodycart"
+						th:unless="${#lists.isEmpty(carts)}">
+						<tr th:each="item : ${carts}"
+							th:class="${item.Pro_Status == 'OutOfStock' ? 'out-of-stock' : 'cart-item'}"
+							th:onclick="'godetailpro(event, \'' + ${item.Product_id} + '\')'">
+							<td class="align-middle"><img
+								th:src="'/uploads/' + ${item.Img}" alt="" style="width: 50px;">
+							</td>
+							<td class="align-middle" th:text="${item.product_name}"></td>
+							<td class="align-middle" th:text="'$' + ${item.Price}"></td>
+							<td class="align-middle"
+								style="display: flex; align-items: center; justify-content: center;">
+								<div class="input-group" style="width: 100px;">
+									<div class="input-group-btn">
+										<div th:if="${item.Pro_Status != 'OutOfStock'}"
+											th:onclick="'minusFromCart(event,' + ${item.Id} + ')'"
+											class="btn-sm btn-primary" style="height: 30px;">
+											<i class="fa fa-minus"></i>
+										</div>
+										<div th:if="${item.Pro_Status == 'OutOfStock'}"
+											class="btn-sm btn-secondary"
+											style="pointer-events: none; height: 30px;">
+											<i class="fa fa-minus"></i>
+										</div>
+									</div>
+									<input type="text"
+										class="form-control form-control-sm bg-secondary border-0 text-center"
+										th:value="${item.Quantity}"
+										th:attr="data-cart-id=${item.Id}, data-price=${item.Price}"
+										style="height: 30px;" readonly />
+									<div class="input-group-btn">
+										<div style="height: 30px;"
+											th:if="${item.Pro_Status != 'OutOfStock'}"
+											th:onclick="'updateQuantity(event,' + ${item.Id} + ')'"
+											class="btn-sm btn-primary">
+											<i class="fa fa-plus"></i>
+										</div>
+										<div th:if="${item.Pro_Status == 'OutOfStock'}"
+											class="btn-sm btn-secondary"
+											style="pointer-events: none; height: 30px;">
+											<i class="fa fa-plus"></i>
+										</div>
+									</div>
+								</div>
+							</td>
+							<td class="align-middle" th:attr="data-total-id=${item.Id}"
+								th:text="${'$' + #numbers.formatDecimal(item.Price * item.Quantity, 1, 'COMMA', 2, 'POINT')}"></td>
+							<td class="align-middle">
+								<div th:onclick="'deleteFromCart(event,' + ${item.Id} + ')'"
+									class="btn btn-sm btn-danger">
+									<i class="fa fa-times"></i>
+								</div>
+							</td>
+						</tr>
+
+					</tbody>
+
+
+				</table>
+			</div>
+			<div class="col-lg-4">
+				<div class="mb-30">
+					<div class="input-group">
+						<input type="text" class="form-control border-0 p-4 inputdiscount"
+							placeholder="Discount Code">
+						<div class="input-group-append">
+							<button type="button" th:onclick="applydiscount()"
+								class="btn btn-primary">Apply Discount</button>
+						</div>
+					</div>
+					<span id="coupon-error" style="color: red;">&nbsp;</span>
+
+				</div>
+				<h5 class="section-title position-relative text-uppercase mb-3">
+					<span class="bg-secondary pr-3">Cart Summary</span>
+				</h5>
+				<div class="bg-light p-30 mb-5">
+					<div class="border-bottom pb-2">
+						<div class="d-flex justify-content-between mb-3">
+							<h6>Cart Subtotal</h6>
+							<h6 class="subtotal"
+								th:text="${'$' + #numbers.formatDecimal(totalCartValue, 1, 'COMMA', 2, 'POINT')}"></h6>
+						</div>
+						<hr class="pb-2">
+						<div class="d-flex justify-content-between mb-3">
+							<h6>Discount</h6>
+							<h6 class="discountasd text-danger">- $0.00</h6>
+						</div>
+
+					</div>
+					<div class="pt-2">
+						<div class="d-flex justify-content-between mt-2">
+							<h5>Total (Excluding shipping)</h5>
+							<h5 class="totalamount text-success"
+								th:text="${'$' + #numbers.formatDecimal(totalCartValue, 1, 'COMMA', 2, 'POINT')}"></h5>
+						</div>
+						<a id="checkoutButton" th:onclick="goToCheckout()"
+							class="btn btn-block btn-primary font-weight-bold my-3 py-3">Proceed
+							To Checkout</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Cart End -->
+
+	<!-- Footer Start -->
+	<div th:replace="~{customer/layout/footer_customer}"></div>
+	<!-- Footer End -->
+
+
+</body>
+<script>
+
+let appliedCoupon = null;
+let checkcheckcoupon = false;
+function updateQuantity(event,cartId) {
+	event.stopPropagation();
+    $.ajax({
+        url: '/cart/pluscart',
+        type: 'POST',
+        data: {
+            id: cartId
+        },
+        success: function(response) {
+            var jsonResponse = JSON.parse(response);
+
+            if (jsonResponse.status === "success") {
+            	var quantityInput = $('input[data-cart-id="' + cartId + '"]');          
+            	var currentQuantity = parseInt(quantityInput.val());
+            	currentQuantity++;
+            	quantityInput.val(currentQuantity);
+
+            	var price = parseFloat(quantityInput.data('price'));
+            	
+            	var newTotal = Number(price * currentQuantity);
+            	
+            	var totalCell = $('td[data-total-id="' + cartId + '"]');
+
+            	totalCell.text('$' + newTotal.toFixed(2));
+                if(appliedCoupon !== null){
+     	    		var totalamount = calculateTotalAmount()
+     	    		const cpe = document.getElementById('coupon-error')
+     	    		if(applyrealllllllei(appliedCoupon,totalamount)){
+     	    			cpe.innerHTML = 'success(' + appliedCoupon.code +')';
+    	            	cpe.style.color = 'rgb(70 165 0)';
+    	            	const result = applyCouponDiscount(appliedCoupon, totalamount);
+    	            	updateDiscountAndTotal(result.discount, result.finalAmount,totalamount);
+    	            	checkcheckcoupon = true
+     	    		}else{
+     	    			cpe.innerHTML = 'Not enough conditions to apply this coupon('+ appliedCoupon.code +')';
+    	            	cpe.style.color = 'red';
+    	            	checkcheckcoupon = false
+    	            	updateDiscountAndTotal(0, totalamount,totalamount);
+     	    		}
+     		    }else{
+     		    	checkcheckcoupon = false
+     		    	var totalamount = calculateTotalAmount()
+     		    	updateDiscountAndTotal(0, totalamount,totalamount);
+     		    }
+                
+            } else {
+
+            }
+        },
+        error: function(xhr, status, error) {
+        }
+    });
+}
+function minusFromCart(event,cartId) {
+	event.stopPropagation();
+	const inputField = $(`input[data-cart-id='${cartId}']`);
+	let currentQuantity = parseInt(inputField.val());
+	if (currentQuantity > 1) {
+		 $.ajax({
+		        url: '/cart/minuscart', // Đường dẫn đến endpoint
+		        type: 'POST', // Phương thức HTTP
+		        data: { id: cartId }, // Dữ liệu gửi đi (ID sản phẩm trong giỏ hàng)
+		        success: function(response) {
+		            // Phân tích chuỗi JSON từ phản hồi
+		            const result = JSON.parse(response);
+		            if (result.status === "success") {
+		                const price = parseFloat(inputField.data('price')); 
+		                currentQuantity--;
+		                inputField.val(currentQuantity); 
+		                var newTotal = Number(price * currentQuantity);
+		               
+		                var totalCell = $('td[data-total-id="' + cartId + '"]');
+		                totalCell.text('$' + newTotal.toFixed(2));
+		                if(appliedCoupon !== null){
+		                	
+	         	    		var totalamount = calculateTotalAmount()
+	         	    		const cpe = document.getElementById('coupon-error')
+	         	    		if(applyrealllllllei(appliedCoupon,totalamount)){
+	         	    			cpe.innerHTML = 'success(' + appliedCoupon.code +')';
+		    	            	cpe.style.color = 'rgb(70 165 0)';
+		    	            	checkcheckcoupon = true
+		    	            	const result = applyCouponDiscount(appliedCoupon, totalamount);
+		    	            	updateDiscountAndTotal(result.discount, result.finalAmount,totalamount);
+	         	    		}else{
+	         	    			cpe.innerHTML = 'Not enough conditions to apply this coupon('+ appliedCoupon.code +')';
+		    	            	cpe.style.color = 'red';
+		    	            	checkcheckcoupon = false
+		    	            	updateDiscountAndTotal(0, totalamount,totalamount);
+	         	    		}
+	         		    }else{
+	         		    	checkcheckcoupon = false
+	         		    	var totalamount = calculateTotalAmount()
+	         		    	updateDiscountAndTotal(0, totalamount,totalamount);
+	         		    }
+		                
+		            } else {
+		                alert("Có lỗi xảy ra khi giảm số lượng sản phẩm.");
+		            }
+		        },
+		        error: function(xhr, status, error) {
+		            alert("Đã xảy ra lỗi: " + error);
+		        }
+		    }); 
+    } 
+   
+}
+
+function deleteFromCart(event,cartId) {
+	event.stopPropagation();
+  	  $.ajax({
+        url: '/cart/deletecartbyid', // Đường dẫn đến endpoint
+        type: 'POST', 
+        data: { id: cartId }, 
+        success: function(response) {
+            
+            const result = JSON.parse(response);
+            if (result.status === "success") {
+            	
+				const trElement = event.target.closest('tr');
+				 if (trElement) {
+				        trElement.remove();
+				    }
+				 if(appliedCoupon !== null){
+	                	
+      	    		var totalamount = calculateTotalAmount()
+      	    		const cpe = document.getElementById('coupon-error')
+      	    		if(applyrealllllllei(appliedCoupon,totalamount)){
+      	    			cpe.innerHTML = 'success(' + appliedCoupon.code +')';
+	    	            	cpe.style.color = 'rgb(70 165 0)';
+	    	            	const result = applyCouponDiscount(appliedCoupon, totalamount);
+	    	            	checkcheckcoupon = true
+	    	            	updateDiscountAndTotal(result.discount, result.finalAmount,totalamount);
+      	    		}else{
+      	    			cpe.innerHTML = 'Not enough conditions to apply this coupon('+ appliedCoupon.code +')';
+	    	            	cpe.style.color = 'red';
+	    	            	checkcheckcoupon = false
+	    	            	updateDiscountAndTotal(0, totalamount,totalamount);
+      	    		}
+      	    		
+      	    		
+      		    }else{
+      		    	checkcheckcoupon = false
+      		    	var totalamount = calculateTotalAmount()
+      		    	updateDiscountAndTotal(0, totalamount,totalamount);
+      		    }
+				 setTimeout(() => {
+   	    			checkCart()
+					}, 10);
+            } 
+        },
+        error: function(xhr, status, error) {
+           
+        }
+    });
+}
+function checkCart() {
+    const cartItems = document.querySelectorAll('.cart-item'); 
+    const checkoutButton = document.getElementById('checkoutButton');
+    const itemsoutofstock = document.querySelectorAll('.out-of-stock');
+    if (cartItems.length == 0 && itemsoutofstock.length == 0) {
+        const tbody = document.querySelector(".tbodycart"); 
+        if (tbody && tbody.children.length == 0) { 
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        You haven't added anything to the cart yet.
+                    </td>
+                </tr>`;
+        }
+    }
+    if (cartItems.length > 0 && itemsoutofstock.length == 0) {
+    	checkoutButton.classList.remove('btn-secondary'); 
+        checkoutButton.classList.add('btn-primary');
+        checkoutButton.style.pointerEvents = 'auto'; 
+    } else {
+    	
+    	checkoutButton.classList.remove('btn-primary');
+    	checkoutButton.classList.add('btn-secondary');
+    	checkoutButton.style.pointerEvents = 'none';
+        
+    }
+}
+
+function godetailpro(event,id) {
+	event.stopPropagation();
+    const encodedId = encodeURIComponent(id);
+    window.location.href = '/detailproduct/product?id=' + encodedId;
+}
+
+
+
+
+function applydiscount() {
+    const codedis = document.querySelector('.inputdiscount');  
+    const couponCode = codedis.value.trim();  
+	const cpe = document.getElementById('coupon-error')
+
+    if (!couponCode) {
+    	cpe.style.color = 'red'
+    	cpe.innerHTML = 'Please enter a valid coupon code.';
+        return; 
+    }
+	    validateCouponCode(couponCode, function(isValid, coupon) {
+	        if (isValid) {
+	        	cpe.innerHTML = '&nbsp;';
+	            if (coupon.status == 'Applicable') {
+	            	var preCoupon = appliedCoupon;
+	            	appliedCoupon = coupon
+	         	    	if(appliedCoupon !== null){
+	         	    		var totalamount = calculateTotalAmount()
+	         	    		if(applyrealllllllei(appliedCoupon,totalamount) == true){
+	         	    			cpe.innerHTML = 'success(' + appliedCoupon.code +')';
+		    	            	cpe.style.color = 'rgb(70 165 0)';
+		    	            	checkcheckcoupon = true
+		    	            	const result = applyCouponDiscount(appliedCoupon, totalamount);
+		    	            	updateDiscountAndTotal(result.discount, result.finalAmount,totalamount);
+	         	    		}else{
+	         	    			
+	         	    			if(preCoupon == null) {
+	         	    			    cpe.innerHTML = 'Not enough conditions to apply this coupon ('+ appliedCoupon.code +')';
+	         	    			    cpe.style.color = 'red';
+	         	    			    checkcheckcoupon = false;
+	         	    			   	appliedCoupon = null
+	         	    			} else { 
+	         	    			   
+	         	    			    var totalamount = calculateTotalAmount();
+	         	    			    if(applyrealllllllei(preCoupon, totalamount) == true) {
+	         	    			    	appliedCoupon = preCoupon;
+	         	    			        cpe.innerHTML = 'Cannot apply current code. (Previous code ' + preCoupon.code + ' has been applied successfully)';
+	         	    			        cpe.style.color = 'red';
+	         	    			        checkcheckcoupon = true;
+	         	    			       const result = applyCouponDiscount(appliedCoupon, totalamount);
+		         	    			    updateDiscountAndTotal(result.discount, result.finalAmount, totalamount);
+	         	    			    } else {
+	         	    			        // Mã trước đó không áp dụng được
+	         	    			        cpe.innerHTML = 'Not enough conditions to apply this coupon ('+ appliedCoupon.code +')';
+	         	    			        cpe.style.color = 'red';
+	         	    			        checkcheckcoupon = false;
+	         	    			       	appliedCoupon = null;
+	         	    			       	const result = applyCouponDiscount(appliedCoupon, totalamount);
+		         	    			    updateDiscountAndTotal(result.discount, result.finalAmount, totalamount);
+	         	    			    }
+	         	    			    
+	         	    			   
+	         	    			}
+	         	    			
+	         	    		}
+	         		    }
+
+	            } else if (coupon.status == 'Not Applicable'){
+	            	checkcheckcoupon = false
+	            	cpe.innerHTML = 'The coupon code is not active.';
+	            	cpe.style.color = 'red'
+	            }else if (coupon.status == 'Expired'){
+	            	checkcheckcoupon = false
+	            	cpe.innerHTML = 'The coupon code is Expired.';
+	            	cpe.style.color = 'red'
+	            }
+	        } else {
+	        	appliedCoupon = null;
+	            cpe.innerHTML = 'The coupon code you entered does not exist. Please try again.';
+	            cpe.style.color = 'red'
+	        }
+	    });
+
+	    
+   
+    
+}
+function validateCouponCode(couponCode, callback) {
+    $.ajax({
+        url: '/cart/validatediscount',  
+        type: 'GET',
+        data: { code: couponCode },
+        success: function(response) {
+            if (response) {
+                // Gọi callback với response khi coupon hợp lệ
+                callback(true, response);
+            } else {
+                // Gọi callback với null khi không tìm thấy coupon
+                callback(false, null);
+            }
+        },
+        error: function(xhr, status, error) {
+            // Xử lý lỗi nếu có
+            console.error('Error occurred:', error);
+            callback(false, null);  // Gọi callback với null khi có lỗi
+        }
+    });
+}
+function calculateTotalAmount() {
+    let totalAmount = 0;
+
+    const totals = document.querySelectorAll('td[data-total-id]');
+    
+    totals.forEach(function (total) {
+
+        const price = parseFloat(total.textContent.replace('$', '').trim());
+        if (!isNaN(price)) {
+            totalAmount += price;
+        }
+    });
+
+    return totalAmount;
+}
+function applyrealllllllei(appliedCoupon, amounttotal) {
+   
+    if (amounttotal >= appliedCoupon.minOrderValue) {
+       
+
+        return true;
+
+        
+        
+    } else {
+       
+       
+        return false;
+    }
+}
+function applyCouponDiscount(coupon, amounttotal) {
+    let finalAmount = amounttotal; 
+    let discount = 0; 
+	console.log()
+    if (coupon.discount_percentage !== null && coupon.discountPercentage > 0) {
+        discount = (amounttotal * coupon.discountPercentage) / 100;
+        if(discount >= coupon.maxDiscountAmount){
+        	discount = coupon.maxDiscountAmount
+        }
+        finalAmount = amounttotal - discount; 
+		
+        return { finalAmount, discount }; 
+    }
+
+
+    if (coupon.discount_amount !== null && coupon.discountAmount > 0) {
+        discount = coupon.discountAmount; 
+        finalAmount = amounttotal - discount; 
+
+        return { finalAmount, discount }; 
+    }
+
+    return { finalAmount, discount: 0 }; 
+}
+function updateDiscountAndTotal(discount, amounttotal,totalnguyen) {
+	document.querySelector('.subtotal').textContent = `$${totalnguyen.toFixed(2)}`;
+    // Cập nhật giá trị giảm giá vào phần tử có class 'discountasd'
+    document.querySelector('.discountasd').textContent = `- $${discount.toFixed(2)}`;
+
+    // Cập nhật tổng tiền vào phần tử có class 'totalamount'
+    document.querySelector('.totalamount').textContent = `$${amounttotal.toFixed(2)}`;
+}
+function goToCheckout() {
+	 const appliedCouponId = appliedCoupon ? appliedCoupon.id : null;
+    if (appliedCoupon !== null && checkcheckcoupon == true) {
+    	
+        checkoutLink = `/checkout/savecoupon?coupon=${appliedCouponId}`;
+    } else {
+        checkoutLink = '/checkout/showcheckout';
+    }
+
+    // Điều hướng đến link
+    window.location.href = checkoutLink;
+}
+window.onload = function() {
+		checkCart();
+
+};
+</script>
+</html>

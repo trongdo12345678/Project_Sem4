@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+
+<body>
+	<div th:replace="~{customer/layout/header_customer}"></div>
+
+	<section class="p-3 p-md-4 p-xl-5">
+		<div class="container">
+			<div class="card border-light-subtle shadow-sm">
+				<div class="row g-0">
+					<div class="col-12 col-md-6">
+						<img class="img-fluid rounded-start w-100 h-100 object-fit-cover"
+							src="/customer/img/banner1.png" alt="BootstrapBrain Logo">
+					</div>
+					<div class="col-12 col-md-6">
+						<div class="card-body p-3 p-md-4 p-xl-5">
+							<div class="row">
+								<div class="col-12">
+									<div class="mb-5">
+										<h3>SIGN UP</h3>
+									</div>
+								</div>
+							</div>
+							<form id="registrationForm" method="post"
+								th:action="@{/account/goregister}" onsubmit="return false;">
+								<div class="row gy-3 gy-md-4 overflow-hidden">
+									<div class="col-12">
+										<label for="email" class="form-label">Email <span
+											class="text-danger">*</span></label> <input type="email"
+											class="form-control" name="email" id="email" placeholder=" "
+											required> <small id="email-error-message"
+											class="text-danger">&nbsp;</small>
+									</div>
+
+									<!-- Password field with toggle -->
+									<div class="col-12">
+										<label for="password" class="form-label">Password <span
+											class="text-danger">*</span></label>
+										<div class="input-group">
+											<input type="password" class="form-control" name="password"
+												id="password" required> <span
+												class="input-group-text"
+												onclick="togglePassword('password', 'toggleEye1')"> <i
+												id="toggleEye1" class="fa fa-eye"></i>
+											</span>
+										</div>
+										<small id="password-error-message" class="text-danger">&nbsp;</small>
+									</div>
+
+									<!-- Confirm Password field with toggle -->
+									<div class="col-12">
+										<label for="corfpassword" class="form-label">Confirm
+											password <span class="text-danger">*</span>
+										</label>
+										<div class="input-group">
+											<input type="password" class="form-control"
+												name="corfpassword" id="corfpassword" required> <span
+												class="input-group-text"
+												onclick="togglePassword('corfpassword', 'toggleEye2')">
+												<i id="toggleEye2" class="fa fa-eye"></i>
+											</span>
+										</div>
+										<small id="confirm-error-message" class="text-danger">&nbsp;</small>
+									</div>
+
+									<!-- Submit button -->
+									<div style="margin-top: 20px;" class="col-12">
+										<div class="d-grid">
+											<button class="btn bsb-btn-xl btn-primary" type="button"
+												id="submitBtn" onclick="checkEmail()">Sign up</button>
+										</div>
+									</div>
+								</div>
+							</form>
+							<div class="row">
+								<div class="col-12">
+									<hr class="mt-5 mb-4 border-secondary-subtle">
+									<div
+										class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end">
+										<a href="/account/signin" style="margin-right: 20px;"
+											class="link-secondary text-decoration-none">Already have
+											an account?</a>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Footer Start -->
+	<div th:replace="~{customer/layout/footer_customer}"></div>
+	<!-- Footer End -->
+
+</body>
+<script>
+    function togglePassword(fieldId, eyeIconId) {
+        const field = document.getElementById(fieldId);
+        const toggleEye = document.getElementById(eyeIconId);
+        if (field.type === "password") {
+            field.type = "text";
+            toggleEye.classList.remove("fa-eye");
+            toggleEye.classList.add("fa-eye-slash");
+        } else {
+            field.type = "password";
+            toggleEye.classList.remove("fa-eye-slash");
+            toggleEye.classList.add("fa-eye");
+        }
+    }
+
+    function checkEmail() {
+        const email = document.getElementById("email").value;
+        const emailErrorMessage = document.getElementById("email-error-message");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Xóa thông báo lỗi trước khi kiểm tra
+        emailErrorMessage.innerHTML = "&nbsp;";
+
+        if (email) {
+            // Sử dụng AJAX để kiểm tra email
+            fetch(`/account/checkemail?email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data) { 
+                        emailErrorMessage.innerHTML = "Email has already been registered!";
+                    } else {
+                        // Nếu email không trùng, kiểm tra mật khẩu và gửi form
+                        if (validatePasswords()) {
+                            submitBtn.disabled = true; // Vô hiệu hóa nút gửi
+                            document.getElementById("registrationForm").submit(); // Gửi form
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    function validatePasswords() {
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("corfpassword").value;
+        const errorMessage = document.getElementById("confirm-error-message");
+        const passwordErrorMessage = document.getElementById("password-error-message");
+
+        // Regular expression to check if password contains both letters and numbers
+        const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+        // Validate password length and content
+        if (!passwordPattern.test(password)) {
+            passwordErrorMessage.innerHTML = "Password must be at least 8 characters and include letters and numbers."
+            return false; // Ngăn form gửi đi
+        } else {
+            passwordErrorMessage.innerHTML = "&nbsp;"; // Ẩn thông báo lỗi mật khẩu nếu hợp lệ
+        }
+
+        // Validate confirm password
+        if (password !== confirmPassword) {
+            errorMessage.innerHTML = "Passwords do not match!"; // Hiển thị thông báo lỗi
+            return false; // Ngăn form gửi đi
+        }
+
+        errorMessage.innerHTML = "&nbsp;"; // Ẩn thông báo lỗi nếu trùng khớp
+        return true; // Cho phép form gửi đi
+    }
+</script>
+</html>

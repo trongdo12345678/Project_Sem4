@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stock</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" th:href="@{/css/stockAll.css}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+#filterForm {
+	display: flex;
+	align-items: center; /* Căn giữa theo chiều dọc */
+	justify-content: flex-start; /* Căn lề trái */
+	gap: 5px; /* Giảm khoảng cách giữa các thành phần */
+	max-width: 500px; /* Giới hạn độ rộng form */
+	margin: 20px auto; /* Căn giữa */
+	padding: 10px;
+	border: 1px solid #ccc; /* Đường viền */
+	border-radius: 8px; /* Bo góc */
+	background-color: #f9f9f9; /* Màu nền */
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+}
+
+#filterForm label {
+	font-size: 14px;
+	color: #333; /* Màu chữ */
+	margin-right: 10px; /* Khoảng cách giữa label và input */
+}
+
+#filterForm input[type="date"] {
+	padding: 8px;
+	font-size: 14px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	width: 130px; /* Giới hạn chiều rộng của input */
+	box-sizing: border-box; /* Tính cả padding vào width */
+}
+
+#filterForm input[type="date"]:focus {
+	outline: none;
+	border-color: #007bff; /* Đổi màu khi focus */
+	box-shadow: 0px 0px 5px rgba(0, 123, 255, 0.5);
+}
+#lineChart {
+	width: 100%;   
+    height: 100%; 
+}
+
+#filterForm button {
+	padding: 8px 16px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #fff;
+	background-color: #007bff;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+#filterForm button:hover {
+	background-color: #0056b3; /* Màu khi hover */
+}
+</style>
+</head>
+<body>
+
+	<div th:replace="warehouseManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-header">
+								<div class="input-group input-group-sm"
+									style="width: 80%; margin-left: 15%;">
+
+								</div>
+								<!-- Form lọc với th: để hỗ trợ Thymeleaf -->
+								<form id="filterForm" method="get">
+									<label for="startDate"></label> <input type="date"
+										id="startDate" name="startDate">
+
+									<label for="endDate">-- --</label> <input type="date"
+										id="endDate" name="endDate">
+
+									<button type="button" id="applyFilterButton"
+										style="margin-left: 25px;">Apply Filter</button>
+								</form>
+								<div id="lowStockChartContainer" style="width: 100%; max-width: 1200px; margin: 25px auto;">
+									<canvas id="lineChart" style="width: 1400px; height: 700px;"></canvas>
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+	<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script th:inline="javascript">
+
+// Khi DOM đã tải
+document.addEventListener("DOMContentLoaded", function () {
+	const currentDate = new Date();
+
+	// Trừ đi 1 tháng
+	currentDate.setMonth(currentDate.getMonth() - 1);
+
+	// Chuyển đổi sang định dạng 'YYYY-MM-DD'
+	const defaultStartDate = currentDate.toISOString().split('T')[0];
+	
+    const defaultEndDate = new Date().toISOString().split('T')[0];
+
+    // Gán giá trị mặc định cho các input ngày
+    document.getElementById('startDate').value = defaultStartDate;
+    document.getElementById('endDate').value = defaultEndDate;
+
+    // Tự động áp dụng bộ lọc khi trang tải
+    applyFilter(defaultStartDate, defaultEndDate);
+});
+
+// Hàm áp dụng bộ lọc
+function applyFilter(startDate, endDate) {
+    // Nếu không có startDate và endDate thì lấy từ input
+    startDate = startDate || document.getElementById('startDate').value;
+    endDate = endDate || document.getElementById('endDate').value;
+
+    // Kiểm tra ngày hợp lệ
+    if (new Date(startDate) > new Date(endDate)) {
+        alert("Start Date must be before End Date!");
+        return;
+    }
+
+    // Gọi AJAX để lấy dữ liệu
+    $.ajax({
+        url: '/warehouseManager/gettLineChart',
+        method: 'GET',
+        data: { startDate: startDate, endDate: endDate },
+        success: function (response) {
+            console.log("Fetched data:", response);
+            drawLineChart(response); // Vẽ biểu đồ
+        },
+        error: function (error) {
+            console.error("Không lấy được dữ liệu:", error);
+        }
+    });
+}
+
+// Gán sự kiện cho nút áp dụng bộ lọc
+document.getElementById('applyFilterButton').addEventListener('click', function () {
+    applyFilter(); // Gọi hàm mà không cần truyền tham số
+});
+
+// Hàm vẽ biểu đồ
+function drawLineChart(data) {
+    const ctx = document.getElementById('lineChart').getContext('2d');
+
+    const chartData = processChartData(data); // Xử lý dữ liệu cho biểu đồ
+    const labels = Array.from(new Set(data.map(item => item.ImportDate))).sort();
+
+    const datasets = Object.keys(chartData).map(product => ({
+        label: product,
+        data: labels.map(date => {
+            const entry = chartData[product].find(item => item.date === date);
+            return entry ? entry.quantity : 0;
+        }),
+        borderColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.8)`,
+        backgroundColor: `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.5)`, // Màu trong hộp
+        borderWidth: 2,
+        tension: 0.3
+    }));
+
+    if (window.myChart) {
+        window.myChart.destroy(); // Hủy biểu đồ cũ nếu tồn tại
+    }
+
+    window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 30, // Khoảng cách từ hộp chú thích đến biểu đồ
+                    left: 50,
+                    right: 10,
+                    bottom: 10
+                }
+            },
+            plugins: {
+                legend: { 
+                    position: 'right', // Đặt hộp chú thích ở bên phải
+                    labels: {
+                        boxWidth: 60, 
+                        boxHeight: 30, 
+                        padding: 20,  
+                        usePointStyle: false, // Tắt kiểu chấm để giữ hình chữ nhật
+                    }
+                },
+                title: { 
+                    display: true, 
+                    text: 'Products are in stock from time to time',
+                    padding: {
+                        top: 20,  // Khoảng cách từ tiêu đề đến biểu đồ
+                        bottom: 50  // Khoảng cách từ tiêu đề đến cạnh trên của biểu đồ
+                    },
+                    font: {
+                        size: 18,  // Kích thước chữ tiêu đề (bạn có thể thay đổi theo yêu cầu)
+                        weight: 'bold',  // Định dạng chữ (có thể dùng 'normal', 'bold', v.v.)
+                        family: "'Helvetica Neue', 'Arial', sans-serif"  // Phông chữ
+                    }
+                }
+
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Import Date' }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Stock Quantity' }
+                }
+            }
+        }
+    });
+}
+
+
+
+// Hàm xử lý dữ liệu
+function processChartData(data) {
+    const groupedData = {};
+    data.forEach(item => {
+        const product = item.ProductName;
+        const date = item.ImportDate;
+        const quantity = item.TrueQuantity;
+
+        if (!groupedData[product]) {
+            groupedData[product] = [];
+        }
+        groupedData[product].push({ date, quantity });
+    });
+
+    Object.keys(groupedData).forEach(product => {
+        groupedData[product].sort((a, b) => new Date(a.date) - new Date(b.date));
+    });
+
+    return groupedData;
+}
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>

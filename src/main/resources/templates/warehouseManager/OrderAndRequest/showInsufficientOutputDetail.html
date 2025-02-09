@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Request Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href=@{/css/showOrderInWarehouseDetail.css}>
+</head>
+<body>
+
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Order Request Details</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Order Request Details</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Order Request Information</h3>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="table-container">
+
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td th:text="${request.name}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Name</th>
+                                            <td th:text="${#temporals.format(request.date, 'yyyy-MM-dd')}"></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Status</th>
+                                            <td th:text="${request.statusRequest}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                                <table class="table table-bordered table-sm mt-3">
+                                    <thead>
+                                        <tr>
+                                            <th>Product ID</th>
+                                            <th>Unit</th>
+                                            <th>Quantity requested</th>
+                                            <th>Quantity exported</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="detail : ${details}">
+                                            <td>
+                                                <span th:text="${detail.productName}"></span>
+                                            </td>
+                                            <td>
+                                            	<span th:text="${detail.unit_name}"></span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${detail.quantity_requested}"></span>
+                                            </td>
+                                            <td>
+                                                <span th:text="${detail.quantity_exported}"></span>
+                                            </td>                                            
+                                            <td>
+                                                <span th:text="${detail.status}"></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <a href="/warehouseManager/showOrderAndRequest" class="btn btn-primary">Back to List</a>
+                                    <div style="display: inline;">
+								        <a th:href="@{/warehouseManager/showAddWarehouseRelesenote(employeeId=${employeeId}, requestId=${requestId})}"
+								           class="btn btn-primary"
+								           th:classappend="${request.statusRequest == 'waiting for shipping' ? ' disabled' : ''}" 
+								           th:attr="disabled=${request.statusRequest == 'waiting for shipping' ? 'true' : null}">Create slip</a>
+								    </div>
+								    <div style="display: inline;">
+							        <a th:href="@{/warehouseManager/showAddAllWarehouseRelesenote(employeeId=${employeeId}, requestId=${requestId}, name=${request.name})}" 
+							           class="btn btn-primary"
+							           th:classappend="${request.statusRequest == 'waiting for shipping' ? ' disabled' : (request.statusRequest == 'Processing' ? ' disabled' : '')}"
+							           th:attr="disabled=${request.statusRequest == 'waiting for shipping' || request.statusRequest == 'Processing' ? 'true' : null}">Create All slip</a>
+							    </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

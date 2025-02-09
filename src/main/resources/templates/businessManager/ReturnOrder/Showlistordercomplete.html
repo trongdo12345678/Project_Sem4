@@ -1,0 +1,302 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Return orders</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Return orders</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="card">
+				<div class="card-header">
+					<h4>Processing Return Orders</h4>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover">
+							<thead class="thead-light">
+								<tr>
+									<th>#</th>
+									<th>Order Info</th>
+									<th>Return Date</th>
+									<th>Customer</th>
+									<th>Total Amount</th>
+									<th>Status</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="return, iterStat : ${returnOrders}"
+									style="cursor: pointer;">
+									<td
+										th:text="${(pv.page_current - 1) * pv.page_size + iterStat.count}"></td>
+									<td>
+										<div>
+											Order ID: <span th:text="${return.order.orderID}"></span>
+										</div> <small class="text-muted"
+										th:text="${#temporals.format(return.order.date, 'dd-MM-yyyy')}"></small>
+									</td>
+									<td
+										th:text="${#temporals.format(return.returnDate, 'dd-MM-yyyy')}"></td>
+									<td>
+										<div th:text="${return.order.cus_Name}"></div> <small
+										class="text-muted" th:text="${return.order.phone}"></small>
+									</td>
+									<td>
+										<div>
+											Total: $<span
+												th:text="${#numbers.formatDecimal(return.totalAmount, 1, 2)}"></span>
+										</div> <small class="text-muted"> Final: $<span
+											th:text="${#numbers.formatDecimal(return.finalAmount, 1, 2)}"></span>
+									</small>
+									</td>
+									<td><span class="badge badge-warning"
+										th:text="${return.status}"></span></td>
+									<td>
+										<button type="button" class="btn btn-sm btn-info"
+											data-toggle="modal" data-target="#returnModal"
+											th:onclick="'showReturnDetails(' + ${return.id} + ')'">
+											<i class="fas fa-eye"></i> View
+										</button>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-12">
+				<nav th:if="${pv.total_page > 1}">
+					<!-- Only show the pagination if there's more than one page -->
+					<ul class="pagination justify-content-center">
+						<!-- First Page -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlistcomplete(cp=1)}"
+							title="First page">&laquo;</a></li>
+
+						<!-- Previous Page -->
+						<li class="page-item" th:if="${pv.page_current > 1}"><a
+							class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlistcomplete(cp=${pv.page_current - 1})}"
+							title="Previous page">&lt;</a></li>
+
+						<!-- Page Number Links -->
+						<li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+							th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+							th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+							<a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlistcomplete(cp=${i + 1})}"
+							th:text="${i + 1}"></a>
+						</li>
+
+						<!-- Next Page -->
+						<li class="page-item" th:if="${pv.page_current < pv.total_page}">
+							<a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlistcomplete(cp=${pv.page_current + 1})}"
+							title="Next page">&gt;</a>
+						</li>
+
+						<!-- Last Page -->
+						<li class="page-item" th:if="${pv.total_page > 1}"><a
+							class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlistcomplete(cp=${pv.total_page})}"
+							title="Last page">&raquo;</a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</section>
+</div>
+<div class="modal fade" id="returnModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Return Order Details</h5>
+				<button type="button" class="close" data-dismiss="modal">
+					<span>&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!-- Order & Customer Info Section -->
+				<div id="orderInfoSection"></div>
+
+				<!-- Return Info Section -->
+				<div id="returnInfoSection"></div>
+
+				<!-- Return Details Table -->
+				<div class="row mb-3">
+					<div class="col-12">
+						<h6>Return Details</h6>
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>Product</th>
+									<th>Quantity</th>
+									<th>Amount</th>
+									<th>Reason</th>
+								</tr>
+							</thead>
+							<tbody id="returnDetailsTable">
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<!-- Employee Section -->
+				<div id="employeeSection"></div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/ShowOrderRequest.js}"></script>
+<script>
+  function getStatusBadge(status) {
+	    switch(status.toLowerCase()) {
+	        case 'accepted':
+	            return 'success';
+	        case 'rejected':
+	            return 'danger';
+	        case 'processing':
+	            return 'warning';
+	        case 'completed':
+	            return 'primary';
+	        case 'cancelled':
+	            return 'secondary';
+	        default:
+	            return 'info';
+	    }
+	}
+
+	function formatDate(dateString) {
+	    if (!dateString) return 'N/A';
+	    const date = new Date(dateString);
+	    return date.toLocaleDateString('en-GB');
+	}
+
+	function formatCurrency(amount) {
+	    return amount ? `$${amount.toFixed(2)}` : '$0.00';
+	}
+
+	function showReturnDetails(returnId) {
+	    $.ajax({
+	        url: '/businessManager/returnorder/getReturnDetails',
+	        type: 'GET',
+	        data: { id: returnId },
+	        success: function(data) {
+	            console.log('Return Data:', data); // For debugging
+
+	            // Order & Customer Info
+	            let orderInfoHtml = `
+	                <div class="row mb-3">
+	                    <div class="col-md-6">
+	                        <h6>Order Information</h6>
+	                        <p><strong>Order ID:</strong> ${data.order.orderID}</p>
+	                        <p><strong>Order Date:</strong> ${formatDate(data.order.date)}</p>
+	                        <p><strong>Order Status:</strong> ${data.order.status}</p>
+	                    </div>
+	                    <div class="col-md-6">
+	                        <h6>Customer Information</h6>
+	                        <p><strong>Name:</strong> ${data.order.cus_Name || 'N/A'}</p>
+	                        <p><strong>Phone:</strong> ${data.order.phone || 'N/A'}</p>
+	                        <p><strong>Address:</strong> ${data.order.address || 'N/A'}</p>
+	                    </div>
+	                </div>
+	            `;
+	            $('#orderInfoSection').html(orderInfoHtml);
+
+	            // Return Info
+	            let returnInfoHtml = `
+	                <div class="row mb-3">
+	                    <div class="col-md-6">
+	                        <h6>Return Information</h6>
+	                        <p><strong>Return Status:</strong> 
+	                           <span class="badge badge-${getStatusBadge(data.status)}">${data.status}</span>
+	                        </p>
+	                        <p><strong>Return Date:</strong> ${formatDate(data.returnDate)}</p>
+	                        <p><strong>Total Amount:</strong> ${formatCurrency(data.totalAmount)}</p>
+	                        <p><strong>Discount Amount:</strong> ${formatCurrency(data.discountAmount)}</p>
+	                        <p><strong>Final Amount:</strong> ${formatCurrency(data.finalAmount)}</p>
+	                    </div>
+	                    <div class="col-md-6">
+	                        <h6>Additional Information</h6>
+	                        <p><strong>Note:</strong> ${data.note || 'N/A'}</p>
+	                        <p><strong>Message:</strong> ${data.message || 'N/A'}</p>
+	                    </div>
+	                </div>
+	            `;
+	            $('#returnInfoSection').html(returnInfoHtml);
+
+	            // Return Details Table
+	            let detailsHtml = '';
+            if (data.returnDetails && data.returnDetails.length > 0) {
+                data.returnDetails.forEach(detail => {
+                    console.log('Detail:', detail); // Kiểm tra từng detail
+                    detailsHtml += `
+                        <tr>
+                            <td>${detail.productName || 'N/A'}</td>
+                            <td>${detail.quantity}</td>
+                            <td>${formatCurrency(detail.amount)}</td>
+                            <td>${detail.reason || 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                detailsHtml = '<tr><td colspan="4" class="text-center">No return details available</td></tr>';
+            }
+            $('#returnDetailsTable').html(detailsHtml);
+
+	            // Employee Info (if exists)
+	            if (data.employee) {
+	                let employeeHtml = `
+	                    <div class="alert alert-secondary">
+	                        <h6><i class="fas fa-user"></i> Processed by:</h6>
+	                        <div class="mt-2">
+	                            <p class="mb-1"><strong>Name:</strong> ${data.employee.first_name} ${data.employee.last_name}</p>
+	                            <p class="mb-1"><strong>Phone:</strong> ${data.employee.phone || 'N/A'}</p>
+	                            <p class="mb-1"><strong>Role:</strong> ${data.employee.role_name || 'N/A'}</p>
+	                            <p class="mb-0 mt-2">
+	                                <i class="fas fa-info-circle"></i> 
+	                                <small class="text-muted">Contact this employee for any questions about this return order.</small>
+	                            </p>
+	                        </div>
+	                    </div>
+	                `;
+	                $('#employeeSection').html(employeeHtml);
+	            } else {
+	                $('#employeeSection').empty();
+	            }
+
+	            // Show the modal
+	            $('#returnModal').modal('show');
+	        },
+	        error: function(xhr, status, error) {
+	            console.error('Error fetching return details:', error);
+	            alert('Error loading return order details. Please try again.');
+	        }
+	    });
+	}
+  </script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+</html>
+

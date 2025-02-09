@@ -1,0 +1,301 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Return orders</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Return orders</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="card">
+				<div class="card-header">
+					<h4>Return Order Detail #[[${returnOrder.id}]]</h4>
+					<span th:text="${returnOrder.status}"
+						th:class="${
+                    returnOrder.status == 'Processing' ? 'badge badge-warning' : 
+                    returnOrder.status == 'Accepted' ? 'badge badge-success' : 
+                    returnOrder.status == 'Completed' ? 'badge badge-success' : 
+                    returnOrder.status == 'Cancelled' ? 'badge badge-danger' : 
+                    returnOrder.status == 'Rejected' ? 'badge badge-danger' : ''
+                }">
+					</span>
+				</div>
+
+				<div class="card-body">
+					<!-- Order Information -->
+					<div class="row mb-4">
+
+						<div class="col-md-6">
+							<h5>Order Information</h5>
+							<p>
+								<strong>Order ID:</strong> [[${returnOrder.order.orderID}]]
+							</p>
+							<p>
+								<strong>Order Date:</strong>
+								[[${#temporals.format(returnOrder.order.date, 'dd-MM-yyyy')}]]
+							</p>
+							<p>
+								<strong>Return Date:</strong>
+								[[${#temporals.format(returnOrder.returnDate, 'dd-MM-yyyy')}]]
+							</p>
+						</div>
+						<div class="col-md-6">
+							<h5>Customer Information</h5>
+							<p>
+								<strong>Name:</strong> [[${returnOrder.order.cus_Name}]]
+							</p>
+							<p>
+								<strong>Phone:</strong> [[${returnOrder.order.phone}]]
+							</p>
+							<p>
+								<strong>Address:</strong> [[${returnOrder.order.address}]]
+							</p>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-6">
+							<div class="alert alert-info mb-3"
+								th:if="${returnOrder.message != null && !returnOrder.message.empty}">
+								<i class="fas fa-info-circle"></i> <strong>Message from
+									Seller:</strong>
+								<p class="mb-0 mt-1" th:text="${returnOrder.message}"></p>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="alert alert-secondary mb-3"
+								th:if="${returnOrder.employee != null}">
+								<i class="fas fa-user"></i> <strong>Processed by:</strong>
+								<p class="mb-0 mt-1"
+									th:text="${returnOrder.employee.first_name + ' ' + returnOrder.employee.last_name}"></p>
+							</div>
+						</div>
+					</div>
+					<!-- Return Items -->
+					<h5>Return Items</h5>
+					<div class="table-responsive">
+						<table class="table table-bordered">
+							<thead class="thead-light">
+								<tr>
+									<th>#</th>
+									<th>Product</th>
+									<th>Quantity</th>
+									<th>Amount</th>
+									<th>Reason</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="detail, iterStat : ${returnOrder.returnDetails}">
+									<td th:text="${iterStat.count}"></td>
+									<td th:text="${detail.productName}"></td>
+									<td th:text="${detail.quantity}"></td>
+									<td>$[[${#numbers.formatDecimal(detail.amount, 1, 2)}]]</td>
+									<td th:text="${detail.reason}"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Totals -->
+					<div class="row justify-content-end mt-4">
+						<div class="col-md-4">
+							<table class="table table-bordered">
+								<tr>
+									<th>Total Amount:</th>
+									<td>$[[${#numbers.formatDecimal(returnOrder.totalAmount,
+										1, 2)}]]</td>
+								</tr>
+								<tr>
+									<th>Discount:</th>
+									<td>$[[${#numbers.formatDecimal(returnOrder.discountAmount,
+										1, 2)}]]</td>
+								</tr>
+								<tr class="table-primary">
+									<th>Final Amount:</th>
+									<td>$[[${#numbers.formatDecimal(returnOrder.finalAmount,
+										1, 2)}]]</td>
+								</tr>
+							</table>
+						</div>
+					</div>
+
+					<!-- Note -->
+					<div class="mt-4">
+						<h5>Note:</h5>
+						<p class="border p-3 bg-light">[[${returnOrder.note}]]</p>
+					</div>
+
+					<!-- Action Buttons -->
+
+
+					<!-- Status Button for non-Processing status -->
+					<div class="d-flex justify-content-end mt-4">
+						<!-- Luôn hiện cả 2 nút, chỉ disable tùy theo status -->
+						<button class="btn btn-success mr-2" data-toggle="modal"
+							data-target="#acceptModal"
+							th:disabled="${returnOrder.status == 'Accepted' || returnOrder.status == 'Completed' || returnOrder.status == 'Cancelled'}"
+							th:classappend="${returnOrder.status == 'Accepted' || returnOrder.status == 'Completed' || returnOrder.status == 'Cancelled' ? 'opacity-50' : ''}">
+							<i class="fas fa-check"></i> Accept Return
+						</button>
+						<button class="btn btn-danger" data-toggle="modal"
+							data-target="#rejectModal"
+							th:disabled="${returnOrder.status != 'Processing'}"
+							th:classappend="${returnOrder.status != 'Processing' ? 'opacity-50' : ''}">
+							<i class="fas fa-times"></i> Reject Return
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+
+<div class="modal fade" id="acceptModal" tabindex="-1" role="dialog"
+	aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Accept Return Order</h5>
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<p>Please provide instructions for the return process:</p>
+				<div class="form-group">
+					<label for="acceptMessage">Return Instructions:</label>
+					<textarea class="form-control" id="acceptMessage" rows="3" required
+						placeholder="Example: Please package the items securely and send to our warehouse at..."></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-success"
+					onclick="acceptReturn()">
+					<i class="fas fa-check"></i> Confirm Accept
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="returnOrderId" th:value="${returnOrder.id}">
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog"
+	aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Reject Return Order</h5>
+				<button type="button" class="close" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+
+				<p>Please provide reason for rejection:</p>
+				<div class="form-group">
+					<label for="rejectMessage">Rejection Reason:</label>
+					<textarea class="form-control" id="rejectMessage" rows="3" required></textarea>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-danger"
+					onclick="rejectWithReason()">
+					<i class="fas fa-times"></i> Confirm Reject
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Add this JavaScript for handling reject with reason -->
+<script>
+	function acceptReturn() {
+		const message = document.getElementById('acceptMessage').value;
+		if (!message.trim()) {
+			alert('Please provide return instructions');
+			return;
+		}
+
+		const returnOrderId = document.getElementById('returnOrderId').value;
+
+		$
+				.ajax({
+					url : '/businessManager/returnorder/accept',
+					type : 'POST',
+					data : {
+						id : returnOrderId,
+						message : message
+					},
+					success : function(response) {
+						if (response.success) {
+							$('#acceptModal').modal('hide');
+							window.location.href = response.redirectUrl;
+						} else {
+							alert('Failed to accept return order: '
+									+ response.message);
+						}
+					},
+					error : function(xhr, status, error) {
+						alert('Error occurred while accepting return order');
+					}
+				});
+	}
+
+	function rejectWithReason() {
+		const message = document.getElementById('rejectMessage').value;
+		if (!message.trim()) {
+			alert('Please provide a reason for rejection');
+			return;
+		}
+
+		const returnOrderId = document.getElementById('returnOrderId').value;
+
+		$
+				.ajax({
+					url : '/businessManager/returnorder/reject',
+					type : 'POST',
+					data : {
+						id : returnOrderId,
+						message : message
+					},
+					success : function(response) {
+						if (response.success) {
+							$('#rejectModal').modal('hide');
+							window.location.href = response.redirectUrl;
+						} else {
+							alert('Failed to reject return order: '
+									+ response.message);
+						}
+					},
+					error : function(xhr, status, error) {
+						alert('Error occurred while rejecting return order');
+					}
+				});
+	}
+</script>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/ShowOrderRequest.js}"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+</html>
+

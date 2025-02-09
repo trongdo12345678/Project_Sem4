@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+<style>
+		.notification {
+			display:none;
+		    position: fixed;
+		    top: 20px; /* khoảng cách từ trên */
+		    right: 20px; /* khoảng cách từ bên phải */
+		    background-color: #FFD333; /* màu nền */
+		    color: black; /* màu chữ */
+		    padding: 15px; /* khoảng cách bên trong */
+		    border-radius: 5px; /* bo góc */
+		    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* đổ bóng */
+		    transform: translateX(100%); 
+		    opacity: 0;
+		    z-index: 1000;
+		    animation : slideleft 4s;
+		}
+		@keyframes slideleft{
+			0%{
+			transform: translateX(100%); 
+			opacity: 0;
+			}
+			50%{
+			transform: translateX(0); 
+			opacity: 1;
+			}
+			100%{
+			transform: translateX(100%); 
+			opacity: 0;
+			}
+		}
+		
+		
+		
+</style>
+<body>
+  <div th:replace="~{customer/layout/header_customer}"></div>
+
+   
+    <!-- Breadcrumb Start -->
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <div class="col-12">
+                <nav class="breadcrumb bg-light mb-30">
+                    <a class="breadcrumb-item text-dark" href="/">Home</a>
+                    <span class="breadcrumb-item active">Shop</span>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <!-- Breadcrumb End -->
+
+
+    <!-- Shop Start -->
+    <div class="container-fluid">
+        <div class="row px-xl-5">
+            <!-- Shop Sidebar Start -->
+            <div class="col-lg-3 col-md-4">
+                <!-- Price Start -->
+                <h5 class="section-title position-relative text-uppercase mb-3"><span class="bg-secondary pr-3">Filter by brand and category</span></h5>
+				<div class="bg-light p-4 mb-30">
+				    <form th:action="@{/shoppingpage/filter}" method="post"> <!-- Change to your actual endpoint -->
+					    <!-- Brand Filter -->
+					    <h5 class="section-title position-relative text-uppercase mb-3">
+					        <span class="bg-secondary pr-3">Filter by brand</span>
+					    </h5>
+					    <div class="bg-light p-4 mb-30">
+					        <div th:each="item : ${brands}" class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+								<input type="checkbox" class="custom-control-input"
+									th:id="'brand-' + ${item.id}" th:name="'brands'"
+									th:value="${item.id}"
+									th:checked="${#lists.contains(selectedBrands, item.id)}">
+								<!-- Check if this brand is in the selected brands -->
+					            <label class="custom-control-label" 
+					                   th:text="${item.name}" 
+					                   th:for="'brand-' + ${item.id}"></label>
+					        </div>
+					    </div>
+					
+					    <!-- Category Filter -->
+					    <h5 class="section-title position-relative text-uppercase mb-3">
+					        <span class="bg-secondary pr-3">Filter by category</span>
+					    </h5>
+					    <div class="bg-light p-4 mb-30">
+					        <div th:each="item : ${categorys}" class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-3">
+					            <input type="checkbox" 
+					                   class="custom-control-input" 
+					                   th:id="'category-' + ${item.id}" 
+					                   th:name="'categories'" 
+					                   th:value="${item.id}"
+					                   th:checked="${#lists.contains(selectedCategories, item.id)}"> <!-- Check if this category is in the selected categories -->
+					            <label class="custom-control-label" 
+					                   th:text="${item.name}" 
+					                   th:for="'category-' + ${item.id}"></label>
+					        </div>
+					    </div>
+					
+					    <!-- Submit Button -->
+					    <div class="text-center">
+					     <a href="/shoppingpage/reset" class="btn btn-primary">Clear</a>
+					        <button type="submit" class="btn btn-primary">Apply Filters</button>
+					        
+					    </div>
+					</form>
+
+
+
+				</div>
+            </div>
+            <!-- Shop Sidebar End -->
+
+
+            <!-- Shop Product Start -->
+            <div class="col-lg-9 col-md-8">
+           
+                <div class="row pb-3">
+                    <div class="col-12 pb-1">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                         <span th:if="${stringsearch != null}" th:text="'Search for &quot;' + ${stringsearch} + '&quot;'"></span>
+                        </div>
+                    </div>
+                     <div th:if="${#lists.isEmpty(pronewar)}" class="col-12 text-center">
+        					<h4>No products found</h4>
+    				</div>
+                    <div th:each="item : ${pronewar}" class="col-lg-3 col-md-4 col-sm-6 pb-1">
+    <div class="product-item bg-light mb-4">
+        <div class="product-img position-relative overflow-hidden">
+            <img class="img-fluid w-100" th:src="'/uploads/' + ${item.Img}" alt="">
+            <div class="product-action">
+                <a class="btn btn-outline-dark btn-square" th:if="${item.status != 'OutOfStock'}" th:onclick="'addToCart(' + ${item.Id} + ')'">
+                    <i class="fa fa-shopping-cart"></i>
+                </a>
+                <span th:if="${item.Status == 'OutOfStock'}" style="font-weight:500;color:black;font-size:20;" class="out-of-stock-message">Out of stock</span>
+            </div>
+        </div>
+        <div class="text-center py-4">
+            <a class="h6 text-decoration-none text-truncate" th:href="@{'/detailproduct/product?id=' + ${item.Id}}" th:text="${item.Product_name}"></a>
+            
+            <!-- Thêm Brand và Category -->
+            <div class="d-flex align-items-center justify-content-center mt-2">
+                <span class="badge badge-info mr-2" th:text="${item.Brand_name}"></span>
+                <span class="badge badge-secondary" th:text="${item.Category_name}"></span>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center mt-2">
+                <h5 th:text="'$' + ${item.Price}"></h5>
+                <!-- <h6 class="text-muted ml-2"><del>$123.00</del></h6> -->
+            </div>
+            <div class="d-flex align-items-center justify-content-center mb-1">
+                <div class="text-primary mr-2">
+                    <th:block th:with="rating=${item.averageRating}">
+                        <!-- Rating từ 1-5 -->
+                        <th:block th:if="${rating >= 1}"><small class="fas fa-star"></small></th:block>
+                        <th:block th:if="${rating >= 0.5 && rating < 1}"><small class="fas fa-star-half-alt"></small></th:block>
+                        <th:block th:if="${rating < 0.5}"><small class="far fa-star"></small></th:block>
+                        
+                        <th:block th:if="${rating >= 2}"><small class="fas fa-star"></small></th:block>
+                        <th:block th:if="${rating >= 1.5 && rating < 2}"><small class="fas fa-star-half-alt"></small></th:block>
+                        <th:block th:if="${rating < 1.5}"><small class="far fa-star"></small></th:block>
+                        
+                        <th:block th:if="${rating >= 3}"><small class="fas fa-star"></small></th:block>
+                        <th:block th:if="${rating >= 2.5 && rating < 3}"><small class="fas fa-star-half-alt"></small></th:block>
+                        <th:block th:if="${rating < 2.5}"><small class="far fa-star"></small></th:block>
+                        
+                        <th:block th:if="${rating >= 4}"><small class="fas fa-star"></small></th:block>
+                        <th:block th:if="${rating >= 3.5 && rating < 4}"><small class="fas fa-star-half-alt"></small></th:block>
+                        <th:block th:if="${rating < 3.5}"><small class="far fa-star"></small></th:block>
+                        
+                        <th:block th:if="${rating >= 5}"><small class="fas fa-star"></small></th:block>
+                        <th:block th:if="${rating >= 4.5 && rating < 5}"><small class="fas fa-star-half-alt"></small></th:block>
+                        <th:block th:if="${rating < 4.5}"><small class="far fa-star"></small></th:block>
+                    </th:block>
+                </div>
+                <small class="pt-1">
+                    (<span th:text="${item.totalFeedbacks}">0</span>)
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+                   <div class="col-12">
+					    <nav th:if="${pv.total_page > 1}"> <!-- Only show the pagination if there's more than one page -->
+					        <ul class="pagination justify-content-center">
+					            <!-- First Page -->
+					            <li class="page-item">
+					                <a class="page-link" th:href="@{/shoppingpage(cp=1)}" title="First page">&laquo;</a>
+					            </li>
+					
+					            <!-- Previous Page -->
+					            <li class="page-item" th:if="${pv.page_current > 1}">
+					                <a class="page-link" th:href="@{/shoppingpage(cp=${pv.page_current - 1})}" title="Previous page">&lt;</a>
+					            </li>
+					
+					            <!-- Page Number Links -->
+					            <li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+					                th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+					                th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+					                <a class="page-link" th:href="@{/shoppingpage(cp=${i + 1})}"
+					                   th:text="${i + 1}"></a>
+					            </li>
+					
+					            <!-- Next Page -->
+					            <li class="page-item" th:if="${pv.page_current < pv.total_page}">
+					                <a class="page-link" th:href="@{/shoppingpage(cp=${pv.page_current + 1})}" title="Next page">&gt;</a>
+					            </li>
+					
+					            <!-- Last Page -->
+					            <li class="page-item" th:if="${pv.total_page > 1}">
+					                <a class="page-link" th:href="@{/shoppingpage(cp=${pv.total_page})}" title="Last page">&raquo;</a>
+					            </li>
+					        </ul>
+					    </nav>
+					</div>
+
+
+                   
+                    
+                </div>
+            </div>
+            <!-- Shop Product End -->
+        </div>
+    </div>
+    <!-- Shop End -->
+   
+    <!-- Footer Start -->
+   <div th:replace="~{customer/layout/footer_customer}"></div>
+    <!-- Footer End -->
+<div id="cartNotification" class="notification" >
+    <p>The product has been added to the cart successfully!</p>
+</div>
+
+
+    <!-- Back to Top -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+function showNotification() {
+	const notification = document.getElementById('cartNotification');
+	// Đặt display thành none để ẩn thông báo
+    notification.style.display = 'none';
+    
+    // Đợi một chút trước khi hiển thị lại thông báo
+    setTimeout(() => {
+        notification.style.display = 'block'; // Thiết lập display thành block
+        notification.classList.add('show'); // Thêm class show để hiển thị animation
+    }, 10); // Thời gian chờ rất ngắn (10ms) để trình duyệt nhận thấy sự thay đổi
+    
+   
+}
+function addToCart(productId) {
+    $.ajax({
+        url: '/cart/addtocart',
+        type: 'POST',
+        data: {
+            id: productId
+        },
+        success: function(response) {
+           
+            try {
+                const jsonResponse = JSON.parse(response); 
+                if (jsonResponse.status === "false") {
+                    window.location.href = '/account/signin'; 
+                } else if (jsonResponse.status === "success") {
+                	showNotification()
+ 					resetsize()
+                } else if (jsonResponse.status === "failed") {
+                    alert("Failed to add product to cart.");
+                }
+            } catch (e) {
+                console.error("An error occurred while processing the response: ", e);
+                alert("An error occurred while adding product to cart.");
+            }
+        },
+        error: function(xhr) {
+            console.error("Error status: " + xhr.status); // In trạng thái lỗi
+            console.error("Error response: " + xhr.responseText); // In nội dung phản hồi
+            alert("An error occurred while adding product to cart.");
+        }
+    });
+}
+function resetsize() {
+    $.ajax({
+        url: '/cart/size',
+        type: 'POST',
+        success: function(response) {
+           
+            try {
+                const jsonResponse = JSON.parse(response);
+                const numberquantitycart = document.getElementById('numberquantitycart');
+                numberquantitycart.innerHTML=jsonResponse.status
+               
+            } catch (e) {
+            }
+        },
+        error: function(xhr) {
+        }
+    });
+}
+
+
+</script>
+
+
+</body>
+
+</html>

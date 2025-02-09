@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Order Request</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<!--     <link rel="stylesheet" th:href="@{/css/addAllWarehouseReleasenote.css}"> -->
+</head>
+<body>
+
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <section class="content">
+    <div class="container-fluid">
+        <div class="row">
+			<form th:action="@{/warehouseManager/addRelesenoteByOrder}" method="post"  enctype="multipart/form-data" class="w-100">
+			    <div class="card card-primary">
+			        <div class="card-header">
+			            <h3 class="card-title">Add Warehouse Release Note</h3>
+			        </div>
+                        <div class="card-body">
+                            <div class="table-container" style="display: flex; gap: 20px;">
+
+                                <table class="table table-bordered table-sm mt-3" style="flex: 1 1 50%; width: 50%; height: 50%;">
+                                    <tbody>
+                                        <tr>
+                                            <th>Order Id:</th>
+                                        <td><input type="text" name="orderID" th:value="${order.orderID}" class="form-control" readonly /></td>
+                                        	
+                                        </tr>  
+                                        
+                                        <tr>
+                                        <th>Status:</th>
+                                        <td><input type="text" id="statusWr" name="statusWr" value="Completed" class="form-control" readonly></td>
+                                        </tr>                                     
+                                    </tbody>
+                                </table>
+                                <input type="hidden" id="employeeId" name="employeeId" th:value="${employeeId}">
+								<input type="hidden" id="id" name="id" th:value="${id}">
+
+							<table class="table table-bordered table-sm mt-3">
+							    <thead>
+							        <tr>
+							            <th>Product ID</th>
+							            <th>Unit</th>
+							            <th>Quantity</th>
+							            <th>Status</th>
+							        </tr>
+							    </thead>
+							    <tbody>
+							                <tr th:each="detail : ${details}">
+									            <td>
+									                <input type="hidden" name="id_product[]" th:value="${detail.product_Id}" />
+									                <input type="text" th:value="${detail.product_name}" class="form-control" readonly />
+									            </td>
+									            <td>
+									            	<span th:text = "${detail.unit_name}" class="form-control" readonly></span>
+									            </td>
+									            <td>
+									                <input type="text" name="quantity_Ex[]" th:value="${detail.quantity}" class="form-control" readonly />
+									            </td>
+									            <td>
+									                <input type="text" name="status[]"  value="Completed" class="form-control" readonly />
+									            </td>
+									        </tr>
+							    </tbody>
+							</table>
+
+                            </div>
+                        </div>
+			        <div class="card-footer">
+			            <button type="submit" class="btn btn-primary">Submit</button>
+			        </div>
+			    </div>
+			</form>
+
+        </div>
+    </div>
+</section>
+
+
+</div>
+
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

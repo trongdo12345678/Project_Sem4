@@ -1,0 +1,291 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<style>
+/* Tăng khoảng cách giữa các ô trong bảng */
+
+/* Phân trang chung */
+#pagination {
+	text-align: center;
+	margin-top: 20px;
+	font-family: Arial, sans-serif;
+}
+
+/* Nút phân trang (Previous, Next, số trang) */
+#pagination button {
+	padding: 0px 11px;
+	margin: 0 2px;
+	border: 1px solid #ddd;
+	background-color: #f8f9fa;
+	cursor: pointer;
+	border-radius: 4px;
+	font-size: 16px;
+	color: #007bff;
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Nút phân trang đang được chọn */
+#pagination button.selected {
+	background-color: #007bff;
+	color: white;
+	font-weight: bold;
+}
+
+/* Nút Previous và Next */
+#pagination button#prev, #pagination button#next {
+	background-color: #e9ecef;
+	font-weight: bold;
+}
+
+#pagination button#prev:hover, #pagination button#next:hover {
+	background-color: #007bff;
+	color: white;
+}
+
+/* Nút disabled (không thể nhấn) */
+#pagination button:disabled {
+	cursor: not-allowed;
+	background-color: #FFFFFF;
+	color: #ccc;
+}
+
+/* Khoảng cách giữa các nút */
+#page-numbers button {
+	padding: 1px 11px;
+	margin: 10px 4px;
+}
+</style>
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header"
+							style="margin-top: 15px; background-color: white; padding: 10px;">
+							<h3 class="card-title"
+								style="color: rgba(0, 0, 0, .5); font-size: 24px; font-weight: bold;">Order
+								List</h3>
+						</div>
+
+
+						<div class="card-body table-responsive p-0">
+							<table class="table table-bordered table-hover"
+								style="border: 1px solid #dee2e6;">
+								<thead>
+									<tr style="background-color: #f1f1f1;">
+										<th style="padding: 10px; text-align: center;">Order Id</th>
+										<th style="padding: 10px; text-align: center;">Customer
+											Name</th>
+										<th style="padding: 10px; text-align: center;">Phone</th>
+										<th style="padding: 10px; text-align: center;">Address</th>
+										<th style="padding: 10px; text-align: center;">Order Date</th>
+										<th style="padding: 10px; text-align: center;">Pay status</th>
+										<th style="padding: 10px; text-align: center;">Total
+											Amount</th>
+										<th style="padding: 10px; text-align: center;">Status</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr th:each="order : ${orders}">
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.OrderID}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.Cus_Name}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.Phone}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.Address}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span
+											th:text="${#temporals.format(order.Date, 'dd-MM-yyyy')}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.Pay_status}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="'$' + ${order.TotalAmount}"></span>
+										</td>
+										<td th:onclick="'showOrderDetails(' + ${order.Id} + ')'"
+											style="cursor: pointer; text-align: center; padding: 22px 10px;">
+											<span th:text="${order.Status}"></span>
+										</td>
+									</tr>
+								</tbody>
+
+							</table>
+							<!-- Phần phân trang -->
+							<div id="pagination"
+								style="text-align: center; margin-top: 20px; margin-bottom:20px;">
+								<button onclick="previousPage()" id="prev"
+									class="btn btn-primary" style="margin-right: -5px;">&lt;</button>
+								<div id="page-numbers" style="display: inline-block;"></div>
+								<button onclick="nextPage()" id="next" class="btn btn-primary"
+									style="margin-left: -5px;">&gt;</button>
+							</div>
+
+							<!-- Modal for Order Details -->
+							<!-- Modal for Order Details -->
+							<div class="modal fade" id="orderDetailsModal" tabindex="-1"
+								aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+								<div class="modal-dialog modal-lg">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="orderDetailsModalLabel">Order
+												Details</h5>
+											<button type="button" class="btn-close"
+												data-bs-dismiss="modal" aria-label="Close"></button>
+										</div>
+										<div id="order-details-container"></div>
+										
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<!-- Add Bootstrap CSS -->
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<!-- Add Bootstrap JS (for modal) -->
+<script
+	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+<script th:inline="javascript">
+
+        function showOrderDetails(orderId) {
+
+            // Gửi yêu cầu GET đến API để lấy chi tiết đơn hàng
+            fetch(`/businessManager/getOrderDetails?orderId=${orderId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); 
+            })
+            .then(data => {
+
+            	let orderDetailsHTML = "<table class='table table-bordered'><thead><tr><th>Product Name</th><th>Price</th><th>Image</th><th>Quantity</th></tr></thead><tbody>";
+
+            	data.forEach(detail => {
+            	    orderDetailsHTML += `<tr>
+            	        <td>${detail.product_name}</td>
+            	        <td>$${detail.price}</td>
+            	        <td><img src="/uploads/${detail.img}" alt="${detail.product_name}" style="width: 50px; height: 50px;"></td>
+            	        <td>${detail.quantity}</td>
+            	    </tr>`;
+            	});
+
+            	orderDetailsHTML += "</tbody></table>";
+
+
+                                  
+                // Kiểm tra nếu phần tử tồn tại trước khi thay đổi innerHTML
+                const detailsContainer = document.getElementById("order-details-container");
+                if (detailsContainer) {
+                    detailsContainer.innerHTML = orderDetailsHTML;
+
+                    // Mở modal sau khi cập nhật nội dung
+                    $('#orderDetailsModal').modal('show');
+                } else {
+                    console.error("order-details-container not found!");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching order details:", error);
+            });
+    }
+        //phan trang
+const rowsPerPage = 8; // Số dòng mỗi trang
+    const totalOrders = /*[[${orders.size()}]]*/ 20; // Dữ liệu tổng số đơn hàng từ Thymeleaf
+    let currentPage = 1;
+    let totalPages = Math.ceil(totalOrders / rowsPerPage);
+
+    function displayTablePage(page) {
+        const rows = document.querySelectorAll('tbody tr');
+        const startIndex = (page - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        // Ẩn tất cả các dòng
+        rows.forEach((row, index) => {
+            row.style.display = 'none';
+        });
+
+        // Hiển thị các dòng thuộc trang hiện tại
+        for (let i = startIndex; i < endIndex && i < rows.length; i++) {
+            rows[i].style.display = '';
+        }
+
+        // Cập nhật các nút điều hướng (Previous và Next)
+        document.getElementById('prev').disabled = (currentPage === 1);
+        document.getElementById('next').disabled = (currentPage === totalPages);
+        
+        // Cập nhật các số trang
+        updatePageNumbers();
+    }
+
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            displayTablePage(currentPage);
+        }
+    }
+
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            displayTablePage(currentPage);
+        }
+    }
+
+    function updatePageNumbers() {
+        const pageNumbersDiv = document.getElementById('page-numbers');
+        pageNumbersDiv.innerHTML = ''; // Xóa số trang hiện tại
+
+        const visiblePages = 3; // Số lượng trang hiển thị (trước và sau trang hiện tại)
+        const startPage = Math.max(1, currentPage - Math.floor(visiblePages / 2));
+        const endPage = Math.min(totalPages, currentPage + Math.floor(visiblePages / 2));
+
+        // Thêm dấu "..." trước trang đầu tiên
+        if (startPage > 1) {
+            pageNumbersDiv.innerHTML += `<button onclick="goToPage(1)">1</button> ... `;
+        }
+
+        // Thêm các số trang
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbersDiv.innerHTML += `<button onclick="goToPage(${i})" style="margin: 0 5px;">${i}</button>`;
+        }
+
+        // Thêm dấu "..." sau trang cuối cùng
+        if (endPage < totalPages) {
+            pageNumbersDiv.innerHTML += `... <button onclick="goToPage(${totalPages})">${totalPages}</button>`;
+        }
+    }
+
+    function goToPage(page) {
+        currentPage = page;
+        displayTablePage(currentPage);
+    }
+
+    // Hiển thị trang đầu tiên khi tải trang
+    displayTablePage(currentPage);
+                
+    </script>
+</html>

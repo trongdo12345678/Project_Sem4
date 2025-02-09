@@ -1,0 +1,800 @@
+<style>
+.form-control:disabled, .form-control[readonly] {
+	background-color: #e9ecef !important;
+	cursor: not-allowed;
+}
+
+.form-text {
+	font-size: 80%;
+	color: #6c757d;
+}
+
+.alert {
+	margin-bottom: 1rem;
+}
+
+.modal-lg {
+	max-width: 800px;
+}
+</style>
+<body xmlns:th="http://www.thymeleaf.org">
+	<script src="/plugins/jquery/jquery.min.js"></script>
+	<!-- Bootstrap 4 -->
+	<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<!-- AdminLTE App -->
+	<script src="/dist/js/adminlte.min.js"></script>
+	<!-- Header -->
+	<div th:replace="admin/layout/header_admin"></div>
+
+	<!-- Main Content -->
+	<div class="content-wrapper">
+		<!-- Content Header -->
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Discount Management</h1>
+					</div>
+					<div class="col-sm-6 text-right">
+						<button type="button" class="btn btn-primary" data-toggle="modal"
+							data-target="#addDiscountModal">Add New Discount</button>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div class="card-header">
+								<h3 class="card-title">Discount List</h3>
+							</div>
+							<div class="card-body">
+								<table class="table table-bordered">
+									<thead>
+										<tr>
+											<th>Code</th>
+											<th>Discount Percentage</th>
+											<th>Discount Amount</th>
+											<th>Expiry Date</th>
+											<th>Min Order Value</th>
+											<th>Max Discount</th>
+											<th>Status</th>
+											<th>Created By</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="coupon : ${coupons}">
+											<td th:text="${coupon.code}"></td>
+											<td
+												th:text="${coupon.discountPercentage != null ? coupon.discountPercentage + '%' : '-'}"></td>
+											<td
+												th:text="${coupon.discountAmount != null ? #numbers.formatDecimal(coupon.discountAmount, 0, 'COMMA', 0, 'POINT') + ' $' : '-'}"></td>
+											<td
+												th:text="${coupon.expiryDate != null ? #temporals.format(coupon.expiryDate, 'dd/MM/yyyy') : '-'}"></td>
+											<td
+												th:text="${coupon.minOrderValue != null ? #numbers.formatDecimal(coupon.minOrderValue, 0, 'COMMA', 0, 'POINT') + ' $' : '-'}"></td>
+											<td
+												th:text="${coupon.maxDiscountAmount != null ? #numbers.formatDecimal(coupon.maxDiscountAmount, 0, 'COMMA', 0, 'POINT') + ' $' : '-'}"></td>
+											<td th:text="${coupon.status}"></td>
+											<td
+												th:text="${coupon.employee != null ? coupon.employee.First_name + ' ' + coupon.employee.Last_name : '-'}"></td>
+											<td>
+												<button class="btn btn-sm btn-info"
+													th:onclick="'openEditModal(' + ${coupon.id} + ')'">
+													<i class="fas fa-edit"></i> Edit
+												</button>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+
+						</div>
+					</div>
+					<div class="col-12">
+						<nav th:if="${pv.total_page > 1}">
+							<!-- Only show the pagination if there's more than one page -->
+							<ul class="pagination justify-content-center">
+								<!-- First Page -->
+								<li class="page-item"><a class="page-link"
+									th:href="@{/admin/discount/showList(cp=1)}" title="First page">&laquo;</a></li>
+
+								<!-- Previous Page -->
+								<li class="page-item" th:if="${pv.page_current > 1}"><a
+									class="page-link"
+									th:href="@{/admin/discount/showList(cp=${pv.page_current - 1})}"
+									title="Previous page">&lt;</a></li>
+
+								<!-- Page Number Links -->
+								<li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+									th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+									th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+									<a class="page-link"
+									th:href="@{/admin/discount/showList(cp=${i + 1})}"
+									th:text="${i + 1}"></a>
+								</li>
+
+								<!-- Next Page -->
+								<li class="page-item" th:if="${pv.page_current < pv.total_page}">
+									<a class="page-link"
+									th:href="@{/admin/discount/showList(cp=${pv.page_current + 1})}"
+									title="Next page">&gt;</a>
+								</li>
+
+								<!-- Last Page -->
+								<li class="page-item" th:if="${pv.total_page > 1}"><a
+									class="page-link"
+									th:href="@{/admin/discount/showList(cp=${pv.total_page})}"
+									title="Last page">&raquo;</a></li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+
+	<div class="modal fade" id="addDiscountModal">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Add New Discount</h5>
+					<button type="button" class="close" data-dismiss="modal">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="addDiscountForm">
+						<div class="form-group">
+							<label for="addCode">Discount Code</label> <input type="text"
+								class="form-control" id="addCode" name="code" required>
+						</div>
+
+						<!-- Discount Type Selection -->
+						<div class="form-group">
+							<label>Discount Type</label>
+							<div class="custom-control custom-radio">
+								<input type="radio" id="addPercentageType"
+									name="addDiscountType" class="custom-control-input"
+									value="percentage" checked onchange="toggleAddDiscountFields()">
+								<label class="custom-control-label" for="addPercentageType">
+									Percentage Discount </label>
+							</div>
+							<div class="custom-control custom-radio">
+								<input type="radio" id="addAmountType" name="addDiscountType"
+									class="custom-control-input" value="amount"
+									onchange="toggleAddDiscountFields()"> <label
+									class="custom-control-label" for="addAmountType"> Fixed
+									Amount Discount </label>
+							</div>
+						</div>
+
+						<div class="row">
+							<!-- Percentage Discount Field -->
+							<div class="col-md-6">
+								<div class="form-group" id="addPercentageField">
+									<label for="addDiscountPercentage">Discount Percentage
+										(%)</label> <input type="number" class="form-control"
+										id="addDiscountPercentage" name="discountPercentage" min="0"
+										max="100" step="0.01">
+								</div>
+							</div>
+
+							<!-- Amount Discount Field -->
+							<div class="col-md-6">
+								<div class="form-group" id="addAmountField"
+									style="display: none;">
+									<label for="addDiscountAmount">Discount Amount ($)</label> <input
+										type="number" class="form-control" id="addDiscountAmount"
+										name="discountAmount" min="0" step="0.01">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="addMinOrderValue">Minimum Order Value ($)</label> <input
+										type="number" class="form-control" id="addMinOrderValue"
+										name="minOrderValue" min="0" step="0.01">
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="addMaxDiscountAmount">Maximum Discount
+										Amount ($)</label> <input type="number" class="form-control"
+										id="addMaxDiscountAmount" name="maxDiscountAmount" min="0"
+										step="0.01"> <small class="form-text text-muted">
+										Required for percentage discount. Will be set automatically
+										for fixed amount discount. </small>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="addExpiryDate">Expiry Date</label> <input
+										type="date" class="form-control" id="addExpiryDate"
+										name="expiryDate" required>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="form-group">
+									<label for="addStatus">Status</label> <select
+										class="form-control" id="addStatus" name="status" required>
+										<option value="Applicable">Applicable</option>
+										<option value="Not Applicable">Not Applicable</option>
+										<option value="Expired">Expired</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary" onclick="submitAdd()">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="editDiscountModal" class="modal fade" tabindex="-1"
+		role="dialog">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Edit Discount</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="editDiscountForm">
+						<input type="hidden" id="editDiscountId">
+						<div class="form-group">
+							<label for="editCode">Code</label> <input type="text"
+								class="form-control" id="editCode" required>
+						</div>
+						<div class="form-group">
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" id="editPercentageType"
+									name="editDiscountType" class="custom-control-input"> <label
+									class="custom-control-label" for="editPercentageType">Percentage</label>
+							</div>
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" id="editAmountType" name="editDiscountType"
+									class="custom-control-input"> <label
+									class="custom-control-label" for="editAmountType">Fixed
+									Amount</label>
+							</div>
+						</div>
+						<div id="editPercentageField" class="form-group"
+							style="display: none;">
+							<label for="editDiscountPercentage">Discount Percentage</label> <input
+								type="number" class="form-control" id="editDiscountPercentage"
+								min="0" max="100"> <label for="editMaxDiscountAmount">Max
+								Discount Amount</label> <input type="number" class="form-control"
+								id="editMaxDiscountAmount" min="0">
+						</div>
+						<div id="editAmountField" class="form-group"
+							style="display: none;">
+							<label for="editDiscountAmount">Discount Amount</label> <input
+								type="number" class="form-control" id="editDiscountAmount"
+								min="0">
+						</div>
+						<div class="form-group">
+							<label for="editExpiryDate">Expiry Date</label> <input
+								type="date" class="form-control" id="editExpiryDate" required>
+						</div>
+						<div class="form-group">
+							<label for="editMinOrderValue">Min Order Value</label> <input
+								type="number" class="form-control" id="editMinOrderValue"
+								min="0">
+						</div>
+						<div class="form-group">
+							<label for="editStatus">Status</label> <select
+								class="form-control" id="editStatus">
+								<option value="Applicable">Applicable</option>
+								<option value="Not Applicable">Not Applicable</option>
+								<option value="Expired">Expired</option>
+							</select>
+						</div>
+						<div id="editDiscountAlert" class="alert alert-warning"
+							style="display: none;">This discount has been used and
+							cannot be fully edited.</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary"
+						onclick="submitEdit()">Save changes</button>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Footer -->
+	<div th:replace="admin/layout/footer_admin"></div>
+
+	<!-- Scripts -->
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+	<script>
+	function validateAddForm() {
+	    const form = $('#addDiscountForm');
+	    const code = form.find('#addCode').val().trim();
+	    const expiryDate = new Date(form.find('#addExpiryDate').val());
+	    const today = new Date();
+	    const discountType = form.find('input[name="addDiscountType"]:checked').val();
+	    
+	    // Kiểm tra code trống
+	    if (!code) {
+	        alert('Please enter discount code');
+	        return false;
+	    }
+
+	    let deferred = $.Deferred();
+
+	    $.ajax({
+	        url: '/admin/discount/validatediscount',
+	        type: 'GET',
+	        data: { code: code },
+	        success: function(coupon) {
+	            if (coupon) {
+	                alert('This discount code already exists');
+	                deferred.resolve(false);
+	                return;
+	            }
+
+	            // Kiểm tra ngày hết hạn
+	            if (!form.find('#addExpiryDate').val()) {
+	                alert('Please select expiry date');
+	                deferred.resolve(false);
+	                return;
+	            }
+
+	            if (expiryDate <= today) {
+	                alert('Expiry date must be in the future');
+	                deferred.resolve(false);
+	                return;
+	            }
+
+	            // Kiểm tra giá trị giảm giá
+	            if (discountType === 'percentage') {
+	                const percentage = parseFloat(form.find('#addDiscountPercentage').val());
+	                if (!percentage || percentage <= 0 || percentage > 100) {
+	                    alert('Please enter a valid percentage between 0 and 100');
+	                    deferred.resolve(false);
+	                    return;
+	                }
+	                
+	                // Kiểm tra max discount amount bắt buộc khi giảm theo %
+	                const maxDiscount = parseFloat(form.find('#addMaxDiscountAmount').val());
+	                if (!maxDiscount || maxDiscount <= 0) {
+	                    alert('Maximum discount amount is required when using percentage discount');
+	                    deferred.resolve(false);
+	                    return;
+	                }
+	            } else {
+	                const amount = parseFloat(form.find('#addDiscountAmount').val());
+	                if (!amount || amount <= 0) {
+	                    alert('Please enter a valid discount amount');
+	                    deferred.resolve(false);
+	                    return;
+	                }
+	            }
+
+	            // Kiểm tra min order value (có thể null)
+	            const minOrderValue = form.find('#addMinOrderValue').val();
+	            if (minOrderValue && parseFloat(minOrderValue) < 0) {
+	                alert('Minimum order value cannot be negative');
+	                deferred.resolve(false);
+	                return;
+	            }
+
+	            deferred.resolve(true);
+	        },
+	        error: function(xhr, status, error) {
+	            console.error('Error validating discount code:', error);
+	            alert('Error checking discount code');
+	            deferred.resolve(false);
+	        }
+	    });
+
+	    return deferred.promise();
+	}
+
+		function validateEditForm() {
+		    const form = $('#editDiscountForm');
+		    const discountId = form.find('#editDiscountId').val();
+		    const code = form.find('#editCode').val().trim();
+		    const expiryDate = new Date(form.find('#editExpiryDate').val());
+		    const today = new Date();
+		    const isUsed = $('#editDiscountAlert').is(':visible');
+	
+		    // Nếu discount đã được sử dụng, chỉ validate status
+		    if (isUsed) {
+		        const status = $('#editStatus').val();
+		        if (!status) {
+		            alert('Please select a status');
+		            return false;
+		        }
+		        return true;
+		    }
+	
+		    let deferred = $.Deferred();
+	
+		    // Kiểm tra code trống
+		    if (!code) {
+		        alert('Please enter discount code');
+		        deferred.resolve(false);
+		        return deferred.promise();
+		    }
+	
+		    $.ajax({
+		        url: '/admin/discount/validatediscountid', // Sửa URL endpoint
+		        type: 'GET',
+		        data: { 
+		            code: code,
+		            id: discountId 
+		        },
+		        success: function(coupon) {
+		            if (coupon) {
+		                alert('This discount code already exists');
+		                deferred.resolve(false);
+		                return;
+		            }
+	
+		            // Kiểm tra ngày hết hạn
+		            if (!form.find('#editExpiryDate').val()) {
+		                alert('Please select expiry date');
+		                deferred.resolve(false);
+		                return;
+		            }
+	
+		            if (expiryDate <= today) {
+		                alert('Expiry date must be in the future');
+		                deferred.resolve(false);
+		                return;
+		            }
+	
+		            // Kiểm tra giá trị giảm giá
+		            const discountPercentage = parseFloat(form.find('#editDiscountPercentage').val());
+		            const discountAmount = parseFloat(form.find('#editDiscountAmount').val());
+		            
+		            if (discountPercentage !== null && !isNaN(discountPercentage)) {
+		                if (discountPercentage <= 0 || discountPercentage > 100) {
+		                    alert('Please enter a valid percentage between 0 and 100');
+		                    deferred.resolve(false);
+		                    return;
+		                }
+		                
+		                // Kiểm tra max discount amount bắt buộc khi giảm theo %
+		                const maxDiscount = parseFloat(form.find('#editMaxDiscountAmount').val());
+		                if (!maxDiscount || maxDiscount <= 0) {
+		                    alert('Maximum discount amount is required when using percentage discount');
+		                    deferred.resolve(false);
+		                    return;
+		                }
+		            } else if (discountAmount !== null && !isNaN(discountAmount)) {
+		                if (discountAmount <= 0) {
+		                    alert('Please enter a valid discount amount');
+		                    deferred.resolve(false);
+		                    return;
+		                }
+		            } else {
+		                alert('Please enter either discount percentage or amount');
+		                deferred.resolve(false);
+		                return;
+		            }
+	
+		            // Kiểm tra min order value (có thể null)
+		            const minOrderValue = form.find('#editMinOrderValue').val();
+		            if (minOrderValue && parseFloat(minOrderValue) < 0) {
+		                alert('Minimum order value cannot be negative');
+		                deferred.resolve(false);
+		                return;
+		            }
+	
+		            deferred.resolve(true);
+		        },
+		        error: function(xhr, status, error) {
+		            console.error('Error validating discount code:', error);
+		            alert('Error checking discount code');
+		            deferred.resolve(false);
+		        }
+		    });
+	
+		    return deferred.promise();
+		}
+	// Functions for Add Modal
+	function toggleAddDiscountFields() {
+	    const percentageType = $('#addPercentageType').is(':checked');
+	    
+	    if (percentageType) {
+	        $('#addPercentageField').show();
+	        $('#addAmountField').hide();
+	        $('#addMaxDiscountAmount')
+	            .prop('readonly', false)
+	            .prop('disabled', false)
+	            .prop('required', true)
+	            .css('background-color', '#fff');
+	        $('#addDiscountAmount').val('');
+	        
+	    } else {
+	        $('#addPercentageField').hide();
+	        $('#addAmountField').show();
+	        $('#addDiscountPercentage').val('');
+	        
+	        const discountAmount = $('#addDiscountAmount').val();
+	        $('#addMaxDiscountAmount')
+	            .val(discountAmount)
+	            .prop('readonly', true)
+	            .prop('disabled', true)
+	            .prop('required', false)
+	            .css('background-color', '#e9ecef');
+	    }
+	}
+
+	function submitAdd() {
+	    const form = $('#addDiscountForm');
+	    const discountType = form.find('input[name="addDiscountType"]:checked').val();
+	    
+	    const formData = {
+	        code: $('#addCode').val().trim(),
+	        discountPercentage: discountType === 'percentage' ? $('#addDiscountPercentage').val() : null,
+	        discountAmount: discountType === 'amount' ? $('#addDiscountAmount').val() : null,
+	        expiryDate: $('#addExpiryDate').val(),
+	        minOrderValue: $('#addMinOrderValue').val() || null,
+	        maxDiscountAmount: discountType === 'amount' ? $('#addDiscountAmount').val() : $('#addMaxDiscountAmount').val(),
+	        status: $('#addStatus').val()
+	    };
+
+	    validateAddForm().then(function(isValid) {
+	        if (isValid) {
+	            $.ajax({
+	                url: '/admin/discount/add',
+	                type: 'POST',
+	                contentType: 'application/json',
+	                data: JSON.stringify(formData),
+	                success: function(response) {
+	                    if(response.message === "Discount added successfully") {
+	                        $('#addDiscountModal').modal('hide');
+	                        location.reload();
+	                    } else {
+	                        alert(response.message);
+	                    }
+	                },
+	                error: function(xhr, status, error) {
+	                    console.error('Error:', error);
+	                    alert(xhr.responseJSON?.message || 'An error occurred while adding the discount');
+	                }
+	            });
+	        }
+	    });
+	}
+
+// Document ready
+$(document).ready(function() {
+    // Add Modal Events
+    $('#addDiscountAmount').on('input', function() {
+        if ($('#addAmountType').is(':checked')) {
+            $('#addMaxDiscountAmount').val($(this).val());
+        }
+    });
+
+    // Edit Modal Events
+    $('#editDiscountAmount').on('input', function() {
+        if ($('#editAmountType').is(':checked')) {
+            $('#editMaxDiscountAmount').val($(this).val());
+        }
+    });
+
+    // Initial setup
+    toggleAddDiscountFields();
+    
+    // Form submissions
+    $('#addDiscountForm').on('submit', function(e) {
+        e.preventDefault();
+        submitAdd();
+    });
+
+    $('#editDiscountForm').on('submit', function(e) {
+        e.preventDefault();
+        submitEdit();
+    });
+});
+let isDiscountUsed = false;
+
+function openEditModal(discountId) {
+    $.ajax({
+        url: `/admin/discount/${discountId}`,
+        type: 'GET',
+        success: function(discount) {
+        	
+            $('#editDiscountId').val(discountId);
+            $('#editCode').val(discount.code);
+            $('#editExpiryDate').val(discount.expiryDate);
+            $('#editMinOrderValue').val(discount.minOrderValue);
+            $('#editStatus').val(discount.status);
+
+            if (discount.discountPercentage) {
+                $('#editPercentageType').prop('checked', true);
+                $('#editAmountType').prop('checked', false);
+                $('#editPercentageField').show();
+                $('#editAmountField').hide();
+                $('#editDiscountPercentage').val(discount.discountPercentage);
+                $('#editMaxDiscountAmount').val(discount.maxDiscountAmount);
+            } else {
+                $('#editAmountType').prop('checked', true);
+                $('#editPercentageType').prop('checked', false);
+                $('#editAmountField').show();
+                $('#editPercentageField').hide();
+                $('#editDiscountAmount').val(discount.discountAmount);
+            }
+
+            $.ajax({
+                url: `/admin/discount/check-usage/${discountId}`,
+                type: 'GET',
+                success: function(response) {
+                    isDiscountUsed = response.isUsed;
+                    if (isDiscountUsed) {
+                        $('#editDiscountAlert').show();
+                        $('#editDiscountForm input:not(#editExpiryDate)').prop('readonly', true);
+                        $('#editExpiryDate').prop('readonly', false);
+                        $('#editStatus').prop('disabled', false);
+                        $('#editPercentageType, #editAmountType').prop('disabled', true);
+                    } else {
+                        $('#editDiscountAlert').hide();
+                        $('#editDiscountForm input').prop('readonly', false);
+                        $('#editStatus').prop('disabled', false);
+                        $('#editPercentageType, #editAmountType').prop('disabled', false);
+                        initializeEditDiscountTypeHandlers();
+                    }
+                    
+                    $('#editDiscountModal').modal('show');
+                }
+            });
+        }
+    });
+}
+
+// Hàm xử lý sự kiện chuyển đổi loại giảm giá
+function initializeEditDiscountTypeHandlers() {
+    $('#editPercentageType, #editAmountType').on('change', function() {
+        const isPercentage = $('#editPercentageType').is(':checked');
+        
+        if (isPercentage) {
+            $('#editPercentageField').show();
+            $('#editAmountField').hide();
+            $('#editMaxDiscountAmount').prop('readonly', false).prop('disabled', false);
+            $('#editDiscountAmount').val('');
+        } else {
+            $('#editPercentageField').hide();
+            $('#editAmountField').show();
+            $('#editDiscountPercentage').val('');
+            $('#editMaxDiscountAmount').prop('readonly', true).prop('disabled', true);
+        }
+    });
+}
+function submitEdit() {
+    const discountId = $('#editDiscountId').val();
+    const code = $('#editCode').val().trim();
+    let formData;
+    
+    if (isDiscountUsed) {
+        formData = {
+            id: discountId,
+            code: code,
+            expiryDate: $('#editExpiryDate').val(),
+            status: $('#editStatus').val(),
+            discountPercentage: $('#editDiscountPercentage').val() || null,
+            discountAmount: $('#editDiscountAmount').val() || null,
+            maxDiscountAmount: $('#editMaxDiscountAmount').val()
+        };
+        submitFormData(formData);
+        return;
+    }
+    
+    $.ajax({
+        url: '/admin/discount/validatediscountid',
+        type: 'GET',
+        data: { 
+            code: code,
+            id: discountId 
+        },
+        success: function(coupon) {
+            if (coupon) {
+                alert('This discount code already exists');
+                return;
+            }
+            
+            const isPercentage = $('#editPercentageType').is(':checked');
+            formData = {
+                id: discountId,
+                code: code,
+                discountPercentage: isPercentage ? $('#editDiscountPercentage').val() : null,
+                discountAmount: !isPercentage ? $('#editDiscountAmount').val() : null,
+                expiryDate: $('#editExpiryDate').val(),
+                minOrderValue: $('#editMinOrderValue').val() || null,
+                maxDiscountAmount: $('#editMaxDiscountAmount').val(),
+                status: $('#editStatus').val()
+            };
+            
+            submitFormData(formData);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error validating discount code:', error);
+            alert('Error checking discount code');
+        }
+    });
+}
+// Tách phần submit form thành function riêng
+function submitFormData(formData) {
+    $.ajax({
+        url: '/admin/discount/update',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            if(response.message === "Discount updated successfully") {
+                $('#editDiscountModal').modal('hide');
+                location.reload();
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON?.message || 'Error updating discount');
+        }
+    });
+}
+function toggleEditDiscountFields() {
+    const percentageType = $('#editPercentageType').is(':checked');
+    
+    if (percentageType) {
+        $('#editPercentageField').show();
+        $('#editAmountField').hide();
+        $('#editMaxDiscountAmount')
+            .prop('readonly', false)
+            .prop('disabled', false)
+            .prop('required', true)
+            .css('background-color', '#fff');
+        $('#editDiscountAmount').val('');
+        
+    } else {
+        $('#editPercentageField').hide();
+        $('#editAmountField').show();
+        $('#editDiscountPercentage').val('');
+        
+        const discountAmount = $('#editDiscountAmount').val();
+        $('#editMaxDiscountAmount')
+            .val(discountAmount)
+            .prop('readonly', true)
+            .prop('disabled', true)
+            .prop('required', false)
+            .css('background-color', '#e9ecef');
+    }
+}
+
+// Thêm sự kiện khi thay đổi giá trị discountAmount
+$('#editDiscountAmount').on('input', function() {
+    if ($('#editAmountType').is(':checked')) {
+        $('#editMaxDiscountAmount').val($(this).val());
+    }
+});
+</script>
+</body>

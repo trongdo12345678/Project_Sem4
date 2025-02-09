@@ -1,0 +1,186 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/addProduct.css}">
+<body>
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Product</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Product</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Add Product</h3>
+							</div>
+							<form th:object="${new_item}" action="addProductWithDetails"
+								method="post" enctype="multipart/form-data">
+								<h4>Product</h4>
+								<div class="card-body row">
+									<!-- Product Name -->
+									<div class="form-group col-4">
+										<label for="proName">Product Name</label> <input type="text"
+											id="proName" name="proName" class="form-control"
+											placeholder="Enter Product Name" required>
+									</div>
+									<!-- Price -->
+									<div class="form-group col-3">
+										<label for="price">Price (USD)</label> <input type="number"
+											id="price" name="price" class="form-control"
+											placeholder="Enter Price in USD" required> <small
+											id="priceError" class="text-danger" style="display: none;">Price
+											cannot be negative.</small>
+									</div>
+									<!-- Status -->
+									<div class="form-group col-3">
+										<label for="status">Status</label> <select name="status"
+											id="status" class="form-control" required>
+											<option th:value="Active" th:text="Active"></option>
+											<option th:value="InActive" th:text="InActive"></option>
+											<option th:value="OutOfstock" th:text="OutOfstock"></option>
+											<option th:value="NewRelease" th:text="NewRelease"></option>
+										</select>
+									</div>
+									<!-- Warranty Period -->
+									<div class="form-group col-2">
+										<label for="wpe">Warranty Period</label> <select name="wpe"
+											id="wpe" class="form-control" required>
+											<option value="0">0 months</option>
+											<option value="6">6 months</option>
+											<option value="12">12 months</option>
+											<option value="18">18 months</option>
+											<option value="24">24 months</option>
+										</select>
+									</div>
+									<!-- Price change -->
+									<input type="hidden" id="priceChanges" name="priceChanges">
+									<!-- Unit -->
+									<div class="form-group col-4">
+										<label for="unitId">Unit</label> <select name="unitId"
+											id="unitId" class="form-control" required>
+											<option th:each="item : ${units}" th:value="${item.id}"
+												th:text="${item.name}"></option>
+										</select>
+									</div>
+									<!-- Brand -->
+									<div class="form-group col-4">
+										<label for="brandId">Brand</label> <select name="brandId"
+											id="brandId" class="form-control" required>
+											<option th:each="item : ${brands}" th:value="${item.id}"
+												th:text="${item.name}"></option>
+										</select>
+									</div>
+									<!-- Category -->
+									<div class="form-group col-4">
+										<label for="cateId">Category</label> <select name="cateId"
+											id="cateId" class="form-control" required>
+											<option th:each="item : ${categorys}" th:value="${item.id}"
+												th:text="${item.name}"></option>
+										</select>
+									</div>
+									<!-- Description -->
+									<div class="form-group col-12">
+										<label for="description">Description</label>
+										<textarea name="description" id="description"
+											class="form-control" placeholder="Enter description" required></textarea>
+									</div>
+									<!-- Product Dimensions -->
+									<div class="form-group col-3">
+										<label for="weight">Weight</label> <input type="number"
+											id="weight" name="weight" class="form-control"
+											placeholder="Enter weight" required min="0"> <small
+											id="weightError" class="text-danger" style="display: none;">Weight
+											cannot be negative.</small>
+									</div>
+									<div class="form-group col-3">
+										<label for="width">Width</label> <input type="number"
+											id="width" name="width" class="form-control"
+											placeholder="Enter width" required min="0"> <small
+											id="widthError" class="text-danger" style="display: none;">Width
+											cannot be negative.</small>
+									</div>
+									<div class="form-group col-3">
+										<label for="height">Height</label> <input type="number"
+											id="height" name="height" class="form-control"
+											placeholder="Enter height" required min="0"> <small
+											id="heightError" class="text-danger" style="display: none;">Height
+											cannot be negative.</small>
+									</div>
+									<div class="form-group col-3">
+										<label for="length">Length</label> <input type="number"
+											id="length" name="length" class="form-control"
+											placeholder="Enter length" required min="0"> <small
+											id="lengthError" class="text-danger" style="display: none;">Length
+											cannot be negative.</small>
+									</div>
+
+									<input type="hidden" id="dateStart" name="dateStart"> <input
+										type="hidden" id="dateEnd" name="dateEnd">
+									<!-- Product Image (Main Image) -->
+									<div class="form-group col-6">
+										<label for="productImage">Product Image (Main Image)</label> <input
+											type="file" class="form-control" id="productImage"
+											name="productImage" accept="image/*" required
+											onchange="showImage(event)"> <img id="preview"
+											alt="Main Image Preview"
+											style="display: none; margin-top: 10px; max-width: 100%; height: 100px;">
+									</div>
+									<div class="form-group col-6">
+										<label for="additionalImages">Additional Images
+											(Product Images)</label> <input type="file" class="form-control"
+											id="additionalImages" name="additionalImages" multiple>
+										<div id="imagePreviewContainer"
+											class="image-preview-container"></div>
+									</div>
+								</div>
+								<div id="specContainer">
+									<div class="card-body row">
+										<div class="form-group col-6">
+											<label for="specNames-0">Specification Name 1</label> <input
+												type="text" id="specNames-0" name="specNames[]"
+												class="form-control" placeholder="Enter Specification " required>
+										</div>
+										<div class="form-group col-6">
+											<label for="specDescriptions-0">Specification
+												Description 1</label> <input type="text" id="specDescriptions-0"
+												name="specDescriptions[]" placeholder="Enter Specification description" class="form-control" required>
+										</div>
+									</div>
+								</div>
+
+								<div class="card-footer">
+									<a th:href="@{/admin/product/showProduct}"
+										class="btn btn-danger">Back to list product</a>
+									<button type="submit" class="btn btn-primary">Add
+										product</button>
+									<button type="button" id="addSpecBtn" class="btn btn-success">Add
+										Specification</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div th:replace="admin/layout/footer_admin"></div>
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script th:src="@{/js/showdetailimg.js}"></script>
+	<script th:src="@{/js/addProduct.js}"></script>
+</body>
+</html>
+

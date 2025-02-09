@@ -1,0 +1,130 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<body>
+	<div th:replace="warehouseManager/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Warehouse receipt</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Warehouse receipt</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+			<!-- /.container-fluid -->
+		</section>
+		<section class="content">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-12">
+						<div class="card">
+							<div>
+								<p th:if="${message}" th:text="${message}"
+									class="custom-alert success"></p>
+								<p th:if="${error}" th:text="${error}"
+									class="custom-alert error"></p>
+							</div>
+							<div>
+								<span id="error-message" th:text="${error}"
+									style="display: none;"></span>
+							</div>
+							<div class="card-header">
+								<div class="d-flex align-items-center">
+									<a
+										th:href="@{/warehouseManager/warehouseReceipt/showAddWhReceipt}"
+										style="width: 20%; padding: 10px"
+										class="btn btn-primary btn-sm me-2">Add Warehouse Receipt</a>
+									<div class="input-group input-group-sm"
+										style="margin-left: 1%; width: 90%; padding: 10px">
+										<input type="text" name="table_search" id="searchInput"
+											onkeyup="searchTable()" class="form-control"
+											placeholder="Search">
+									</div>
+								</div>
+							</div>
+
+							<div class="card-body table-responsive p-0">
+								<table class="table table-hover text-nowrap">
+									<thead>
+										<tr class="text-center">
+											<th>STT</th>
+											<th>Name</th>
+											<th>Warehouse Receipt Note</th>
+											<th>Status</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:if="${#lists.isEmpty(whrs)}" class="text-center">
+											<td colspan="8">No positions found</td>
+										</tr>
+										<tr th:each="item, iterStat : ${whrs}" class="text-center"
+											th:classappend="${item.id == newReceiptId} ? 'highlighted-row' : ''">
+											<td
+												th:text="${(pv.Page_current - 1) * pv.Page_size + iterStat.index + 1}"
+												style="cursor: pointer;"
+												th:onclick="'goToDetail(' + ${item.id} + ')'"></td>
+											<td style="cursor: pointer;"
+												th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+												th:text="${item.name}"></span></td>
+											<td style="cursor: pointer;"
+												th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+												th:text="${item.wh_name}"></span></td>
+											<td style="cursor: pointer;"
+												th:onclick="'goToDetail(' + ${item.id} + ')'"><span
+												th:text="${item.status}"></span></td>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+								<table style="margin-left: 42%">
+									<tfoot id="paginationFooter">
+										<tr class="pagination">
+											<td><a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt(cp=1)}"
+												title="First page">&laquo;</a></td>
+											<td th:if="${pv.Page_current > 1}"><a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt(cp=${pv.Page_current - 1})}"
+												title="Previous page">&lt;</a></td>
+											<td th:each="i : ${#numbers.sequence(0, pv.Total_page - 1)}"
+												th:if="${i < 3 or (i >= (pv.Page_current - 2) and i <= (pv.Page_current + 2))}">
+												<a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt(cp=${i + 1})}"
+												th:class="${i + 1 == pv.Page_current ? 'active' : ''}">
+													<span th:text="${i + 1}"></span>
+											</a>
+											</td>
+											<td th:if="${pv.Page_current < pv.Total_page}"><a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt(cp=${pv.Page_current + 1})}"
+												title="Next page">&gt;</a></td>
+											<td><a
+												th:href="@{/warehouseManager/warehouseReceipt/showWhReceipt(cp=${pv.Total_page})}"
+												title="Last page">&raquo;</a></td>
+
+										</tr>
+									</tfoot>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+	<script th:src="@{/js/showWarehouse_receipt.js}"></script>
+
+	<div th:replace="warehouseManager/layout/footer_admin"></div>
+</body>
+</html>
+
+
+

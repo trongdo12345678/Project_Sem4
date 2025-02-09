@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{customer/layout/head_customer}"></head>
+
+<body>
+	<div th:replace="~{customer/layout/header_customer}"></div>
+
+
+	<!-- Carousel Start -->
+	<div class="container-fluid mb-3">
+		<div class="row px-xl-5">
+			<div class="col-lg-8">
+				<div id="header-carousel"
+					class="carousel slide carousel-fade mb-30 mb-lg-0"
+					data-ride="carousel">
+					<ol class="carousel-indicators">
+						<li data-target="#header-carousel" data-slide-to="0"
+							class="active"></li>
+						<li data-target="#header-carousel" data-slide-to="1"></li>
+						<li data-target="#header-carousel" data-slide-to="2"></li>
+					</ol>
+					<div class="carousel-inner">
+						<div class="carousel-item position-relative active"
+							style="height: 430px;">
+							<img class="position-absolute w-100 h-100"
+								src="customer/img/banner1.png" style="object-fit: cover;">
+							<div
+								class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+								<div class="p-3" style="max-width: 700px;">
+									<h1
+										class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Quality</h1>
+									<p class="mx-md-5 px-5 animate__animated animate__bounceIn">Lorem
+										rebum magna amet lorem magna erat diam stet. Sadips duo stet
+										amet amet ndiam elitr ipsum diam</p>
+									<a
+										class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
+										href="#">Shop Now</a>
+								</div>
+							</div>
+						</div>
+						<div class="carousel-item position-relative"
+							style="height: 430px;">
+							<img class="position-absolute w-100 h-100"
+								src="customer/img/banner2.png" style="object-fit: cover;">
+							<div
+								class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+								<div class="p-3" style="max-width: 700px;">
+									<h1
+										class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Affordable</h1>
+									<p class="mx-md-5 px-5 animate__animated animate__bounceIn">Lorem
+										rebum magna amet lorem magna erat diam stet. Sadips duo stet
+										amet amet ndiam elitr ipsum diam</p>
+									<a
+										class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
+										href="#">Shop Now</a>
+								</div>
+							</div>
+						</div>
+						<div class="carousel-item position-relative"
+							style="height: 430px;">
+							<img class="position-absolute w-100 h-100"
+								src="customer/img/banner3.png" style="object-fit: cover;">
+							<div
+								class="carousel-caption d-flex flex-column align-items-center justify-content-center">
+								<div class="p-3" style="max-width: 700px;">
+									<h1
+										class="display-4 text-white mb-3 animate__animated animate__fadeInDown">Variety</h1>
+									<p class="mx-md-5 px-5 animate__animated animate__bounceIn">Lorem
+										rebum magna amet lorem magna erat diam stet. Sadips duo stet
+										amet amet ndiam elitr ipsum diam</p>
+									<a
+										class="btn btn-outline-light py-2 px-4 mt-3 animate__animated animate__fadeInUp"
+										href="#">Shop Now</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="product-offer mb-30" style="height: 200px;">
+					<img class="img-fluid" src="customer/img/banner4.png" alt="">
+					<div class="offer-text">
+						<h6 class="text-white text-uppercase">Save 20%</h6>
+						<h3 class="text-white mb-3">Special Offer</h3>
+						<a href="/shoppingpage/reset" class="btn btn-primary">Shop Now</a>
+					</div>
+				</div>
+				<div class="product-offer mb-30" style="height: 200px;">
+					<img class="img-fluid" src="customer/img/banner5.jpg" alt="">
+					<div class="offer-text">
+						<h6 class="text-white text-uppercase">Save 20%</h6>
+						<h3 class="text-white mb-3">Special Offer</h3>
+						<a href="/shoppingpage/reset" class="btn btn-primary">Shop Now</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Carousel End -->
+
+
+	<!-- Featured Start -->
+	<div class="container-fluid pt-5">
+		<div class="row px-xl-5 pb-3">
+			<div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+				<div class="d-flex align-items-center bg-light mb-4"
+					style="padding: 30px;">
+					<h1 class="fa fa-check text-primary m-0 mr-3"></h1>
+					<h5 class="font-weight-semi-bold m-0">Quality Product</h5>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+				<div class="d-flex align-items-center bg-light mb-4"
+					style="padding: 30px;">
+					<h1 class="fa fa-shipping-fast text-primary m-0 mr-2"></h1>
+					<h5 class="font-weight-semi-bold m-0">Free Shipping</h5>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+				<div class="d-flex align-items-center bg-light mb-4"
+					style="padding: 30px;">
+					<h1 class="fas fa-exchange-alt text-primary m-0 mr-3"></h1>
+					<h5 class="font-weight-semi-bold m-0">14-Day Return</h5>
+				</div>
+			</div>
+			<div class="col-lg-3 col-md-6 col-sm-12 pb-1">
+				<div class="d-flex align-items-center bg-light mb-4"
+					style="padding: 30px;">
+					<h1 class="fa fa-phone-volume text-primary m-0 mr-3"></h1>
+					<h5 class="font-weight-semi-bold m-0">24/7 Support</h5>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Featured End -->
+
+
+
+	<!-- Products Start -->
+	<div class="container-fluid pt-5 pb-3">
+		<div class="container-fluid pt-5 pb-3">
+			<h2
+				class="section-title position-relative text-uppercase mx-xl-5 mb-4">
+				<span class="bg-secondary pr-3">NEW ARRIVAL</span>
+			</h2>
+			<div class="row">
+				<div class="col-12">
+					<div class="owl-carousel related-carousel">
+						<div class="product-item bg-light" th:each="item : ${pronewar}">
+							<div class="product-img position-relative overflow-hidden">
+								<img class="img-fluid w-100" th:src="'/uploads/' + ${item.Img}"
+									alt="">
+								<div class="product-action">
+									<a class="btn btn-outline-dark btn-square"
+										th:href="@{'/detailproduct/product?id=' + ${item.Id}}"
+										th:if="${item.status != 'OutOfStock'}"> <i
+										class="fa fa-shopping-cart"></i>
+									</a> <span th:if="${item.Status == 'OutOfStock'}"
+										class="out-of-stock-message">Out of stock</span>
+								</div>
+							</div>
+							<div class="text-center py-4">
+								<a class="h6 text-decoration-none text-truncate"
+									th:href="@{'/detailproduct/product?id=' + ${item.Id}}"
+									th:text="${item.Product_name}"></a>
+								<div
+									class="d-flex align-items-center justify-content-center mt-2">
+									<h5 th:text="'$' + ${item.Price}"></h5>
+								</div>
+								<div
+									class="d-flex align-items-center justify-content-center mb-1">
+									<div class="text-primary mr-2">
+										<th:block th:with="rating=${item.averageRating}">
+											<!-- Rating từ 1-5 -->
+											<th:block th:if="${rating >= 1}">
+												<small class="fas fa-star"></small>
+											</th:block>
+											<th:block th:if="${rating >= 0.5 && rating < 1}">
+												<small class="fas fa-star-half-alt"></small>
+											</th:block>
+											<th:block th:if="${rating < 0.5}">
+												<small class="far fa-star"></small>
+											</th:block>
+
+											<th:block th:if="${rating >= 2}">
+												<small class="fas fa-star"></small>
+											</th:block>
+											<th:block th:if="${rating >= 1.5 && rating < 2}">
+												<small class="fas fa-star-half-alt"></small>
+											</th:block>
+											<th:block th:if="${rating < 1.5}">
+												<small class="far fa-star"></small>
+											</th:block>
+
+											<th:block th:if="${rating >= 3}">
+												<small class="fas fa-star"></small>
+											</th:block>
+											<th:block th:if="${rating >= 2.5 && rating < 3}">
+												<small class="fas fa-star-half-alt"></small>
+											</th:block>
+											<th:block th:if="${rating < 2.5}">
+												<small class="far fa-star"></small>
+											</th:block>
+
+											<th:block th:if="${rating >= 4}">
+												<small class="fas fa-star"></small>
+											</th:block>
+											<th:block th:if="${rating >= 3.5 && rating < 4}">
+												<small class="fas fa-star-half-alt"></small>
+											</th:block>
+											<th:block th:if="${rating < 3.5}">
+												<small class="far fa-star"></small>
+											</th:block>
+
+											<th:block th:if="${rating >= 5}">
+												<small class="fas fa-star"></small>
+											</th:block>
+											<th:block th:if="${rating >= 4.5 && rating < 5}">
+												<small class="fas fa-star-half-alt"></small>
+											</th:block>
+											<th:block th:if="${rating < 4.5}">
+												<small class="far fa-star"></small>
+											</th:block>
+										</th:block>
+									</div>
+									<small class="pt-1"> (<span
+										th:text="${item.totalFeedbacks}">0</span>)
+									</small>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Products End -->
+
+
+	<!-- Offer Start -->
+	<div class="container-fluid pt-5 pb-3">
+		<div class="row px-xl-5">
+			<div class="col-md-6">
+				<div class="product-offer mb-30" style="height: 300px;">
+					<img class="img-fluid" src="customer/img/banner1.png" alt="">
+					<div class="offer-text">
+						<h6 class="text-white text-uppercase">Save 20%</h6>
+						<h3 class="text-white mb-3">Special Offer</h3>
+						<a href="" class="btn btn-primary">Shop Now</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<div class="product-offer mb-30" style="height: 300px;">
+					<img class="img-fluid" src="customer/img/banner2.png" alt="">
+					<div class="offer-text">
+						<h6 class="text-white text-uppercase">Save 20%</h6>
+						<h3 class="text-white mb-3">Special Offer</h3>
+						<a href="" class="btn btn-primary">Shop Now</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Offer End -->
+
+
+	<!-- Products Start -->
+	<div class="container-fluid pt-5 pb-3">
+		<h2
+			class="section-title position-relative text-uppercase mx-xl-5 mb-4">
+			<span class="bg-secondary pr-3">OTHER PRODUCT</span>
+		</h2>
+		<div class="row px-xl-5">
+			<div th:each="item : ${pro_eightnew}"
+				class="col-lg-3 col-md-4 col-sm-6 pb-1">
+				<div class="product-item bg-light mb-4">
+					<div class="product-img position-relative overflow-hidden">
+						<img class="img-fluid w-100" th:src="'/uploads/'+${item.Img}"
+							alt="">
+						<div class="product-action">
+							<a class="btn btn-outline-dark btn-square"
+								th:if="${item.status != 'OutOfStock'}"
+								th:href="@{'/detailproduct/product?id=' + ${item.Id}}"> <i
+								class="fa fa-shopping-cart"></i>
+							</a> <span th:if="${item.Status == 'OutOfStock'}"
+								class="out-of-stock-message">Out of stock</span>
+						</div>
+					</div>
+					<div class="text-center py-4">
+						<a class="h6 text-decoration-none text-truncate"
+							th:href="@{'/detailproduct/product?id=' + ${item.Id}}"
+							th:text="${item.Product_name}"></a>
+						<div class="d-flex align-items-center justify-content-center mt-2">
+							<h5 th:text=" '$' + ${item.Price}"></h5>
+							<!-- <h6 class="text-muted ml-2"><del>$123.00</del></h6> -->
+						</div>
+						<div class="d-flex align-items-center justify-content-center mb-1">
+							<div class="text-primary mr-2">
+								<th:block th:with="rating=${item.averageRating}">
+									<!-- Rating từ 1-5 -->
+									<th:block th:if="${rating >= 1}">
+										<small class="fas fa-star"></small>
+									</th:block>
+									<th:block th:if="${rating >= 0.5 && rating < 1}">
+										<small class="fas fa-star-half-alt"></small>
+									</th:block>
+									<th:block th:if="${rating < 0.5}">
+										<small class="far fa-star"></small>
+									</th:block>
+
+									<th:block th:if="${rating >= 2}">
+										<small class="fas fa-star"></small>
+									</th:block>
+									<th:block th:if="${rating >= 1.5 && rating < 2}">
+										<small class="fas fa-star-half-alt"></small>
+									</th:block>
+									<th:block th:if="${rating < 1.5}">
+										<small class="far fa-star"></small>
+									</th:block>
+
+									<th:block th:if="${rating >= 3}">
+										<small class="fas fa-star"></small>
+									</th:block>
+									<th:block th:if="${rating >= 2.5 && rating < 3}">
+										<small class="fas fa-star-half-alt"></small>
+									</th:block>
+									<th:block th:if="${rating < 2.5}">
+										<small class="far fa-star"></small>
+									</th:block>
+
+									<th:block th:if="${rating >= 4}">
+										<small class="fas fa-star"></small>
+									</th:block>
+									<th:block th:if="${rating >= 3.5 && rating < 4}">
+										<small class="fas fa-star-half-alt"></small>
+									</th:block>
+									<th:block th:if="${rating < 3.5}">
+										<small class="far fa-star"></small>
+									</th:block>
+
+									<th:block th:if="${rating >= 5}">
+										<small class="fas fa-star"></small>
+									</th:block>
+									<th:block th:if="${rating >= 4.5 && rating < 5}">
+										<small class="fas fa-star-half-alt"></small>
+									</th:block>
+									<th:block th:if="${rating < 4.5}">
+										<small class="far fa-star"></small>
+									</th:block>
+								</th:block>
+							</div>
+							<small class="pt-1"> (<span
+								th:text="${item.totalFeedbacks}">0</span>)
+							</small>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Products End -->
+
+
+	<!-- Vendor Start -->
+	<div class="container-fluid py-5">
+		<div class="row px-xl-5">
+			<div class="col">
+				<div class="owl-carousel vendor-carousel">
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-1.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-2.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-3.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-4.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-5.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-6.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-7.jpg" alt="">
+					</div>
+					<div class="bg-light p-4">
+						<img src="customer/img/vendor-8.jpg" alt="">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Vendor End -->
+
+
+	<!-- Footer Start -->
+	<div th:replace="~{customer/layout/footer_customer}"></div>
+	<!-- Footer End -->
+
+
+	<!-- Back to Top -->
+
+</body>
+
+</html>

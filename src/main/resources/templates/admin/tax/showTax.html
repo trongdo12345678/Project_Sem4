@@ -1,0 +1,439 @@
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+<div th:replace="admin/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Tax Management</h1>
+                </div>
+                <div class="col-12 text-right">
+                    <button type="button" class="btn btn-primary" onclick="openAddTaxModal()">
+                        <i class="fas fa-plus"></i> Add New Tax
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tax List Table -->
+            <div class="card">
+                <div class="card-body">
+               
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Tax Type</th>
+                                <th>Period</th>
+                                <th>Revenue Amount</th>
+                                <th>Tax Rate</th>
+                                <th>Tax Amount</th>
+                                <th>Status</th>
+                                <th>Payment Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="tax : ${taxList}">
+                                <td th:text="${tax.taxType}"></td>
+                                <td>
+                                    <span th:text="${#temporals.format(tax.periodStart, 'dd/MM/yyyy')}"></span>
+                                    - 
+                                    <span th:text="${#temporals.format(tax.periodEnd, 'dd/MM/yyyy')}"></span>
+                                </td>
+                                <td th:text="${#numbers.formatDecimal(tax.Amount, 0, 'COMMA', 2, 'POINT')}"></td>
+                                <td th:text="${tax.taxRate + '%'}"></td>
+                                <td th:text="${#numbers.formatDecimal(tax.taxAmount, 0, 'COMMA', 2, 'POINT')}"></td>
+                                <td>
+                                    <span th:class="${tax.paymentStatus == 'Pending' ? 'badge badge-warning' : 
+                                                    tax.paymentStatus == 'Paid' ? 'badge badge-success' : 
+                                                    'badge badge-danger'}"
+                                          th:text="${tax.paymentStatus}">
+                                    </span>
+                                </td>
+                                <td th:text="${tax.paymentDate != null ? #temporals.format(tax.paymentDate, 'dd/MM/yyyy') : '-'}"></td>
+								<td>
+								    <button class="btn btn-info btn-sm" th:onclick="'viewTax(' + ${tax.id} + ')'">
+								        <i class="fas fa-eye"></i> View
+								    </button>
+								</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+            <div class="col-12">
+					    <nav th:if="${pv.total_page > 1}"> <!-- Only show the pagination if there's more than one page -->
+					        <ul class="pagination justify-content-center">
+					            <!-- First Page -->
+					            <li class="page-item">
+					                <a class="page-link" th:href="@{/admin/tax/showtax(cp=1)}" title="First page">&laquo;</a>
+					            </li>
+					
+					            <!-- Previous Page -->
+					            <li class="page-item" th:if="${pv.page_current > 1}">
+					                <a class="page-link" th:href="@{/admin/tax/showtax(cp=${pv.page_current - 1})}" title="Previous page">&lt;</a>
+					            </li>
+					
+					            <!-- Page Number Links -->
+					            <li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+					                th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+					                th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+					                <a class="page-link" th:href="@{/admin/tax/showtax(cp=${i + 1})}"
+					                   th:text="${i + 1}"></a>
+					            </li>
+					
+					            <!-- Next Page -->
+					            <li class="page-item" th:if="${pv.page_current < pv.total_page}">
+					                <a class="page-link" th:href="@{/admin/tax/showtax(cp=${pv.page_current + 1})}" title="Next page">&gt;</a>
+					            </li>
+					
+					            <!-- Last Page -->
+					            <li class="page-item" th:if="${pv.total_page > 1}">
+					                <a class="page-link" th:href="@{/admin/tax/showtax(cp=${pv.total_page})}" title="Last page">&raquo;</a>
+					            </li>
+					        </ul>
+					    </nav>
+					</div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Add Tax Modal -->
+<div class="modal fade" id="addTaxModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Tax</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addTaxForm">
+                    <div class="form-group">
+                        <label>Tax Type</label>
+                        <select class="form-control" name="taxType" required>
+                            <option value="Corporate Income Tax">Corporate Income Tax</option>
+                            <option value="VAT">VAT</option>
+                            <option value="Business License Tax">Business License Tax</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Period Start</label>
+                                <input type="date" class="form-control" 
+                                       id="periodStart" name="periodStart" 
+                                       required onchange="calculateRevenue()">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Period End</label>
+                                <input type="date" class="form-control" 
+                                       id="periodEnd" name="periodEnd" 
+                                       required onchange="calculateRevenue()">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Revenue Amount</label>
+                                <input type="number" class="form-control" 
+                                       id="revenueAmount"
+                                       readonly>
+                                <small class="text-muted">Automatically calculated from completed orders</small>
+                            </div>
+                            
+                           
+                                
+                            </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Amount</label> <input type="number"
+										class="form-control" id="Amount" name="Amount"
+										required="required" onchange="calculateTaxAmount()">
+								</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tax Rate (%)</label>
+                                <input type="number" class="form-control" 
+                                       id="taxRate" name="taxRate" 
+                                       min="0" max="100" step="0.01" 
+                                       required onchange="calculateTaxAmount()">
+                            </div>
+                        </div>
+                         
+                        </div>
+                        
+                        
+                   	<div class="row">
+                   	<div class="col-12">
+                    <div class="form-group">
+                        <label>Tax Amount</label>
+                        <input type="number" class="form-control" 
+                               id="taxAmount" name="taxAmount" 
+                               readonly>
+                        <small class="text-muted">Automatically calculated based on revenue and tax rate</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Note</label>
+                        <textarea class="form-control" name="note" rows="3"></textarea>
+                    </div>
+                    </div>
+                   	</div>
+                    
+                    
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveTax()">Save Tax</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="viewTaxModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tax Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Tax Type:</strong> <span id="viewTaxType"></span></p>
+                        <p><strong>Period:</strong> <span id="viewPeriod"></span></p>
+                        <p><strong>Amount:</strong> <span id="viewAmount"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Tax Rate:</strong> <span id="viewTaxRate"></span></p>
+                        <p><strong>Tax Amount:</strong> <span id="viewTaxAmount"></span></p>
+                        <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p><strong>Note:</strong></p>
+                        <p id="viewNote"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="actionButtons">
+                    <!-- Nút Pay và Cancel chỉ hiện khi status là Pending -->
+                    <button class="btn btn-success" onclick="markAsPaid()" id="btnPaid">
+                        <i class="fas fa-check"></i> Mark as Paid
+                    </button>
+                    <button class="btn btn-danger" onclick="cancelTax()" id="btnCancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script>
+function calculateRevenue() {
+    var startDate = $('#periodStart').val();
+    var endDate = $('#periodEnd').val();
+    
+    $('#revenueAmount').val('');
+    $('#taxAmount').val('');
+    
+    if (startDate && endDate) {
+        if (new Date(endDate) < new Date(startDate)) {
+            alert('End date cannot be before start date');
+            $('#periodEnd').val('');
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/tax/calculate-revenue',
+            type: 'GET',
+            data: {
+                startDate: startDate,
+                endDate: endDate
+            },
+            success: function(response) {
+                $('#revenueAmount').val(response);
+               
+                calculateTaxAmount();
+            },
+            error: function(xhr) {
+                alert(xhr.responseText || 'Error calculating revenue');
+            }
+        });
+    }
+}
+
+function calculateTaxAmount() {
+    var revenue = parseFloat($('#Amount').val()) || 0;
+    var rate = parseFloat($('#taxRate').val()) || 0;
+    
+    if (revenue && rate) {
+        var taxAmount = (revenue * rate / 100).toFixed(2);
+        $('#taxAmount').val(taxAmount);
+    }
+}
+
+function openAddTaxModal() {
+    $('#addTaxForm')[0].reset();
+    $('#revenueAmount').val('');
+    $('#taxAmount').val('');
+    $('#addTaxModal').modal('show');
+}
+function saveTax() {
+    // Get form data
+    var formData = {
+        taxType: $('#addTaxForm select[name="taxType"]').val(),
+        periodStart: $('#periodStart').val(),
+        periodEnd: $('#periodEnd').val(),
+        amount: parseFloat($('#Amount').val()),
+        taxRate: parseFloat($('#taxRate').val()),
+        taxAmount: parseFloat($('#taxAmount').val()),
+        note: $('#addTaxForm textarea[name="note"]').val()
+    };
+   $.ajax({
+        url: '/admin/tax/add',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            $('#addTaxModal').modal('hide');
+            // Refresh page hoặc update table
+            location.reload();
+        },
+        error: function(xhr) {
+            alert(xhr.responseText || 'Error adding tax');
+        }
+    });
+}
+function viewTax(id) {
+    $.ajax({
+        url: '/admin/tax/' + id,
+        type: 'GET',
+        success: function(tax) {
+            // Populate modal with tax details
+            $('#viewTaxType').text(tax.taxType);
+            $('#viewPeriod').text(formatDate(tax.periodStart) + ' - ' + formatDate(tax.periodEnd));
+            $('#viewRevenue').text(formatMoney(tax.revenueAmount));
+            $('#viewTaxRate').text(tax.taxRate + '%');
+            $('#viewTaxAmount').text(formatMoney(tax.taxAmount));
+            $('#viewStatus').text(tax.paymentStatus);
+            $('#viewNote').text(tax.note || '-');
+            
+            // Show/hide action buttons based on status
+            if (tax.paymentStatus === 'Pending') {
+                $('#actionButtons').show();
+                $('#btnPaid').attr('onclick', 'markAsPaid(' + id + ')');
+                $('#btnCancel').attr('onclick', 'cancelTax(' + id + ')');
+            } else {
+                $('#actionButtons').hide();
+            }
+            
+            // Show modal
+            $('#viewTaxModal').modal('show');
+        },
+        error: function(xhr) {
+            alert('Error loading tax details');
+        }
+    });
+}
+
+// Function để đánh dấu đã nộp
+function markAsPaid(id) {
+    if (confirm('Are you sure you want to mark this tax as paid?')) {
+        $.ajax({
+            url: '/admin/tax/' + id + '/pay',
+            type: 'POST',
+            success: function() {
+                $('#viewTaxModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Error updating tax status');
+            }
+        });
+    }
+}
+
+// Function để hủy
+function cancelTax(id) {
+    if (confirm('Are you sure you want to cancel this tax?')) {
+        $.ajax({
+            url: '/admin/tax/' + id + '/cancel',
+            type: 'POST',
+            success: function() {
+                $('#viewTaxModal').modal('hide');
+                location.reload();
+            },
+            error: function(xhr) {
+                alert('Error cancelling tax');
+            }
+        });
+    }
+}
+
+function viewTax(id) {
+    $.ajax({
+        url: '/admin/tax/' + id,
+        type: 'GET',
+        success: function(tax) {
+            // Populate modal with tax details
+            $('#viewTaxType').text(tax.taxType);
+            $('#viewPeriod').text(formatDate(tax.periodStart) + ' - ' + formatDate(tax.periodEnd));
+            $('#viewAmount').text(formatMoney(tax.amount));
+            $('#viewTaxRate').text(tax.taxRate + '%');
+            $('#viewTaxAmount').text(formatMoney(tax.taxAmount));
+            $('#viewStatus').text(tax.paymentStatus);
+            $('#viewNote').text(tax.note || '-');
+            
+            // Show/hide action buttons based on status
+            if (tax.paymentStatus === 'Pending') {
+                $('#actionButtons').show();
+                $('#btnPaid').attr('onclick', 'markAsPaid(' + id + ')');
+                $('#btnCancel').attr('onclick', 'cancelTax(' + id + ')');
+            } else {
+                $('#actionButtons').hide();
+            }
+            
+            // Show modal
+            $('#viewTaxModal').modal('show');
+        },
+        error: function(xhr) {
+            alert('Error loading tax details');
+        }
+    });
+}
+
+// Helper function để format tiền USD
+function formatMoney(amount) {
+    return new Intl.NumberFormat('en-US', { 
+        style: 'currency', 
+        currency: 'USD' 
+    }).format(amount);
+}
+
+// Helper function để format ngày
+function formatDate(date) {
+    return new Date(date).toLocaleDateString('en-US');
+}
+
+</script>
+
+<div th:replace="admin/layout/footer_admin"></div>
+</body>

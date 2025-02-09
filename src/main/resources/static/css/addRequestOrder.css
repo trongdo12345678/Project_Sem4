@@ -1,0 +1,128 @@
+
+
+.is-invalid {
+    border: 2px solid red;
+    background-color: #fdd;
+}
+.card-secondary {
+    margin-top: 1.5rem; 
+}
+.card-header{
+	    background-color: #6C75E8;
+}
+
+.card-header h3 {
+    color: black; 
+}
+
+.table th {
+    background-color: #007bff; 
+    color: white; 
+}
+
+.table td {
+    background-color: #f8f9fa; 
+}
+
+
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.table th {
+    background-color: #007bff;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+}
+
+.table {
+    margin-bottom: 1.5rem;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.table th, .table td {
+    padding: 0.5rem; 
+    vertical-align: middle;
+    border: none;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    text-align: left;
+}
+
+.table td label {
+    font-weight: bold;
+    margin-bottom: 0.2rem; 
+    display: inline-block;
+}
+
+
+.form-control {
+    font-size: 0.85rem;
+    padding: 0.4rem; 
+}
+
+.add-detail-btn {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    padding: 0.5rem 1.2rem; 
+    border: none;
+    border-radius: 0.3rem;
+    cursor: pointer;
+}
+
+.add-detail-btn:hover {
+    background-color: #0056b3;
+}
+
+
+.product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 0.3rem;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+}
+
+.product-list li {
+    padding: 0.4rem; 
+    cursor: pointer;
+    font-size: 0.85rem; 
+}
+
+.product-list li:hover {
+    background-color: #f1f1f1;
+}
+
+
+.product-id {
+    display: block;
+    font-size: 0.8rem;
+    color: #007bff;
+    margin-top: 0.3rem;
+}
+
+
+.card-footer .btn-primary {
+    font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    background-color: #28a745;
+    border: none;
+    border-radius: 0.3rem;
+}
+
+.card-footer .btn-primary:hover {
+    background-color: #218838;
+}

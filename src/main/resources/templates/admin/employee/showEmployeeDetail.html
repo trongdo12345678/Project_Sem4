@@ -1,0 +1,126 @@
+
+<body xmlns:th="http://www.thymeleaf.org" lang="en">
+	<div th:replace="admin/layout/header_admin"></div>
+	<div class="content-wrapper" style="min-height: 1302.4px;">
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row mb-2">
+					<div class="col-sm-6">
+						<h1>Employee</h1>
+					</div>
+					<div class="col-sm-6">
+						<ol class="breadcrumb float-sm-right">
+							<li class="breadcrumb-item"><a href="#">Home</a></li>
+							<li class="breadcrumb-item active">Details Employee</li>
+						</ol>
+					</div>
+				</div>
+			</div>
+		</section>
+		<section class="content-header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card card-primary">
+							<div class="card-header">
+								<h3 class="card-title">Details Employee</h3>
+							</div>
+							<form th:object="${employee}">
+								<div class="card-body row">
+									<div class="form-group col-md-6">
+										<label for="title">First Name</label> <input type="text"
+											id="proName" disabled readonly
+											th:value="${employee.first_name}" class="form-control">
+									</div>
+									<div class="form-group col-md-6">
+										<label for="title">Last Name</label> <input type="text"
+											id="price" disabled readonly th:value="${employee.last_name}"
+											class="form-control">
+									</div>
+									<div class="form-group col-md-6">
+										<label for="phone">Phone</label> <input type="text" disabled
+											readonly th:value="${employee.phone}" class="form-control">
+									</div>
+									<div class="form-group col-6">
+										<label for="exampleInputEmail1">Role</label> <input
+											class="form-control" disabled readonly
+											th:value="${employee.role_name}">
+									</div>
+									<!-- Cột Warehouse Name -->
+									<div class="form-group col-md-12"
+										th:if="${employee.role_name == 'warehouseManager'}">
+										<label for="warehouseName">Warehouse manager:</label>
+										<div class="d-flex align-items-center">
+											<input type="text" id="warehouseName" disabled readonly
+												th:value="${employee.warehouse_name != null ? employee.warehouse_name : 'This employee has not managed any warehouse yet.'}"
+												class="form-control me-2"> <a
+												style="width: 100%; max-width: 150px;"
+												class="btn btn-primary"
+												th:href="@{/admin/warehouse/showWarehouse}"
+												th:if="${employee.warehouse_name == null}">Go add
+												warehouse </a>
+										</div>
+									</div>
+								</div>
+
+								<div class="card-footer">
+									<a th:href="@{/admin/employee/showEmp}" class="btn btn-danger">Back
+										to list employee</a> <a
+										th:href="@{/admin/employee/showUpdateEmployee(id=${employee.id})}"
+										class="btn btn-warning">Update employee</a>
+								</div>
+							</form>
+						</div>
+					</div>
+					
+			    </div>
+			    
+			    <div class="card-footer">
+			    	<a th:href="@{/admin/employee/showEmp}" class="btn btn-danger">Back to List</a>
+			        <a th:href="@{/admin/employee/showUpdateEmployee(id=${employee.id})}" class="btn btn-success">Update</a>
+ 					<a th:href="@{deleteEmployee(id=${employee.id})}" class="btn btn-danger" onclick="return confirmDeleteEmp();">Delete</a>
+			    </div>
+            </div>
+                    </section>
+          </div>
+
+        <div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Employee Salary Details</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Salary Type</th>
+                            <th>Current Amount</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Created By</th>
+                            <th>Created At</th>
+                            <th>Note</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="salary : ${currentSalaries}">
+                            <td th:text="${salary.salaryType != null ? salary.salaryType.name : 'N/A'}"></td>
+                            <td th:text="${salary.amount != null ? #numbers.formatDecimal(salary.amount, 0, 'COMMA', 0, 'POINT') + ' $' : 'Not set'}"></td>
+                            <td th:text="${salary.startDate != null ? #temporals.format(salary.startDate, 'dd/MM/yyyy') : 'N/A'}"></td>
+                            <td th:text="${salary.endDate != null ? #temporals.format(salary.endDate, 'dd/MM/yyyy') : 'Current'}"></td>
+                            <td th:text="${salary.createdByEmployee != null ? salary.createdByEmployee.First_name + ' ' + salary.createdByEmployee.Last_name : 'N/A'}"></td>
+                            <td th:text="${salary.createdAt != null ? #temporals.format(salary.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}"></td>
+                            <td th:text="${salary.note != null ? salary.note : 'N/A'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+        <div th:replace="admin/layout/footer_admin"></div>
+          <script src="https://code.jquery.com/jquery-3.7.1.js" ></script>
+            <script th:src="@{/js/showEmployee.js}"></script>
+</body>
+

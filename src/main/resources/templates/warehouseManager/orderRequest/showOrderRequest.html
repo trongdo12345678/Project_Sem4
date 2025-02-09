@@ -1,0 +1,122 @@
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="warehouseManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-12">
+					<div class="card" style="margin-top: 10px;">
+						<div class="card-header">
+							<div class="input-group input-group-sm"
+								style="width: 80%; margin-left: 15%;">
+								<input type="text" name="table_search" id="searchInput"
+									class="form-control float-right" placeholder="Search">
+								<div class="input-group-append">
+									<button type="submit" class="btn btn-default">
+										<i class="fas fa-search"></i>
+									</button>
+								</div>
+							</div>
+						</div>
+						<!-- /.card-header -->
+						<div class="card-body table-responsive p-0">
+							<table class="table table-hover text-nowrap"
+								style="table-layout: fixed; width: 100%; border-collapse: collapse; text-align: center;">
+								<thead>
+									<tr style="background-color: #f4f4f4; font-weight: bold;">
+										<th
+											style="width: 33%; padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Name</th>
+										<th
+											style="width: 33%; padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Date</th>
+										<th
+											style="width: 34%; padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Status</th>
+									</tr>
+								</thead>
+								<tbody id="warehouseTable">
+									<tr th:each="item : ${requests}"
+										style="border: 1px solid #ddd;"
+										onmouseover="this.style.backgroundColor='#f9f9f9';"
+										onmouseout="this.style.backgroundColor='';">
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"
+											style="padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+											<span th:text="${item.name}"></span>
+										</td>
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"
+											style="padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+											<span th:text="${#temporals.format(item.date, 'yyyy-MM-dd')}"></span>
+										</td>
+										<td th:onclick="'goToDetail(' + ${item.id} + ')'"
+											style="padding: 10px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+											<span th:text="${item.statusRequest}"></span>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+
+							<table style="margin-left: 42%">
+								<tfoot id="paginationFooter">
+									<tr class="pagination">
+										<td><a
+											th:href="@{/warehouseManager/ShowOrderRequest(cp=1)}"
+											title="First page">&laquo;</a></td>
+										<td th:if="${pv.Page_current > 1}"><a
+											th:href="@{/warehouseManager/ShowOrderRequest(cp=${pv.Page_current - 1})}"
+											title="Previous page">&lt;</a></td>
+										<td th:each="i : ${#numbers.sequence(0, pv.Total_page - 1)}"
+											th:if="${i < 3 or (i >= (pv.Page_current - 2) and i <= (pv.Page_current + 2))}">
+											<a
+											th:href="@{/warehouseManager/ShowOrderRequest(cp=${i + 1})}"
+											th:class="${i + 1 == pv.Page_current ? 'active' : ''}"> <span
+												th:text="${i + 1}"></span>
+										</a>
+										</td>
+										<td th:if="${pv.Page_current < pv.Total_page}"><a
+											th:href="@{/warehouseManager/ShowOrderRequest(cp=${pv.Page_current + 1})}"
+											title="Next page">&gt;</a></td>
+										<td><a
+											th:href="@{/warehouseManager/ShowOrderRequest(cp=${pv.Total_page})}"
+											title="Last page">&raquo;</a></td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/orderRequesRn.js}"></script>
+<div th:replace="warehouseManager/layout/footer_admin"></div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.getElementById("searchInput");
+    const tableBody = document.getElementById("warehouseTable");
+
+    searchInput.addEventListener("keyup", function () {
+        const filter = this.value.toLowerCase();
+        const rows = tableBody.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            const nameCell = rows[i].querySelector("td:nth-child(1) span");
+            const dateCell = rows[i].querySelector("td:nth-child(2) span");
+
+            if (nameCell && dateCell) {
+                const nameText = nameCell.textContent.toLowerCase();
+                const dateText = dateCell.textContent.toLowerCase();
+
+                if (nameText.includes(filter) || dateText.includes(filter)) {
+                    rows[i].style.display = ""; // Hiển thị hàng
+                } else {
+                    rows[i].style.display = "none"; // Ẩn hàng
+                }
+            }
+        }
+    });
+});
+
+</script>
+</html>

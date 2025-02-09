@@ -1,0 +1,130 @@
+
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<link rel="stylesheet" th:href="@{/css/pagination.css}">
+<div th:replace="businessManager/layout/header_admin"></div>
+<div class="content-wrapper" style="min-height: 1302.4px;">
+	<!-- Content Header (Page header) -->
+	<section class="content-header">
+		<div class="container-fluid">
+			<div class="row mb-2">
+				<div class="col-sm-6">
+					<h1>Return orders</h1>
+				</div>
+				<div class="col-sm-6">
+					<ol class="breadcrumb float-sm-right">
+						<li class="breadcrumb-item"><a href="#">Home</a></li>
+						<li class="breadcrumb-item active">Return orders</li>
+					</ol>
+				</div>
+			</div>
+		</div>
+		<!-- /.container-fluid -->
+	</section>
+
+	<!-- Main content -->
+	<section class="content">
+		<div class="container-fluid">
+			<div class="card">
+				<div class="card-header">
+					<h4>Processing Return Orders</h4>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover">
+							<thead class="thead-light">
+								<tr>
+									<th>#</th>
+									<th>Order Info</th>
+									<th>Return Date</th>
+									<th>Customer</th>
+									<th>Total Amount</th>
+									<th>Status</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="return, iterStat : ${returnOrders}"
+									style="cursor: pointer;"
+									th:onclick="'window.location.href=\'/businessManager/returnorder/showdetailor?id=' + ${return.id} + '\''">
+									<td
+										th:text="${(pv.page_current - 1) * pv.page_size + iterStat.count}"></td>
+									<td>
+										<div>
+											Order ID: <span th:text="${return.order.orderID}"></span>
+										</div> <small class="text-muted"
+										th:text="${#temporals.format(return.order.date, 'dd-MM-yyyy')}"></small>
+									</td>
+									<td
+										th:text="${#temporals.format(return.returnDate, 'dd-MM-yyyy')}"></td>
+									<td>
+										<div th:text="${return.order.cus_Name}"></div> <small
+										class="text-muted" th:text="${return.order.phone}"></small>
+									</td>
+									<td>
+										<div>
+											Total: $<span
+												th:text="${#numbers.formatDecimal(return.totalAmount, 1, 2)}"></span>
+										</div> <small class="text-muted"> Final: $<span
+											th:text="${#numbers.formatDecimal(return.finalAmount, 1, 2)}"></span>
+									</small>
+									</td>
+									<td><span class="badge badge-warning"
+										th:text="${return.status}"></span></td>
+									<td><a
+										th:href="@{'/businessManager/returnorder/showdetailor?id=' + ${return.id}}"
+										class="btn btn-sm btn-info"> <i class="fas fa-eye"></i>
+											View
+									</a></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="col-12">
+				<nav th:if="${pv.total_page > 1}">
+					<!-- Only show the pagination if there's more than one page -->
+					<ul class="pagination justify-content-center">
+						<!-- First Page -->
+						<li class="page-item"><a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlist(cp=1)}"
+							title="First page">&laquo;</a></li>
+
+						<!-- Previous Page -->
+						<li class="page-item" th:if="${pv.page_current > 1}"><a
+							class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlist(cp=${pv.page_current - 1})}"
+							title="Previous page">&lt;</a></li>
+
+						<!-- Page Number Links -->
+						<li th:each="i : ${#numbers.sequence(0, pv.total_page - 1)}"
+							th:if="${(i >= pv.page_current - 2) && (i <= pv.page_current) && (pv.total_page > 1)}"
+							th:class="${i + 1 == pv.page_current ? 'active page-item' : 'page-item'}">
+							<a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlist(cp=${i + 1})}"
+							th:text="${i + 1}"></a>
+						</li>
+
+						<!-- Next Page -->
+						<li class="page-item" th:if="${pv.page_current < pv.total_page}">
+							<a class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlist(cp=${pv.page_current + 1})}"
+							title="Next page">&gt;</a>
+						</li>
+
+						<!-- Last Page -->
+						<li class="page-item" th:if="${pv.total_page > 1}"><a
+							class="page-link"
+							th:href="@{/businessManager/returnorder/showreturnlist(cp=${pv.total_page})}"
+							title="Last page">&raquo;</a></li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</section>
+</div>
+<script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+<script th:src="@{/js/ShowOrderRequest.js}"></script>
+<div th:replace="businessManager/layout/footer_admin"></div>
+</html>
+

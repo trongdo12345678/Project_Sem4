@@ -1,0 +1,192 @@
+.conversion-container {
+    background-color: #f8f9fa; 
+    border: 1px solid #dee2e6; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    padding: 10px; 
+    margin-top: 8px; 
+    max-width: 260px;
+    text-align: left; 
+}
+
+
+.conversion-container ul {
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+}
+
+
+.conversion-container li {
+    display: flex; 
+    justify-content: space-between; 
+    padding: 5px 5px; 
+    border-bottom: 1px solid #dee2e6; 
+}
+
+
+.conversion-container li:last-child {
+    border-bottom: none;
+}
+
+
+.conversion-label {
+    font-weight: 600;
+    color: #495057; 
+}
+
+
+.quantity-label {
+    font-weight: 500;
+    color: #6c757d; 
+}
+
+
+.no-conversion-message {
+    text-align: center;
+    color: #dc3545;
+    font-style: italic;
+}
+	table {
+    width: 100%;
+    table-layout: fixed; 
+	}
+	
+	table th, table td {
+	    text-align: center;
+	    padding: 10px;
+	    min-width: 150px; 
+	    overflow: hidden; 
+	    word-wrap: break-word; 
+	}
+
+.conversion-div {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    display: none; 
+    z-index: 999; 
+    width: 220px; 
+    max-width: 100%;  
+    margin-left: -106px;
+}
+.conversion-div h5 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #007bff;
+}
+.btn-close-conversion {
+    display: block;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+
+thead th {
+    background-color: #4F4F4F;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+
+tbody tr {
+    border: 1px solid #ddd;
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9; 
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1; 
+}
+
+
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+
+.input-group .btn {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+}
+
+.input-group .btn:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+
+.card-header .input-group {
+    margin: 0 auto;
+}
+
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+.nav-pills .nav-link.active {
+	background-color: #1874CD !important;
+}
+
+    
+/* Căn chỉnh form */
+#filterForm {
+    display: flex;
+    align-items: center; 
+    gap: 10px; 
+}
+
+
+#filterForm input[type="date"] {
+    padding: 5px;
+    font-size: 14px;
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    background-color: #f9f9f9; 
+}
+
+
+#filterForm button {
+    padding: 5px 15px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none; 
+    border-radius: 5px; 
+}
+
+#filterForm button:hover {
+    background-color: #0056b3; /* Màu khi hover */
+}

@@ -1,0 +1,47 @@
+{"properties": [
+  {
+    "name": "momo.access-key",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.access-key'"
+  },
+  {
+    "name": "momo.partner-code",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.partner-code'"
+  },
+  {
+    "name": "momo.secret-key",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.secret-key'"
+  },
+  {
+    "name": "momo.momo-api-url",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.momo-api-url'"
+  },
+  {
+    "name": "momo.return-url",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.return-url'"
+  },
+  {
+    "name": "momo.notify-url",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.notify-url'"
+  },
+  {
+    "name": "momo.request-type",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.request-type'"
+  },
+  {
+    "name": "momo.refund-url",
+    "type": "java.lang.String",
+    "description": "A description for 'momo.refund-url'"
+  },
+  {
+    "name": "google.maps.api.key",
+    "type": "java.lang.String",
+    "description": "A description for 'google.maps.api.key'"
+  }
+]}
